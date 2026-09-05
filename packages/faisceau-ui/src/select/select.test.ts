@@ -162,6 +162,35 @@ describe("Select", () => {
     controller.destroy();
   });
 
+  it("aligns the selected item by default and allows opting out", async () => {
+    const regular = createSelect({
+      alignItemWithTrigger: false,
+      items: ["One"],
+      label: "Regular",
+    });
+    const aligned = createSelect({
+      defaultValue: ["One"],
+      items: ["One"],
+      label: "Aligned",
+    }).mount(document.body);
+    const alignedPositioner = requirePart<HTMLElement>(aligned.root, "positioner");
+
+    expect(requirePart(regular.root, "positioner").hasAttribute("data-fui-item-aligned")).toBe(
+      false,
+    );
+    expect(alignedPositioner.hasAttribute("data-fui-item-aligned")).toBe(true);
+
+    requirePart<HTMLButtonElement>(aligned.root, "trigger").click();
+    await flushPositioning();
+
+    expect(aligned.api.get().open).toBe(true);
+    expect(alignedPositioner.style.getPropertyValue("--x")).not.toBe("");
+    expect(alignedPositioner.style.getPropertyValue("--y")).not.toBe("");
+
+    regular.destroy();
+    aligned.destroy();
+  });
+
   it("uses Lucide icons and only authors fui-prefixed classes", () => {
     const controller = createSelect({ items: ["One", "Two"], label: "Value" });
     expect(requirePart(controller.root, "value").hasAttribute("data-placeholder-shown")).toBe(true);
@@ -193,4 +222,10 @@ function requireItem(root: ParentNode, value: string): HTMLElement {
 async function flushMachine(): Promise<void> {
   await Promise.resolve();
   await new Promise((resolve) => setTimeout(resolve, 0));
+}
+
+async function flushPositioning(): Promise<void> {
+  await flushMachine();
+  await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+  await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
 }

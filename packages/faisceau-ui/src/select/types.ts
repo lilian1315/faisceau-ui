@@ -9,6 +9,8 @@ type SelectMachineOptions = Omit<
 >;
 
 interface SelectViewOptions extends FuiFieldOptions {
+  /** Aligns the selected item's text with the trigger value when the popup opens. @default true */
+  alignItemWithTrigger?: boolean;
   /** Text displayed while no item is selected. */
   placeholder?: string;
   /** Adds an explicit clear button next to the trigger. */

@@ -21,6 +21,7 @@ import {
   type NativeSelectSource,
 } from "../shared/index.js";
 import { createSelectMarkup, enhanceSelectMarkup } from "./markup.js";
+import { createItemAlignedPositioning } from "./positioning.js";
 import type { EnhanceSelectOptions, SelectController, SelectOptions } from "./types.js";
 
 interface SelectParts {
@@ -89,6 +90,7 @@ function setupSelect(
   },
 ): SelectController {
   const {
+    alignItemWithTrigger = true,
     className,
     clearLabel,
     clearable,
@@ -97,7 +99,9 @@ function setupSelect(
     id: requestedId,
     items: _items,
     label: nextLabel,
+    onOpenChange,
     placeholder = "Select an option",
+    positioning: requestedPositioning,
     ...behavior
   } = options;
   const parts = resolveParts(root, setup.nativeSelect, setup.items, clearable ?? false, clearLabel);
@@ -125,6 +129,27 @@ function setupSelect(
   const itemRecords = mapItems(parts.itemElements, setup.items, machineId);
   const ids = createPartIds(machineId, root, parts, itemRecords);
   const collection = createCollection(setup.items);
+  const itemByValue = new Map(itemRecords.map(({ element, item }) => [item.value, element]));
+  const positioning = alignItemWithTrigger
+    ? createItemAlignedPositioning({
+        fallbackGutter: 6,
+        getSelectedItem: () => {
+          const selectedValue = getNativeSelectValue(parts.nativeSelect)[0];
+          return selectedValue === undefined ? null : (itemByValue.get(selectedValue) ?? null);
+        },
+        positioner: parts.positioner,
+        requested: requestedPositioning,
+        trigger: parts.trigger,
+        valueText: parts.value,
+      })
+    : {
+        gutter: 6,
+        placement: "bottom-start" as const,
+        sameWidth: true,
+        ...requestedPositioning,
+      };
+  parts.positioner.toggleAttribute("data-fui-item-aligned", alignItemWithTrigger);
+  if (alignItemWithTrigger) parts.positioner.removeAttribute("data-fui-positioned");
   const machineProps: select.Props<FuiItem> = {
     ...behavior,
     collection,
@@ -133,12 +158,11 @@ function setupSelect(
     ids,
     invalid: behavior.invalid ?? errorElement !== null,
     name: behavior.name ?? (parts.nativeSelect.name || undefined),
-    positioning: {
-      gutter: 6,
-      placement: "bottom-start",
-      sameWidth: true,
-      ...behavior.positioning,
+    onOpenChange(details) {
+      if (alignItemWithTrigger) parts.positioner.removeAttribute("data-fui-positioned");
+      onOpenChange?.(details);
     },
+    positioning,
     translations: {
       ...behavior.translations,
       clearTriggerLabel:

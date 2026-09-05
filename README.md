@@ -62,6 +62,8 @@ select.mount(document.querySelector("#app")!);
 
 Une chaîne peut servir de raccourci d'item ; sa valeur et son libellé seront identiques.
 
+Par défaut, le menu chevauche le contrôle à l'ouverture afin d'aligner le texte de l'option sélectionnée avec la valeur affichée. Si aucun item n'est sélectionné, le menu reprend son positionnement sous le trigger. Utilisez `alignItemWithTrigger: false` pour toujours placer le menu sous le trigger. L'option fonctionne aussi avec `enhanceSelect`. Comme dans Base UI, l'ancre, le décalage et le placement sont gérés par ce mode spécial ; les autres options de `positioning` restent applicables.
+
 ## Créer une Combobox
 
 La Combobox filtre par défaut les libellés sans tenir compte de la casse. Une fonction `filter` permet de remplacer ce comportement.
