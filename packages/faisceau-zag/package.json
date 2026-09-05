@@ -1,0 +1,35 @@
+{
+  "name": "@lilian1315/faisceau-zag",
+  "version": "0.0.0",
+  "description": "Faisceau bindings for Zag.js machines and DOM props.",
+  "license": "MIT",
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "vp pack",
+    "dev": "vp pack --watch",
+    "test": "vp test"
+  },
+  "dependencies": {
+    "@zag-js/vanilla": "catalog:"
+  },
+  "devDependencies": {
+    "faisceau": "catalog:"
+  },
+  "peerDependencies": {
+    "faisceau": "^0.3.2"
+  }
+}

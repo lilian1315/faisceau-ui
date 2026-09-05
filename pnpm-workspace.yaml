@@ -4,14 +4,26 @@ packages:
 catalogMode: prefer
 
 catalog:
+  "@lilian1315/create-element": 0.12.1
+  "@lucide/icons": 1.41.0
+  "@zag-js/combobox": 1.43.3
+  "@zag-js/select": 1.43.3
+  "@zag-js/vanilla": 1.43.3
   "@types/node": ^24
+  faisceau: 0.3.2
   typescript: ^7.0.2
   vite: npm:@voidzero-dev/vite-plus-core@0.3.0
   vite-plus: 0.3.0
+  "@vitest/browser-playwright": 4.1.11
+  playwright: ^1.62.1
+  vitest: 4.1.11
 overrides:
   vite@*: "catalog:"
+  vitest@*: 4.1.11
 peerDependencyRules:
   allowAny:
     - vite
   allowedVersions:
     vite: "*"
+minimumReleaseAgeExclude:
+  - "@lilian1315/create-element@0.12.1"

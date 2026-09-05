@@ -1,0 +1,18 @@
+{
+  "name": "website",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "vp build",
+    "dev": "vp dev",
+    "test": "vp test --passWithNoTests"
+  },
+  "dependencies": {
+    "@lilian1315/faisceau-ui": "workspace:*"
+  },
+  "devDependencies": {
+    "vite": "catalog:",
+    "vite-plus": "catalog:"
+  }
+}

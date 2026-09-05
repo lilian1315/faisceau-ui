@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="fr" data-fui-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Démonstration des composants Select et Combobox de Faisceau UI."
+    />
+    <title>Faisceau UI — Select &amp; Combobox</title>
+  </head>
+  <body>
+    <main class="demo-shell">
+      <header class="demo-header">
+        <div>
+          <p class="demo-eyebrow">Faisceau UI</p>
+          <h1>Select et Combobox, sans framework</h1>
+          <p class="demo-lead">
+            Les mêmes composants peuvent construire leur DOM ou adopter un markup déjà présent.
+          </p>
+        </div>
+        <button class="demo-theme" id="theme-toggle" type="button">Passer au thème sombre</button>
+      </header>
+
+      <section class="demo-grid" aria-label="Démonstrations des composants">
+        <article class="demo-card">
+          <div class="demo-card-heading">
+            <span class="demo-badge">createSelect</span>
+            <h2>Créé de toutes pièces</h2>
+          </div>
+          <div id="created-select"></div>
+        </article>
+
+        <article class="demo-card">
+          <div class="demo-card-heading">
+            <span class="demo-badge">enhanceSelect</span>
+            <h2>Adopté depuis le HTML</h2>
+          </div>
+          <div class="demo-existing-node" id="enhanced-select">
+            <select aria-label="Environnement" name="environment">
+              <option value="">Choisir un environnement</option>
+              <option value="local">Local</option>
+              <option value="preview" selected>Preview</option>
+              <option value="production" disabled>Production</option>
+            </select>
+          </div>
+        </article>
+
+        <article class="demo-card">
+          <div class="demo-card-heading">
+            <span class="demo-badge">createCombobox</span>
+            <h2>Recherche intégrée</h2>
+          </div>
+          <div id="created-combobox"></div>
+        </article>
+
+        <article class="demo-card">
+          <div class="demo-card-heading">
+            <span class="demo-badge">enhanceCombobox</span>
+            <h2>Markup enrichi</h2>
+          </div>
+          <div class="demo-existing-node" id="enhanced-combobox">
+            <select aria-label="Commande" name="command">
+              <option value="">Rechercher une commande…</option>
+              <option value="build" selected>Build</option>
+              <option value="check">Check</option>
+              <option value="test">Test</option>
+            </select>
+          </div>
+        </article>
+      </section>
+
+      <p class="demo-events" id="demo-events" aria-live="polite">
+        Utilisez Tab, les flèches, Entrée et Échap pour tester les interactions.
+      </p>
+    </main>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
