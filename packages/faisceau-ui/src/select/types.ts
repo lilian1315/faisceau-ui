@@ -5,11 +5,13 @@ import type { FuiController, FuiFieldOptions } from "../types.js";
 
 type SelectMachineOptions = Omit<
   select.Props<FuiItem>,
-  "collection" | "getRootNode" | "id" | "ids"
+  "collection" | "getRootNode" | "id" | "ids" | "multiple"
 >;
 
 interface SelectViewOptions extends FuiFieldOptions {
-  /** Aligns the selected item's text with the trigger value when the popup opens. @default true */
+  /** Allows selecting more than one item without closing the popup. @default false */
+  multiple?: boolean;
+  /** Aligns the selected item's text with the trigger value. Always disabled in multiple mode. @default true */
   alignItemWithTrigger?: boolean;
   /** Text displayed while no item is selected. */
   placeholder?: string;

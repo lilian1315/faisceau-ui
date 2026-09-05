@@ -5,7 +5,13 @@ import type { FuiController, FuiFieldOptions } from "../types.js";
 
 type ComboboxMachineOptions = Omit<
   combobox.Props<FuiItem>,
-  "allowCustomValue" | "collection" | "getRootNode" | "id" | "ids" | "onInputValueChange"
+  | "allowCustomValue"
+  | "collection"
+  | "getRootNode"
+  | "id"
+  | "ids"
+  | "multiple"
+  | "onInputValueChange"
 >;
 
 interface ComboboxViewOptions extends FuiFieldOptions {
@@ -13,12 +19,16 @@ interface ComboboxViewOptions extends FuiFieldOptions {
   items: readonly FuiItemInput[];
   /** Visible label associated with the input. */
   label: string;
+  /** Allows selecting more than one item and renders the choices as removable tags. @default false */
+  multiple?: boolean;
   /** Accessible label for the clear button. */
   clearLabel?: string;
   /** Message displayed when filtering returns no items. */
   emptyLabel?: string;
   /** Override the default case-insensitive label filter. */
   filter?: (item: Readonly<FuiItem>, inputValue: string) => boolean;
+  /** Builds the accessible label for a selected item's remove button. */
+  getRemoveLabel?: (item: Readonly<FuiItem>) => string;
   /** Called after the built-in collection filter has run. */
   onInputValueChange?: combobox.Props<FuiItem>["onInputValueChange"];
 }

@@ -6,6 +6,7 @@ import { effect } from "faisceau";
 import {
   addFuiClasses,
   captureAttributes,
+  createClearIcon,
   createId,
   getNativeSelectValue,
   normalizeItems,
@@ -26,6 +27,7 @@ interface ComboboxParts {
   label: HTMLLabelElement;
   control: HTMLElement;
   input: HTMLInputElement;
+  selection: HTMLElement;
   trigger: HTMLButtonElement;
   clearTrigger: HTMLButtonElement | null;
   positioner: HTMLElement;
@@ -94,6 +96,7 @@ function setupCombobox(
     emptyLabel,
     errorMessage,
     filter = defaultFilter,
+    getRemoveLabel = defaultRemoveLabel,
     id: requestedId,
     items: _items,
     label: nextLabel,
@@ -106,6 +109,7 @@ function setupCombobox(
 
   root.dataset.fuiComponent = "combobox";
   root.dataset.fuiPart ||= "root";
+  root.toggleAttribute("data-fui-multiple", behavior.multiple === true);
   addFuiClasses(root, "fui-combobox");
   addCallerClasses(root, className);
 
@@ -125,6 +129,7 @@ function setupCombobox(
   if (errorElement) errorElement.setAttribute("role", "alert");
 
   const itemRecords = mapItems(parts.itemElements, setup.items, machineId);
+  const itemByValue = new Map(setup.items.map((item) => [item.value, item]));
   const ids = createPartIds(machineId, root, parts, itemRecords);
   configureNativeSelect(parts.nativeSelect, behavior);
   const resetValue = [
@@ -260,6 +265,23 @@ function setupCombobox(
     const api = zag.api.get();
     parts.clearTrigger.hidden = api.inputValue.length === 0 && !api.hasSelectedItems;
   });
+  const stopSelectedTags = effect(() => {
+    const api = zag.api.get();
+    const selectedItems = api.value.flatMap((value) => {
+      const item = itemByValue.get(value);
+      return item === undefined ? [] : [item];
+    });
+    renderSelectedTags(
+      parts.selection,
+      behavior.multiple === true ? selectedItems : [],
+      api.disabled || behavior.readOnly === true,
+      getRemoveLabel,
+      (value) => {
+        api.clearValue(value);
+        api.focus();
+      },
+    );
+  });
   const stopNativeSelectSync = effect(() => {
     setNativeSelectValue(parts.nativeSelect, zag.api.get().value);
   });
@@ -293,6 +315,7 @@ function setupCombobox(
       destroyed = true;
       filterRevision += 1;
       stopClearVisibility();
+      stopSelectedTags();
       stopNativeSelectSync();
       parts.nativeSelect.removeEventListener("change", handleNativeChange);
       parts.nativeSelect.removeEventListener("focus", handleNativeFocus);
@@ -318,6 +341,7 @@ function resolveParts(
   const label = requirePart<HTMLLabelElement>(root, "label");
   const control = requirePart<HTMLElement>(root, "control");
   const input = requirePart<HTMLInputElement>(root, "input");
+  const selection = requirePart<HTMLElement>(root, "selection");
   const trigger = requirePart<HTMLButtonElement>(root, "trigger");
   const positioner = requirePart<HTMLElement>(root, "positioner");
   const content = requirePart<HTMLElement>(root, "content");
@@ -361,6 +385,7 @@ function resolveParts(
     label,
     control,
     input,
+    selection,
     trigger,
     clearTrigger,
     positioner,
@@ -497,6 +522,51 @@ function getFilteredItems(
 
 function defaultFilter(item: Readonly<FuiItem>, inputValue: string): boolean {
   return item.label.toLocaleLowerCase().includes(inputValue.trim().toLocaleLowerCase());
+}
+
+function defaultRemoveLabel(item: Readonly<FuiItem>): string {
+  return `Remove ${item.label}`;
+}
+
+function renderSelectedTags(
+  selection: HTMLElement,
+  items: readonly FuiItem[],
+  disabled: boolean,
+  getRemoveLabel: (item: Readonly<FuiItem>) => string,
+  remove: (value: string) => void,
+): void {
+  const tags = items.map((item) => {
+    const label = h(
+      "span",
+      { class: "fui-combobox-tag-label", data: { fuiPart: "tag-label" } },
+      item.label,
+    );
+    const removeTrigger = h(
+      "button",
+      {
+        "aria-label": getRemoveLabel(item),
+        class: "fui-combobox-tag-remove",
+        data: { fuiPart: "tag-remove", value: item.value },
+        disabled,
+        type: "button",
+      },
+      createClearIcon(),
+    );
+    removeTrigger.addEventListener("click", () => remove(item.value));
+
+    return h(
+      "span",
+      {
+        class: "fui-combobox-tag",
+        data: { fuiPart: "tag", value: item.value },
+      },
+      label,
+      removeTrigger,
+    );
+  });
+
+  selection.replaceChildren(...tags);
+  selection.hidden = tags.length === 0;
 }
 
 function updateFilteredMarkup(

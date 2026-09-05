@@ -109,6 +109,7 @@ function setupSelect(
 
   root.dataset.fuiComponent = "select";
   root.dataset.fuiPart ||= "root";
+  root.toggleAttribute("data-fui-multiple", behavior.multiple === true);
   addFuiClasses(root, "fui-select");
   addCallerClasses(root, className);
 
@@ -130,7 +131,8 @@ function setupSelect(
   const ids = createPartIds(machineId, root, parts, itemRecords);
   const collection = createCollection(setup.items);
   const itemByValue = new Map(itemRecords.map(({ element, item }) => [item.value, element]));
-  const positioning = alignItemWithTrigger
+  const itemAligned = alignItemWithTrigger && behavior.multiple !== true;
+  const positioning = itemAligned
     ? createItemAlignedPositioning({
         fallbackGutter: 6,
         getSelectedItem: () => {
@@ -148,8 +150,8 @@ function setupSelect(
         sameWidth: true,
         ...requestedPositioning,
       };
-  parts.positioner.toggleAttribute("data-fui-item-aligned", alignItemWithTrigger);
-  if (alignItemWithTrigger) parts.positioner.removeAttribute("data-fui-positioned");
+  parts.positioner.toggleAttribute("data-fui-item-aligned", itemAligned);
+  if (itemAligned) parts.positioner.removeAttribute("data-fui-positioned");
   const machineProps: select.Props<FuiItem> = {
     ...behavior,
     collection,
@@ -159,7 +161,7 @@ function setupSelect(
     invalid: behavior.invalid ?? errorElement !== null,
     name: behavior.name ?? (parts.nativeSelect.name || undefined),
     onOpenChange(details) {
-      if (alignItemWithTrigger) parts.positioner.removeAttribute("data-fui-positioned");
+      if (itemAligned) parts.positioner.removeAttribute("data-fui-positioned");
       onOpenChange?.(details);
     },
     positioning,
@@ -174,6 +176,15 @@ function setupSelect(
     machineProps,
     select.connect,
   );
+  let changingFromNative = false;
+  const handleNativeChange = (): void => {
+    if (changingFromNative) return;
+    changingFromNative = true;
+    zag.api.get().setValue(getNativeSelectValue(parts.nativeSelect));
+    changingFromNative = false;
+  };
+  parts.nativeSelect.addEventListener("input", handleNativeChange);
+  parts.nativeSelect.addEventListener("change", handleNativeChange);
 
   zag.bind(root, (api) => api.getRootProps());
   zag.bind(parts.label, (api) => api.getLabelProps());
@@ -215,6 +226,9 @@ function setupSelect(
     parts.value.textContent = isPlaceholder ? placeholder : api.valueAsString;
     parts.value.toggleAttribute("data-placeholder-shown", isPlaceholder);
   });
+  const stopNativeSelectSync = effect(() => {
+    setNativeSelectValue(parts.nativeSelect, zag.api.get().value);
+  });
 
   linkDescription(parts.trigger, descriptionElement, errorElement);
 
@@ -244,6 +258,9 @@ function setupSelect(
       if (destroyed) return;
       destroyed = true;
       stopValueText();
+      stopNativeSelectSync();
+      parts.nativeSelect.removeEventListener("input", handleNativeChange);
+      parts.nativeSelect.removeEventListener("change", handleNativeChange);
       const value = getNativeSelectValue(parts.nativeSelect);
       zag.destroy();
       if (setup.ownsRoot) root.remove();

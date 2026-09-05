@@ -20,6 +20,7 @@ interface ComboboxViewOptions {
   readonly emptyLabel?: string;
   readonly errorMessage?: string;
   readonly label: string;
+  readonly multiple?: boolean;
   readonly placeholder?: string;
 }
 
@@ -68,6 +69,17 @@ function createView(options: ComboboxViewOptions, items: readonly FuiItem[]): Co
     placeholder: options.placeholder,
     type: "text",
   });
+  const selection = h("span", {
+    class: "fui-combobox-selection",
+    data: { fuiPart: "selection" },
+    hidden: true,
+  });
+  const field = h(
+    "span",
+    { class: "fui-combobox-field", data: { fuiPart: "field" } },
+    selection,
+    input,
+  );
   const clearTrigger = h(
     "button",
     {
@@ -91,7 +103,7 @@ function createView(options: ComboboxViewOptions, items: readonly FuiItem[]): Co
   const control = h(
     "div",
     { class: "fui-combobox-control", data: { fuiPart: "control" } },
-    input,
+    field,
     clearTrigger,
     trigger,
   );
@@ -141,18 +153,23 @@ function createNativeSelect(
 ): HTMLSelectElement {
   const initialValue = options.value ?? options.defaultValue ?? [];
   const selectedValues = new Set(initialValue);
-  const placeholder = h("option", { value: "" }, options.placeholder ?? "Select an option");
-  placeholder.hidden = true;
-  placeholder.selected = selectedValues.size === 0;
-  placeholder.defaultSelected = selectedValues.size === 0;
+  const optionElements: HTMLOptionElement[] = [];
 
-  const optionElements = items.map((item) => {
+  if (!options.multiple) {
+    const placeholder = h("option", { value: "" }, options.placeholder ?? "Select an option");
+    placeholder.hidden = true;
+    placeholder.selected = selectedValues.size === 0;
+    placeholder.defaultSelected = selectedValues.size === 0;
+    optionElements.push(placeholder);
+  }
+
+  for (const item of items) {
     const option = h("option", { disabled: item.disabled, value: item.value }, item.label);
     option.selected = selectedValues.has(item.value);
     option.defaultSelected = selectedValues.has(item.value);
     if (item.description) option.dataset.description = item.description;
-    return option;
-  });
+    optionElements.push(option);
+  }
   const nativeSelect = h(
     "select",
     {
@@ -164,7 +181,6 @@ function createNativeSelect(
       required: options.required,
       tabindex: -1,
     },
-    placeholder,
     optionElements,
   );
   if (options.form) nativeSelect.setAttribute("form", options.form);

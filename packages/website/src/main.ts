@@ -58,6 +58,28 @@ enhanceCombobox(requireElement<HTMLElement>("#enhanced-combobox"), {
   placeholder: "Rechercher une commande…",
 });
 
+createSelect({
+  defaultValue: ["fr", "be"],
+  items: [
+    { value: "fr", label: "France" },
+    { value: "be", label: "Belgique" },
+    { value: "ch", label: "Suisse" },
+    { value: "ca", label: "Canada" },
+  ],
+  label: "Pays",
+  multiple: true,
+  name: "countries",
+  onValueChange({ items }) {
+    eventOutput.textContent = `Pays sélectionnés : ${items.map((item) => item.label).join(", ") || "aucun"}`;
+  },
+}).mount(requireElement("#multiple-select"));
+
+enhanceCombobox(requireElement<HTMLElement>("#multiple-combobox"), {
+  emptyLabel: "Aucune commande trouvée",
+  getRemoveLabel: (item) => `Retirer ${item.label}`,
+  placeholder: "Ajouter une commande…",
+});
+
 const themeButton = requireElement<HTMLButtonElement>("#theme-toggle");
 themeButton.addEventListener("click", () => {
   const root = document.documentElement;

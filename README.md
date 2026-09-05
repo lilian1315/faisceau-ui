@@ -62,7 +62,7 @@ select.mount(document.querySelector("#app")!);
 
 Une chaîne peut servir de raccourci d'item ; sa valeur et son libellé seront identiques.
 
-Par défaut, le menu chevauche le contrôle à l'ouverture afin d'aligner le texte de l'option sélectionnée avec la valeur affichée. Si aucun item n'est sélectionné, le menu reprend son positionnement sous le trigger. Utilisez `alignItemWithTrigger: false` pour toujours placer le menu sous le trigger. L'option fonctionne aussi avec `enhanceSelect`. Comme dans Base UI, l'ancre, le décalage et le placement sont gérés par ce mode spécial ; les autres options de `positioning` restent applicables.
+Par défaut, le menu chevauche le contrôle à l'ouverture afin d'aligner le texte de l'option sélectionnée avec la valeur affichée. Si aucun item n'est sélectionné, le menu reprend son positionnement sous le trigger. Utilisez `alignItemWithTrigger: false` pour toujours placer le menu sous le trigger. Ce positionnement est toujours désactivé lorsque `multiple: true`, même si `alignItemWithTrigger: true` est fourni explicitement. L'option fonctionne aussi avec `enhanceSelect`. Comme dans Base UI, l'ancre, le décalage et le placement sont gérés par ce mode spécial ; les autres options de `positioning` restent applicables.
 
 ## Créer une Combobox
 
@@ -84,6 +84,38 @@ const combobox = createCombobox({
 
 combobox.mount(document.querySelector("#app")!);
 ```
+
+## Sélection multiple
+
+Les deux composants acceptent `multiple: true`. Un Select affiche les libellés sélectionnés dans son trigger et garde sa liste ouverte pour permettre plusieurs choix. Une Combobox affiche chaque valeur sélectionnée sous forme de pastille retirable et vide son champ après une sélection afin de poursuivre la recherche.
+
+```ts
+createSelect({
+  label: "Pays",
+  name: "countries",
+  multiple: true,
+  defaultValue: ["fr", "be"],
+  items: [
+    { value: "fr", label: "France" },
+    { value: "be", label: "Belgique" },
+    { value: "ch", label: "Suisse" },
+  ],
+}).mount(document.querySelector("#countries")!);
+
+createCombobox({
+  label: "Villes",
+  name: "cities",
+  multiple: true,
+  getRemoveLabel: (item) => `Retirer ${item.label}`,
+  items: [
+    { value: "paris", label: "Paris" },
+    { value: "lyon", label: "Lyon" },
+    { value: "lille", label: "Lille" },
+  ],
+}).mount(document.querySelector("#cities")!);
+```
+
+En mode enhance, l'attribut HTML natif suffit : `<select multiple>`. Les options portant `selected` deviennent les valeurs initiales. Pour récupérer toutes les valeurs d'un formulaire, utilisez `new FormData(form).getAll(name)`.
 
 ## Formulaires HTML natifs
 

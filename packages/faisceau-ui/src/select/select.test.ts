@@ -81,6 +81,50 @@ describe("Select", () => {
     controller.destroy();
   });
 
+  it("selects, deselects, and submits multiple values without closing", async () => {
+    const form = document.createElement("form");
+    document.body.append(form);
+    const controller = createSelect({
+      defaultValue: ["fr"],
+      items: [
+        { value: "fr", label: "France" },
+        { value: "be", label: "Belgique" },
+        { value: "ch", label: "Suisse" },
+      ],
+      label: "Pays",
+      multiple: true,
+      name: "countries",
+    }).mount(form);
+    const nativeSelect = requirePart<HTMLSelectElement>(controller.root, "native-select");
+
+    expect(nativeSelect.multiple).toBe(true);
+    expect(controller.root.hasAttribute("data-fui-multiple")).toBe(true);
+    expect(
+      controller.root.querySelector('[role="listbox"]')?.getAttribute("aria-multiselectable"),
+    ).toBe("true");
+
+    requirePart<HTMLButtonElement>(controller.root, "trigger").click();
+    await flushMachine();
+    requireItem(controller.root, "be").click();
+    await flushMachine();
+
+    expect(controller.api.get().open).toBe(true);
+    expect(controller.api.get().value).toEqual(["fr", "be"]);
+    expect(requirePart(controller.root, "value").textContent).toBe("France, Belgique");
+    expect(new FormData(form).getAll("countries")).toEqual(["fr", "be"]);
+
+    requireItem(controller.root, "fr").click();
+    await flushMachine();
+    expect(controller.api.get().value).toEqual(["be"]);
+    expect(new FormData(form).getAll("countries")).toEqual(["be"]);
+
+    form.reset();
+    await flushMachine();
+    expect(controller.api.get().value).toEqual(["fr"]);
+    expect(new FormData(form).getAll("countries")).toEqual(["fr"]);
+    controller.destroy();
+  });
+
   it("enhances only a container and its native select", async () => {
     const form = document.createElement("form");
     const root = document.createElement("div");
@@ -135,6 +179,34 @@ describe("Select", () => {
     expect(nativeSelect.value).toBe("expert");
   });
 
+  it("derives multiple mode from enhanced native markup", async () => {
+    const form = document.createElement("form");
+    const root = document.createElement("div");
+    root.innerHTML = `
+      <select aria-label="Pays" name="countries" multiple>
+        <option value="fr" selected>France</option>
+        <option value="be" selected>Belgique</option>
+        <option value="ch">Suisse</option>
+      </select>
+    `;
+    form.append(root);
+    document.body.append(form);
+
+    const nativeSelect = root.querySelector("select")!;
+    const controller = enhanceSelect(root);
+
+    expect(controller.api.get().multiple).toBe(true);
+    expect(controller.api.get().value).toEqual(["fr", "be"]);
+    expect(new FormData(form).getAll("countries")).toEqual(["fr", "be"]);
+
+    for (const option of nativeSelect.options) option.selected = option.value === "ch";
+    nativeSelect.dispatchEvent(new Event("change", { bubbles: true }));
+    await flushMachine();
+    expect(controller.api.get().value).toEqual(["ch"]);
+    expect(new FormData(form).getAll("countries")).toEqual(["ch"]);
+    controller.destroy();
+  });
+
   it("supports keyboard navigation through the list", async () => {
     const controller = createSelect({
       defaultValue: ["one"],
@@ -173,12 +245,21 @@ describe("Select", () => {
       items: ["One"],
       label: "Aligned",
     }).mount(document.body);
+    const multiple = createSelect({
+      alignItemWithTrigger: true,
+      items: ["One", "Two"],
+      label: "Multiple",
+      multiple: true,
+    });
     const alignedPositioner = requirePart<HTMLElement>(aligned.root, "positioner");
 
     expect(requirePart(regular.root, "positioner").hasAttribute("data-fui-item-aligned")).toBe(
       false,
     );
     expect(alignedPositioner.hasAttribute("data-fui-item-aligned")).toBe(true);
+    expect(requirePart(multiple.root, "positioner").hasAttribute("data-fui-item-aligned")).toBe(
+      false,
+    );
 
     requirePart<HTMLButtonElement>(aligned.root, "trigger").click();
     await flushPositioning();
@@ -189,6 +270,7 @@ describe("Select", () => {
 
     regular.destroy();
     aligned.destroy();
+    multiple.destroy();
   });
 
   it("uses Lucide icons and only authors fui-prefixed classes", () => {
