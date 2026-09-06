@@ -9,5 +9,5 @@
     "types": ["node"],
     "verbatimModuleSyntax": true
   },
-  "include": ["published-smoke.test.ts", "verify-exports.ts"]
+  "include": ["published-smoke.test.ts", "published-smoke.test-d.ts", "verify-exports.ts"]
 }

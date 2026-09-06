@@ -21,7 +21,7 @@
   "scripts": {
     "build": "vp pack",
     "dev": "vp pack --watch",
-    "test": "vp test --typecheck"
+    "test": "vp test"
   },
   "dependencies": {
     "@zag-js/core": "catalog:"

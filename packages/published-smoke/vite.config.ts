@@ -9,7 +9,6 @@ export default defineConfig({
           "pnpm --dir ../faisceau-zag pack --dry-run",
           "pnpm --dir ../faisceau-ui pack --dry-run",
           "node verify-exports.ts",
-          "vp exec tsc --project tsconfig.json --noEmit",
           "vp test",
         ],
         dependsOn: [{ task: "build", from: "dependencies" }],
@@ -24,5 +23,8 @@ export default defineConfig({
       provider: playwright({ launchOptions: { channel: "chromium" } }),
     },
     include: ["published-smoke.test.ts"],
+    typecheck: {
+      enabled: true,
+    },
   },
 });

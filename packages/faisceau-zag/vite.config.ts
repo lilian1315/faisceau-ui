@@ -15,5 +15,8 @@ export default defineConfig({
       provider: playwright({ launchOptions: { channel: "chromium" } }),
     },
     include: ["src/**/*.test.ts"],
+    typecheck: {
+      enabled: true,
+    },
   },
 });

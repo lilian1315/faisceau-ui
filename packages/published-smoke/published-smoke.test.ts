@@ -1,35 +1,15 @@
 import "@lilian1315/faisceau-ui/styles.css";
 
 import { afterEach, describe, expect, it } from "vite-plus/test";
-import {
-  createSelect,
-  enhanceCombobox,
-  type FuiItemInput,
-  type SelectController,
-} from "@lilian1315/faisceau-ui";
-import {
-  createCombobox as createComboboxFromSubpath,
-  type ComboboxOptions,
-} from "@lilian1315/faisceau-ui/combobox";
-import {
-  enhanceSelect as enhanceSelectFromSubpath,
-  type EnhanceSelectOptions,
-} from "@lilian1315/faisceau-ui/select";
+import { createSelect, enhanceCombobox } from "@lilian1315/faisceau-ui";
+import { createCombobox as createComboboxFromSubpath } from "@lilian1315/faisceau-ui/combobox";
+import { enhanceSelect as enhanceSelectFromSubpath } from "@lilian1315/faisceau-ui/select";
 import { createZagMachine, normalizeProps } from "@lilian1315/faisceau-zag";
 
 const items = [
   { label: "France", value: "fr" },
   { label: "Belgique", value: "be" },
-] as const satisfies readonly FuiItemInput[];
-
-const comboboxOptions = {
-  items,
-  label: "Pays",
-} satisfies ComboboxOptions;
-
-const enhanceOptions = {
-  clearable: true,
-} satisfies EnhanceSelectOptions;
+] as const;
 
 afterEach(() => {
   document.body.replaceChildren();
@@ -37,18 +17,17 @@ afterEach(() => {
 
 describe("published package contract", () => {
   it("resolves every public entry and runs a styled Select interaction in Chrome", async () => {
-    const combobox = createComboboxFromSubpath(comboboxOptions);
+    const combobox = createComboboxFromSubpath({ items, label: "Pays" });
     expect(combobox.root).toBeInstanceOf(HTMLElement);
     combobox.destroy();
     expect(typeof enhanceCombobox).toBe("function");
     expect(typeof enhanceSelectFromSubpath).toBe("function");
-    expect(enhanceOptions.clearable).toBe(true);
     expect(typeof createZagMachine).toBe("function");
     expect(typeof normalizeProps).toBe("object");
 
     const form = document.createElement("form");
     document.body.append(form);
-    const controller: SelectController = createSelect({
+    const controller = createSelect({
       alignItemWithTrigger: false,
       items,
       label: "Pays",
