@@ -4,6 +4,9 @@ import type { ComboboxOptions } from "@lilian1315/faisceau-ui/combobox";
 import type { CheckboxOptions } from "@lilian1315/faisceau-ui/checkbox";
 import type { EnhanceSelectOptions } from "@lilian1315/faisceau-ui/select";
 import type { TooltipOptions } from "@lilian1315/faisceau-ui/tooltip";
+import type { DialogOptions } from "@lilian1315/faisceau-ui/dialog";
+import type { DrawerOptions } from "@lilian1315/faisceau-ui/drawer";
+import type { ToasterOptions } from "@lilian1315/faisceau-ui/toast";
 
 test("exposes the declarations shipped through every public UI entry", () => {
   const items = [
@@ -15,5 +18,8 @@ test("exposes the declarations shipped through every public UI entry", () => {
   assertType<EnhanceSelectOptions>({ clearable: true });
   assertType<CheckboxOptions>({ label: "Terms" });
   assertType<TooltipOptions>({ content: "Help", trigger: "Info" });
+  assertType<DialogOptions>({ content: "Body", title: "Title", trigger: "Open" });
+  assertType<DrawerOptions>({ content: "Body", side: "right", title: "Title", trigger: "Open" });
+  assertType<ToasterOptions>({ placement: "bottom-end" });
   expectTypeOf(createSelect({ items, label: "Pays" })).toMatchTypeOf<SelectController>();
 });

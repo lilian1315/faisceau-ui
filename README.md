@@ -235,6 +235,24 @@ createTooltip({ content: "Créer un document", trigger: "Créer" }).mount(docume
 enhanceTooltip(document.querySelector<HTMLElement>("[title]")!);
 ```
 
+## Dialog, Drawer et Toast
+
+Dialog et Drawer acceptent le même modèle : la variante `create*` construit tout le composant,
+tandis que `enhance*` part d'un trigger et d'un contenu existants marqués avec
+`data-fui-part="trigger"` et `data-fui-part="content"`. Drawer ajoute l'option `side`.
+
+```ts
+import { createDialog, createDrawer, createToaster } from "@lilian1315/faisceau-ui";
+
+createDialog({ trigger: "Ouvrir", title: "Profil", content: "Contenu" }).mount(document.body);
+createDrawer({ trigger: "Filtres", title: "Filtres", content: "Contenu", side: "right" }).mount(
+  document.body,
+);
+
+const toaster = createToaster({ placement: "bottom-end" }).mount(document.body);
+toaster.store.success({ title: "Enregistré", description: "Les changements sont conservés." });
+```
+
 ## Thèmes et personnalisation
 
 Le thème clair est appliqué par défaut. Le thème sombre s'active sur la page entière ou sur un sous-arbre :
@@ -256,7 +274,7 @@ Toutes les classes appartenant à la bibliothèque commencent par `fui-`. Les at
 
 ## Cycle de vie
 
-Les huit fonctions renvoient un contrôleur commun :
+Les composants pilotés par une machine unique renvoient un contrôleur commun :
 
 - `root` : élément racine du composant ;
 - `api` : valeur réactive Faisceau en lecture seule contenant l'API Zag courante, accessible avec `controller.api.get()` ;
@@ -266,6 +284,9 @@ Les huit fonctions renvoient un contrôleur commun :
 - `destroy()` : arrête les effets et écouteurs de façon idempotente.
 
 `destroy()` retire le markup produit par une fonction `create*`. Pour une fonction `enhance*`, seuls les éléments générés sont retirés et le markup natif est restauré.
+
+Le contrôleur Toast suit le même cycle de vie, mais expose `store` à la place de `api` afin de
+créer, mettre à jour et fermer plusieurs notifications.
 
 ```ts
 const select = createSelect({ label: "Mode", items: ["Simple", "Expert"] });

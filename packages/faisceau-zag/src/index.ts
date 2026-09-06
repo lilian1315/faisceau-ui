@@ -26,9 +26,16 @@ export interface ZagConnected<TApi> {
  * Bindings can be installed before `start()`, which makes it possible to
  * enhance existing markup as well as elements created from scratch.
  */
-export interface ZagMachineController<TProps extends object, TApi> {
+export interface ZagMachineController<
+  TProps extends object,
+  TApi,
+  TSchema extends MachineSchema = MachineSchema,
+> {
   /** The latest value returned by the machine's `connect` function. */
   readonly api: ZagConnected<TApi>;
+
+  /** Underlying Zag service, useful for parent/child machine compositions such as Toast. */
+  readonly service: Service<TSchema>;
 
   /**
    * Reactively apply one of the connected API's prop getters to an element.
@@ -66,7 +73,7 @@ export function createZagMachine<TSchema extends MachineSchema, TApi>(
   machine: Machine<TSchema>,
   props: MaybeGetter<InputProps<NoInfer<TSchema>>>,
   connect: (service: Service<NoInfer<TSchema>>, normalize: typeof normalizeProps) => TApi,
-): ZagMachineController<ZagMachineProps<TSchema>, TApi> {
+): ZagMachineController<ZagMachineProps<TSchema>, TApi, TSchema> {
   type TProps = ZagMachineProps<TSchema>;
 
   const service = new VanillaMachine(machine, props);
@@ -187,7 +194,7 @@ export function createZagMachine<TSchema extends MachineSchema, TApi>(
     service.stop();
   };
 
-  return { api, bind, start, updateProps, destroy };
+  return { api, service: service.service, bind, start, updateProps, destroy };
 }
 
 export { normalizeProps } from "@zag-js/vanilla";

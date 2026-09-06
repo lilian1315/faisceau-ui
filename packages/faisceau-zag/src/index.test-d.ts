@@ -10,6 +10,7 @@ test("couples the machine and connector through one Zag schema", () => {
   expectTypeOf(controller.api.get()).toMatchTypeOf<checkbox.Api>();
   expectTypeOf(controller.api).toHaveProperty("get").toBeFunction();
   expectTypeOf(controller.api).toHaveProperty("peek").toBeFunction();
+  expectTypeOf(controller.service).toMatchTypeOf<checkbox.Service>();
 
   // @ts-expect-error A Checkbox machine cannot be paired with a Combobox connector.
   assertType(createZagMachine(checkbox.machine, { id: "field" }, combobox.connect));

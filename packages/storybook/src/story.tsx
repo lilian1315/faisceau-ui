@@ -1,5 +1,3 @@
-import type { FuiController } from "@lilian1315/faisceau-ui";
-
 interface StoryShellOptions {
   description: string;
   eyebrow: string;
@@ -55,7 +53,7 @@ export function asDom<T extends globalThis.Element>(element: unknown): T {
   return element as T;
 }
 
-export function trackController(root: HTMLElement, controller: FuiController<unknown>): void {
+export function trackController(root: HTMLElement, controller: { destroy(): void }): void {
   queueMicrotask(() => {
     if (!root.isConnected) {
       controller.destroy();

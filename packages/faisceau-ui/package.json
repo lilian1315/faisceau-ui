@@ -32,6 +32,18 @@
       "types": "./dist/tooltip/index.d.mts",
       "import": "./dist/tooltip/index.mjs"
     },
+    "./dialog": {
+      "types": "./dist/dialog/index.d.mts",
+      "import": "./dist/dialog/index.mjs"
+    },
+    "./drawer": {
+      "types": "./dist/drawer/index.d.mts",
+      "import": "./dist/drawer/index.mjs"
+    },
+    "./toast": {
+      "types": "./dist/toast/index.d.mts",
+      "import": "./dist/toast/index.mjs"
+    },
     "./styles.css": {
       "types": "./src/styles/index.d.ts",
       "default": "./src/styles/index.css"
@@ -52,7 +64,9 @@
     "@lucide/icons": "catalog:",
     "@zag-js/checkbox": "catalog:",
     "@zag-js/combobox": "catalog:",
+    "@zag-js/dialog": "catalog:",
     "@zag-js/select": "catalog:",
+    "@zag-js/toast": "catalog:",
     "@zag-js/tooltip": "catalog:",
     "faisceau": "catalog:"
   }

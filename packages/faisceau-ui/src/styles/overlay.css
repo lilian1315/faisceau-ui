@@ -1,0 +1,137 @@
+@layer fui-components {
+  .fui-dialog-trigger,
+  .fui-drawer-trigger,
+  .fui-toast-action {
+    min-block-size: var(--fui-control-height-coarse);
+    padding: var(--fui-space-2) var(--fui-space-3);
+    border: var(--fui-border-width) solid var(--fui-color-border);
+    border-radius: var(--fui-radius-md);
+    background: var(--fui-color-surface);
+    color: var(--fui-color-foreground);
+    cursor: pointer;
+    font: inherit;
+    font-weight: var(--fui-font-weight-medium);
+    transition:
+      background-color var(--fui-duration-fast) var(--fui-easing-standard),
+      scale var(--fui-duration-fast) var(--fui-easing-standard);
+  }
+
+  .fui-dialog-trigger:hover,
+  .fui-drawer-trigger:hover,
+  .fui-toast-action:hover {
+    background: var(--fui-color-accent);
+  }
+  .fui-dialog-trigger:active,
+  .fui-drawer-trigger:active,
+  .fui-toast-action:active {
+    scale: 0.96;
+  }
+
+  .fui-dialog-backdrop,
+  .fui-drawer-backdrop {
+    position: fixed;
+    z-index: 60;
+    inset: 0;
+    background: oklch(0 0 0 / 0.5);
+  }
+
+  .fui-dialog-positioner,
+  .fui-drawer-positioner {
+    position: fixed;
+    z-index: 61;
+    inset: 0;
+    display: grid;
+    pointer-events: none;
+  }
+
+  .fui-dialog-positioner {
+    place-items: center;
+    padding: var(--fui-space-4);
+  }
+  .fui-drawer-positioner {
+    align-items: stretch;
+    justify-items: end;
+  }
+  .fui-drawer[data-side="left"] .fui-drawer-positioner {
+    justify-items: start;
+  }
+  .fui-drawer[data-side="top"] .fui-drawer-positioner {
+    align-items: start;
+    justify-items: stretch;
+  }
+  .fui-drawer[data-side="bottom"] .fui-drawer-positioner {
+    align-items: end;
+    justify-items: stretch;
+  }
+
+  .fui-dialog-content,
+  .fui-drawer-content {
+    position: relative;
+    inline-size: min(32rem, 100%);
+    padding: var(--fui-space-6);
+    border: var(--fui-border-width) solid var(--fui-color-border);
+    border-radius: var(--fui-radius-md);
+    background: var(--fui-color-surface-popover);
+    color: var(--fui-color-foreground);
+    box-shadow: 0 16px 48px var(--fui-color-popover-shadow);
+    pointer-events: auto;
+  }
+
+  .fui-drawer-content {
+    block-size: 100%;
+    inline-size: min(26rem, 90vw);
+    border-radius: 0;
+  }
+  .fui-drawer[data-side="top"] .fui-drawer-content,
+  .fui-drawer[data-side="bottom"] .fui-drawer-content {
+    block-size: auto;
+    inline-size: 100%;
+  }
+  .fui-dialog-title,
+  .fui-drawer-title {
+    margin: 0;
+    padding-inline-end: 2.5rem;
+    font-size: 1.125rem;
+  }
+  .fui-dialog-description,
+  .fui-drawer-description {
+    margin: var(--fui-space-2) 0 var(--fui-space-4);
+    color: var(--fui-color-muted-foreground);
+    line-height: var(--fui-line-height-copy);
+  }
+  .fui-dialog-body,
+  .fui-drawer-body {
+    line-height: var(--fui-line-height-copy);
+  }
+  .fui-dialog-close,
+  .fui-drawer-close,
+  .fui-toast-close {
+    position: absolute;
+    inset-block-start: var(--fui-space-3);
+    inset-inline-end: var(--fui-space-3);
+    display: grid;
+    inline-size: 2.75rem;
+    block-size: 2.75rem;
+    padding: 0;
+    border: 0;
+    border-radius: var(--fui-radius-sm);
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    place-items: center;
+  }
+  .fui-dialog-close:hover,
+  .fui-drawer-close:hover,
+  .fui-toast-close:hover {
+    background: var(--fui-color-accent);
+  }
+  .fui-dialog-trigger:focus-visible,
+  .fui-drawer-trigger:focus-visible,
+  .fui-dialog-close:focus-visible,
+  .fui-drawer-close:focus-visible,
+  .fui-toast-close:focus-visible,
+  .fui-toast-action:focus-visible {
+    outline: var(--fui-focus-ring-width) solid var(--fui-color-ring);
+    outline-offset: var(--fui-focus-ring-offset);
+  }
+}

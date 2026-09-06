@@ -39,6 +39,9 @@ const contracts = [
       ["@lilian1315/faisceau-ui/combobox", "./dist/combobox/index.mjs"],
       ["@lilian1315/faisceau-ui/checkbox", "./dist/checkbox/index.mjs"],
       ["@lilian1315/faisceau-ui/tooltip", "./dist/tooltip/index.mjs"],
+      ["@lilian1315/faisceau-ui/dialog", "./dist/dialog/index.mjs"],
+      ["@lilian1315/faisceau-ui/drawer", "./dist/drawer/index.mjs"],
+      ["@lilian1315/faisceau-ui/toast", "./dist/toast/index.mjs"],
       ["@lilian1315/faisceau-ui/styles.css", "./src/styles/index.css"],
       ["@lilian1315/faisceau-ui/package.json", "./package.json"],
     ],
@@ -53,6 +56,12 @@ const contracts = [
       "./dist/checkbox/index.mjs",
       "./dist/tooltip/index.d.mts",
       "./dist/tooltip/index.mjs",
+      "./dist/dialog/index.d.mts",
+      "./dist/dialog/index.mjs",
+      "./dist/drawer/index.d.mts",
+      "./dist/drawer/index.mjs",
+      "./dist/toast/index.d.mts",
+      "./dist/toast/index.mjs",
       "./src/styles/index.css",
       "./src/styles/index.d.ts",
       "./package.json",
@@ -89,12 +98,15 @@ for (const contract of contracts) {
   }
 }
 
-const [ui, select, combobox, checkbox, tooltip, zag] = await Promise.all([
+const [ui, select, combobox, checkbox, tooltip, dialog, drawer, toast, zag] = await Promise.all([
   import("@lilian1315/faisceau-ui"),
   import("@lilian1315/faisceau-ui/select"),
   import("@lilian1315/faisceau-ui/combobox"),
   import("@lilian1315/faisceau-ui/checkbox"),
   import("@lilian1315/faisceau-ui/tooltip"),
+  import("@lilian1315/faisceau-ui/dialog"),
+  import("@lilian1315/faisceau-ui/drawer"),
+  import("@lilian1315/faisceau-ui/toast"),
   import("@lilian1315/faisceau-zag"),
 ]);
 
@@ -107,6 +119,12 @@ for (const [name, value] of Object.entries({
   createCheckboxFromSubpath: checkbox.createCheckbox,
   createTooltip: ui.createTooltip,
   createTooltipFromSubpath: tooltip.createTooltip,
+  createDialog: ui.createDialog,
+  createDialogFromSubpath: dialog.createDialog,
+  createDrawer: ui.createDrawer,
+  createDrawerFromSubpath: drawer.createDrawer,
+  createToaster: ui.createToaster,
+  createToasterFromSubpath: toast.createToaster,
   createZagMachine: zag.createZagMachine,
 })) {
   if (typeof value !== "function") throw new TypeError(`Published export ${name} is not callable`);
