@@ -12,6 +12,7 @@ dist
 dist-ssr
 *.local
 architecture-review-*.html
+.pnpm-store
 
 # dotenv environment variable files
 .env
