@@ -1,7 +1,7 @@
 import { effect, signal, type Signal } from "faisceau";
 import { normalizeProps, spreadProps, VanillaMachine, type Attrs } from "@zag-js/vanilla";
 
-/** A value or a lazy value accepted by Zag's vanilla machine. */
+/** A value or a Faisceau-tracked getter accepted by Zag's vanilla machine. */
 export type MaybeGetter<T> = T | (() => T);
 
 type FallbackProps = Record<string, unknown>;
@@ -44,7 +44,7 @@ export interface ZagMachineController<TProps extends object, TApi> {
   /** Start the Zag service. Calling this more than once has no effect. */
   start(): void;
 
-  /** Merge new props into the Zag service and refresh its connected API. */
+  /** Merge new props into the Zag service; getter dependencies remain reactive. */
   updateProps(props: MaybeGetter<Partial<TProps>>): void;
 
   /** Re-run the supplied Zag `connect` function. */
@@ -109,6 +109,30 @@ export function createZagMachine<TMachine, TConnect extends AnyConnect>(
   };
 
   const unsubscribe = service.subscribe(refresh);
+  let stopPropsSync = (): void => {};
+
+  const synchronizeProps = (source: MaybeGetter<Partial<TProps>>, applyImmediately: boolean) => {
+    stopPropsSync();
+    stopPropsSync = (): void => {};
+
+    if (typeof source !== "function") {
+      if (applyImmediately) service.updateProps(source as never);
+      return;
+    }
+
+    let firstRun = true;
+    stopPropsSync = effect(() => {
+      source();
+      if (firstRun && !applyImmediately) {
+        firstRun = false;
+        return;
+      }
+      firstRun = false;
+      service.updateProps(source as never);
+    });
+  };
+
+  synchronizeProps(props as MaybeGetter<Partial<TProps>>, false);
 
   const bind = <TElement extends Element>(
     element: TElement,
@@ -159,13 +183,14 @@ export function createZagMachine<TMachine, TConnect extends AnyConnect>(
 
   const updateProps = (nextProps: MaybeGetter<Partial<TProps>>): void => {
     if (state === "destroyed") return;
-    service.updateProps(nextProps as never);
+    synchronizeProps(nextProps, true);
   };
 
   const destroy = (): void => {
     if (state === "destroyed") return;
     state = "destroyed";
 
+    stopPropsSync();
     unsubscribe();
     for (const dispose of bindings) dispose();
 

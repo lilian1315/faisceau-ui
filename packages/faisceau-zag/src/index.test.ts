@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vite-plus/test";
+import { signal } from "faisceau";
 
 import { createZagMachine, normalizeProps, type ZagDomProps } from "./index.js";
 
@@ -162,6 +163,24 @@ describe("createZagMachine", () => {
     controller.destroy();
   });
 
+  it("updates user props from Faisceau dependencies", () => {
+    const showTitle = signal(true);
+    const trigger = document.createElement("button");
+    const controller = createZagMachine(
+      createTestMachine(),
+      () => ({ id: "fruit", showTitle: showTitle.get() }),
+      connectTestMachine,
+    );
+
+    controller.bind(trigger, (api) => api.getTriggerProps());
+    controller.start();
+    expect(trigger.title).toBe("Available choices");
+
+    showTitle.set(false);
+    expect(trigger.hasAttribute("title")).toBe(false);
+    controller.destroy();
+  });
+
   it("disposes an individual binding without affecting the service", async () => {
     const onPress = vi.fn();
     const trigger = document.createElement("button");
@@ -204,5 +223,39 @@ describe("createZagMachine", () => {
 
     expect(trigger.getAttribute("aria-label")).toBe("Second");
     controller.destroy();
+  });
+
+  it("uses the official vanilla prop normalization matrix", () => {
+    const onFocus = vi.fn();
+    const onBlur = vi.fn();
+    const onInput = vi.fn();
+    const onChange = vi.fn();
+    const onDoubleClick = vi.fn();
+    const normalized = normalizeProps.element({
+      className: "field",
+      defaultChecked: true,
+      defaultValue: "France",
+      htmlFor: "country",
+      onBlur,
+      onDoubleClick,
+      onFocus,
+      style: { "--fui-accent": "red", marginBottom: "4px" },
+      viewBox: "0 0 16 16",
+    });
+
+    expect(normalized).toMatchObject({
+      checked: true,
+      class: "field",
+      for: "country",
+      ondblclick: onDoubleClick,
+      onfocusin: onFocus,
+      onfocusout: onBlur,
+      value: "France",
+      viewBox: "0 0 16 16",
+    });
+    expect(normalized.style).toContain("--fui-accent:red;");
+    expect(normalized.style).toContain("margin-bottom:4px;");
+    expect(normalizeProps.input({ onInput }).oninput).toBe(onInput);
+    expect(normalizeProps.input({ onChange }).oninput).toBe(onChange);
   });
 });

@@ -23,13 +23,15 @@
     "dev": "vp pack --watch",
     "test": "vp test"
   },
-  "dependencies": {
-    "@zag-js/vanilla": "catalog:"
-  },
   "devDependencies": {
+    "@zag-js/checkbox": "catalog:",
+    "@zag-js/combobox": "catalog:",
+    "@zag-js/tooltip": "catalog:",
+    "@zag-js/vanilla": "catalog:",
     "faisceau": "catalog:"
   },
   "peerDependencies": {
+    "@zag-js/vanilla": "^1.43.3",
     "faisceau": "^0.3.2"
   }
 }

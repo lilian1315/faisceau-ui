@@ -30,8 +30,10 @@ Les composants sont aussi disponibles depuis les sous-chemins `@lilian1315/faisc
 Pour utiliser directement le pont de bas niveau :
 
 ```bash
-pnpm add @lilian1315/faisceau-zag faisceau
+pnpm add @lilian1315/faisceau-zag @zag-js/vanilla faisceau
 ```
+
+Le pont suit l'adapter Vanilla officiel et déclare ses runtimes en peer dependencies. Cette version est testée avec `@zag-js/vanilla` 1.43.x et `faisceau` 0.3.x. Le projet cible uniquement les navigateurs modernes ; le rendu serveur ne fait pas partie de son contrat.
 
 ## Créer un Select
 

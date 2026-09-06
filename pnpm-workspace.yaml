@@ -6,8 +6,10 @@ catalogMode: prefer
 catalog:
   "@lilian1315/create-element": 0.12.1
   "@lucide/icons": 1.41.0
+  "@zag-js/checkbox": 1.43.3
   "@zag-js/combobox": 1.43.3
   "@zag-js/select": 1.43.3
+  "@zag-js/tooltip": 1.43.3
   "@zag-js/vanilla": 1.43.3
   "@types/node": ^24
   faisceau: 0.3.2

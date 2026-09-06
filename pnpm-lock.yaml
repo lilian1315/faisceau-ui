@@ -214,10 +214,16 @@ catalogs:
     '@vitest/browser-playwright':
       specifier: 4.1.11
       version: 4.1.11
+    '@zag-js/checkbox':
+      specifier: 1.43.3
+      version: 1.43.3
     '@zag-js/combobox':
       specifier: 1.43.3
       version: 1.43.3
     '@zag-js/select':
+      specifier: 1.43.3
+      version: 1.43.3
+    '@zag-js/tooltip':
       specifier: 1.43.3
       version: 1.43.3
     '@zag-js/vanilla':
@@ -285,11 +291,19 @@ importers:
         version: 0.3.2
 
   packages/faisceau-zag:
-    dependencies:
+    devDependencies:
+      '@zag-js/checkbox':
+        specifier: 'catalog:'
+        version: 1.43.3
+      '@zag-js/combobox':
+        specifier: 'catalog:'
+        version: 1.43.3
+      '@zag-js/tooltip':
+        specifier: 'catalog:'
+        version: 1.43.3
       '@zag-js/vanilla':
         specifier: 'catalog:'
         version: 1.43.3
-    devDependencies:
       faisceau:
         specifier: 'catalog:'
         version: 0.3.2
@@ -1086,6 +1100,9 @@ packages:
   '@zag-js/anatomy@1.43.3':
     resolution: {integrity: sha512-KzosWgu0TTtdBNHPUZg2W8E5JsGsExQ8oGkLDmV6Sym9twaATU2YVMCWsfitq3Isss4099wNMsHdjEPK2UyCjw==}
 
+  '@zag-js/checkbox@1.43.3':
+    resolution: {integrity: sha512-1vikdGcAokmLSMAnHQo5lYG/DMMNej2FlaAxiuyna2n0XJy/VFhv/3+/FZNB9CAJBkeqwLm9kqo94c7iEL7cxA==}
+
   '@zag-js/collection@1.43.3':
     resolution: {integrity: sha512-POufSu17mxTic09DP3CD2sGiRCaNODv/gAYyotrM/ynWSeb2+TjSxlKxuiyQS0amiY+BwJ3+m5qJ4odmU9TLMQ==}
 
@@ -1118,6 +1135,9 @@ packages:
 
   '@zag-js/store@1.43.3':
     resolution: {integrity: sha512-NL3Uxk5Rszjd+X+cPXw0N7Kn5TNMyrS6cTMazlBOcN2+J68mzXhNFvM/0H38m0X+3ybK3sE5Ta6NPlhOQADRqw==}
+
+  '@zag-js/tooltip@1.43.3':
+    resolution: {integrity: sha512-sBVhcejAQN5oDFE3PoGrvvjqOt5+9rHQjtjnnuhPZqeghsiX/IaL7AY8KelwDoNkMf2npN5i7loQvAZMZLVFaw==}
 
   '@zag-js/types@1.43.3':
     resolution: {integrity: sha512-QokzUgkJ7a/TRE8SAXqlm1XfiNDbyM8y+mx0PpmzHa8bvmWXLEe/Zx2TRz8aYoGim75NluYzDy3x+WWileF7uA==}
@@ -1992,6 +2012,15 @@ snapshots:
 
   '@zag-js/anatomy@1.43.3': {}
 
+  '@zag-js/checkbox@1.43.3':
+    dependencies:
+      '@zag-js/anatomy': 1.43.3
+      '@zag-js/core': 1.43.3
+      '@zag-js/dom-query': 1.43.3
+      '@zag-js/focus-visible': 1.43.3
+      '@zag-js/types': 1.43.3
+      '@zag-js/utils': 1.43.3
+
   '@zag-js/collection@1.43.3':
     dependencies:
       '@zag-js/utils': 1.43.3
@@ -2056,6 +2085,16 @@ snapshots:
   '@zag-js/store@1.43.3':
     dependencies:
       proxy-compare: 3.0.1
+
+  '@zag-js/tooltip@1.43.3':
+    dependencies:
+      '@zag-js/anatomy': 1.43.3
+      '@zag-js/core': 1.43.3
+      '@zag-js/dom-query': 1.43.3
+      '@zag-js/focus-visible': 1.43.3
+      '@zag-js/popper': 1.43.3
+      '@zag-js/types': 1.43.3
+      '@zag-js/utils': 1.43.3
 
   '@zag-js/types@1.43.3':
     dependencies:
