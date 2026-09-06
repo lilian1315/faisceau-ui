@@ -15,4 +15,4 @@ export type {
 } from "./select/index.js";
 
 export type { FuiItem, FuiItemInput } from "./shared/index.js";
-export type { FuiController, FuiFieldOptions } from "./types.js";
+export type { FuiController, FuiFieldOptions, FuiReactive } from "./types.js";

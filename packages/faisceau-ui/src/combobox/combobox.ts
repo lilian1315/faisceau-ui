@@ -202,7 +202,6 @@ function setupCombobox(
     queueMicrotask(() => {
       if (destroyed || revision !== filterRevision) return;
       zag.updateProps({ collection: createCollection(filteredItems) });
-      zag.refresh();
     });
   };
 

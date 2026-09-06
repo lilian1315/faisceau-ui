@@ -1,29 +1,24 @@
-import { effect, signal, type Signal } from "faisceau";
+import type { Machine, MachineSchema, Service } from "@zag-js/core";
 import { normalizeProps, spreadProps, VanillaMachine, type Attrs } from "@zag-js/vanilla";
+import { effect, signal } from "faisceau";
 
 /** A value or a Faisceau-tracked getter accepted by Zag's vanilla machine. */
 export type MaybeGetter<T> = T | (() => T);
 
-type FallbackProps = Record<string, unknown>;
-type AnyConnect = (service: never, normalize: typeof normalizeProps) => unknown;
-
-type PropsFactory<TMachine> = TMachine extends { props?: infer TFactory }
-  ? NonNullable<TFactory>
-  : never;
-
 /** Infer the public props handled by a Zag machine. */
-export type ZagMachineProps<TMachine> =
-  PropsFactory<TMachine> extends (...args: never[]) => infer TProps
-    ? TProps extends object
-      ? TProps
-      : FallbackProps
-    : FallbackProps;
+export type ZagMachineProps<TSchema extends MachineSchema> = NonNullable<TSchema["props"]>;
 
 /** DOM attributes returned by a connected Zag API. */
 export type ZagDomProps = Attrs;
 
 /** Read a set of DOM props from the latest connected Zag API. */
 export type ZagPropsGetter<TApi> = (api: TApi) => ZagDomProps | null | undefined;
+
+/** Read-only view of the latest connected Zag value. */
+export interface ZagConnected<TApi> {
+  get(): TApi;
+  peek(): TApi;
+}
 
 /**
  * A small lifecycle wrapper around a Zag vanilla machine.
@@ -33,7 +28,7 @@ export type ZagPropsGetter<TApi> = (api: TApi) => ZagDomProps | null | undefined
  */
 export interface ZagMachineController<TProps extends object, TApi> {
   /** The latest value returned by the machine's `connect` function. */
-  readonly api: Signal<TApi>;
+  readonly api: ZagConnected<TApi>;
 
   /**
    * Reactively apply one of the connected API's prop getters to an element.
@@ -46,9 +41,6 @@ export interface ZagMachineController<TProps extends object, TApi> {
 
   /** Merge new props into the Zag service; getter dependencies remain reactive. */
   updateProps(props: MaybeGetter<Partial<TProps>>): void;
-
-  /** Re-run the supplied Zag `connect` function. */
-  refresh(): void;
 
   /** Stop the service and dispose every DOM binding. */
   destroy(): void;
@@ -70,45 +62,41 @@ let controllerId = 0;
  * select.destroy()
  * ```
  */
-export function createZagMachine<TMachine, TConnect extends AnyConnect>(
-  machine: TMachine,
-  props: MaybeGetter<Partial<ZagMachineProps<TMachine>>>,
-  connect: TConnect,
-): ZagMachineController<ZagMachineProps<TMachine>, ReturnType<TConnect>> {
-  type TApi = ReturnType<TConnect>;
-  type TProps = ZagMachineProps<TMachine>;
+export function createZagMachine<TSchema extends MachineSchema, TApi>(
+  machine: Machine<TSchema>,
+  props: MaybeGetter<Partial<NoInfer<ZagMachineProps<TSchema>>>>,
+  connect: (service: Service<NoInfer<TSchema>>, normalize: typeof normalizeProps) => TApi,
+): ZagMachineController<ZagMachineProps<TSchema>, TApi> {
+  type TProps = ZagMachineProps<TSchema>;
 
-  // `VanillaMachine` does not expose the schema type it inferred as a public
-  // utility. The public factory keeps that inference at its boundary and this
-  // cast is the single bridge to Zag's runtime wrapper.
-  const service = new VanillaMachine(machine as never, props as never);
-  const connectApi = connect as unknown as (
-    zagService: typeof service.service,
-    normalize: typeof normalizeProps,
-  ) => TApi;
-  const api = signal(connectApi(service.service, normalizeProps));
+  const service = new VanillaMachine(machine, props);
+  const apiSignal = signal(connect(service.service, normalizeProps));
+  const api: ZagConnected<TApi> = {
+    get: () => apiSignal.get(),
+    peek: () => apiSignal.peek(),
+  };
   const bindings = new Set<() => void>();
   const scope = `faisceau-zag-${++controllerId}`;
 
   let bindingId = 0;
   let state: "idle" | "started" | "destroyed" = "idle";
 
-  const refresh = (): void => {
+  const publishApi = (): void => {
     if (state === "destroyed") return;
 
-    const previousApi = api.peek();
-    const nextApi = connectApi(service.service, normalizeProps);
+    const previousApi = apiSignal.peek();
+    const nextApi = connect(service.service, normalizeProps);
 
     // Most Zag connectors return a fresh object. Trigger explicitly as a
     // fallback for custom connectors that retain their API object.
     if (Object.is(previousApi, nextApi)) {
-      api.trigger();
+      apiSignal.trigger();
     } else {
-      api.set(nextApi);
+      apiSignal.set(nextApi);
     }
   };
 
-  const unsubscribe = service.subscribe(refresh);
+  const unsubscribe = service.subscribe(publishApi);
   let stopPropsSync = (): void => {};
 
   const synchronizeProps = (source: MaybeGetter<Partial<TProps>>, applyImmediately: boolean) => {
@@ -174,7 +162,7 @@ export function createZagMachine<TMachine, TConnect extends AnyConnect>(
       service.start();
       // Starting runs entry actions without necessarily publishing a state
       // change, so force one connected snapshot afterwards.
-      refresh();
+      publishApi();
     } catch (error) {
       state = "idle";
       throw error;
@@ -199,7 +187,7 @@ export function createZagMachine<TMachine, TConnect extends AnyConnect>(
     service.stop();
   };
 
-  return { api, bind, start, updateProps, refresh, destroy };
+  return { api, bind, start, updateProps, destroy };
 }
 
 export { normalizeProps } from "@zag-js/vanilla";

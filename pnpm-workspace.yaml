@@ -8,6 +8,7 @@ catalog:
   "@lucide/icons": 1.41.0
   "@zag-js/checkbox": 1.43.3
   "@zag-js/combobox": 1.43.3
+  "@zag-js/core": 1.43.3
   "@zag-js/select": 1.43.3
   "@zag-js/tooltip": 1.43.3
   "@zag-js/vanilla": 1.43.3

@@ -223,6 +223,9 @@ catalogs:
     '@zag-js/combobox':
       specifier: 1.43.3
       version: 1.43.3
+    '@zag-js/core':
+      specifier: 1.43.3
+      version: 1.43.3
     '@zag-js/select':
       specifier: 1.43.3
       version: 1.43.3
@@ -297,6 +300,10 @@ importers:
         version: 0.3.2
 
   packages/faisceau-zag:
+    dependencies:
+      '@zag-js/core':
+        specifier: 'catalog:'
+        version: 1.43.3
     devDependencies:
       '@zag-js/checkbox':
         specifier: 'catalog:'

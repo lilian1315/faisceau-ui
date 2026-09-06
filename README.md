@@ -219,7 +219,7 @@ Toutes les classes appartenant à la bibliothèque commencent par `fui-`. Les at
 Les quatre fonctions renvoient un contrôleur commun :
 
 - `root` : élément racine du composant ;
-- `api` : valeur réactive Faisceau contenant l'API Zag courante, accessible avec `controller.api.get()` ;
+- `api` : valeur réactive Faisceau en lecture seule contenant l'API Zag courante, accessible avec `controller.api.get()` ;
 - `started` : indique si la machine a été démarrée ;
 - `mount(target)` : ajoute un composant créé au DOM et le démarre ;
 - `start()` : démarre un composant dont le DOM a été inséré manuellement ;

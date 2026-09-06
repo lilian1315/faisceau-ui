@@ -1,8 +1,12 @@
-import type { Reactive } from "faisceau";
+/** Read-only reactive value exposed by a Faisceau UI controller. */
+export interface FuiReactive<T> {
+  get(): T;
+  peek(): T;
+}
 
 /** Lifecycle shared by every DOM component in the package. */
 export interface FuiController<Api> {
-  readonly api: Reactive<Api>;
+  readonly api: FuiReactive<Api>;
   readonly root: HTMLElement;
   readonly started: boolean;
 

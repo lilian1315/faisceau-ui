@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vite-plus/test";
+import type { Machine, MachineSchema } from "@zag-js/core";
 import { signal } from "faisceau";
 
 import { createZagMachine, normalizeProps, type ZagDomProps } from "./index.js";
@@ -23,7 +24,20 @@ interface TestApi {
   open: boolean;
 }
 
-function createTestMachine(onStart = () => {}, onStop = () => {}) {
+interface TestSchema extends MachineSchema {
+  action: "onStart" | "onStop";
+  computed: Record<never, never>;
+  context: Record<never, never>;
+  effect: never;
+  event: { type: "TOGGLE" };
+  guard: never;
+  props: TestProps;
+  refs: Record<never, never>;
+  state: TestState;
+  tag: never;
+}
+
+function createTestMachine(onStart = () => {}, onStop = () => {}): Machine<TestSchema> {
   return {
     implementations: {
       actions: {
@@ -205,7 +219,7 @@ describe("createZagMachine", () => {
     controller.destroy();
   });
 
-  it("refreshes bindings when a connector retains its API object", () => {
+  it("publishes prop updates when a connector retains its API object", () => {
     const trigger = document.createElement("button");
     let label = "First";
     const retainedApi = {
@@ -219,9 +233,19 @@ describe("createZagMachine", () => {
     expect(trigger.getAttribute("aria-label")).toBe("First");
 
     label = "Second";
-    controller.refresh();
+    controller.updateProps({});
 
     expect(trigger.getAttribute("aria-label")).toBe("Second");
+    controller.destroy();
+  });
+
+  it("exposes a read-only connected value and one prop update operation", () => {
+    const controller = createZagMachine(createTestMachine(), { id: "fruit" }, connectTestMachine);
+
+    expect("set" in controller.api).toBe(false);
+    expect("trigger" in controller.api).toBe(false);
+    expect("refresh" in controller).toBe(false);
+    expect("updateProps" in controller).toBe(true);
     controller.destroy();
   });
 
