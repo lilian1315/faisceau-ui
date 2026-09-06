@@ -31,6 +31,10 @@ describe("Select", () => {
     const nativeSelect = requirePart<HTMLSelectElement>(controller.root, "native-select");
     const trigger = requirePart<HTMLButtonElement>(controller.root, "trigger");
     const error = requirePart<HTMLElement>(controller.root, "error");
+    const nativeInput = vi.fn();
+    const nativeChange = vi.fn();
+    nativeSelect.addEventListener("input", nativeInput);
+    nativeSelect.addEventListener("change", nativeChange);
     expect(label.htmlFor).toBe(nativeSelect.id);
     expect(trigger.getAttribute("aria-labelledby")?.split(/\s+/)).toContain(label.id);
     expect(trigger.getAttribute("aria-invalid")).toBe("true");
@@ -45,6 +49,8 @@ describe("Select", () => {
     expect(requirePart(controller.root, "value").textContent).toBe("Belgique");
     expect(new FormData(form).get("country")).toBe("be");
     expect(onValueChange).toHaveBeenCalledOnce();
+    expect(nativeInput).toHaveBeenCalledOnce();
+    expect(nativeChange).toHaveBeenCalledOnce();
 
     controller.destroy();
     expect(controller.root.isConnected).toBe(false);
@@ -64,6 +70,7 @@ describe("Select", () => {
       required: true,
     }).mount(form);
     const nativeSelect = requirePart<HTMLSelectElement>(controller.root, "native-select");
+    const trigger = requirePart<HTMLButtonElement>(controller.root, "trigger");
 
     controller.api.get().setValue(["be"]);
     await flushMachine();
@@ -78,6 +85,7 @@ describe("Select", () => {
     await flushMachine();
     expect(nativeSelect.validity.valueMissing).toBe(true);
     expect(form.checkValidity()).toBe(false);
+    expect(document.activeElement).toBe(trigger);
     controller.destroy();
   });
 
@@ -141,6 +149,8 @@ describe("Select", () => {
     document.body.append(form);
 
     const nativeSelect = root.querySelector("select")!;
+    const nativeChange = vi.fn();
+    nativeSelect.addEventListener("change", nativeChange);
     const controller = enhanceSelect(root);
     const trigger = requirePart<HTMLButtonElement>(root, "trigger");
 
@@ -169,6 +179,7 @@ describe("Select", () => {
     await flushMachine();
     expect(nativeSelect.value).toBe("expert");
     expect(new FormData(form).get("mode")).toBe("expert");
+    expect(nativeChange).toHaveBeenCalledOnce();
 
     controller.destroy();
     expect(root.isConnected).toBe(true);
@@ -193,6 +204,8 @@ describe("Select", () => {
     document.body.append(form);
 
     const nativeSelect = root.querySelector("select")!;
+    const nativeChange = vi.fn();
+    nativeSelect.addEventListener("change", nativeChange);
     const controller = enhanceSelect(root);
 
     expect(controller.api.get().multiple).toBe(true);
@@ -204,6 +217,7 @@ describe("Select", () => {
     await flushMachine();
     expect(controller.api.get().value).toEqual(["ch"]);
     expect(new FormData(form).getAll("countries")).toEqual(["ch"]);
+    expect(nativeChange).toHaveBeenCalledOnce();
     controller.destroy();
   });
 

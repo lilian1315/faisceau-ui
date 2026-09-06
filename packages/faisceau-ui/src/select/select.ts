@@ -8,6 +8,7 @@ import {
   captureAttributes,
   createClearIcon,
   createId,
+  createNativeSelectField,
   getNativeSelectValue,
   normalizeItems,
   queryPart,
@@ -15,9 +16,9 @@ import {
   readNativeSelect,
   requirePart,
   requireNativeSelect,
-  setNativeSelectValue,
   type FuiItem,
   type FuiItemInput,
+  type NativeSelectFieldController,
   type NativeSelectSource,
 } from "../shared/index.js";
 import { createSelectMarkup, enhanceSelectMarkup } from "./markup.js";
@@ -65,15 +66,14 @@ export function enhanceSelect(
   const generated = enhanceSelectMarkup(root, nativeSelect, resolvedOptions, source.items);
 
   return setupSelect(root, resolvedOptions, {
-    cleanup(value) {
+    cleanup() {
       for (const element of generated) element.remove();
       restoreRoot();
-      restoreSelect();
-      setNativeSelectValue(nativeSelect, value);
     },
     items: source.items,
     nativeSelect,
     ownsRoot: false,
+    restoreNativeSelect: restoreSelect,
     start: true,
   });
 }
@@ -82,10 +82,11 @@ function setupSelect(
   root: HTMLElement,
   options: SelectSetupOptions,
   setup: {
-    cleanup?: (value: string[]) => void;
+    cleanup?: () => void;
     items: FuiItem[];
     nativeSelect: HTMLSelectElement;
     ownsRoot: boolean;
+    restoreNativeSelect?: () => void;
     start: boolean;
   },
 ): SelectController {
@@ -100,6 +101,7 @@ function setupSelect(
     items: _items,
     label: nextLabel,
     onOpenChange,
+    onValueChange,
     placeholder = "Select an option",
     positioning: requestedPositioning,
     ...behavior
@@ -130,6 +132,9 @@ function setupSelect(
   const itemRecords = mapItems(parts.itemElements, setup.items, machineId);
   const ids = createPartIds(machineId, root, parts, itemRecords);
   const collection = createCollection(setup.items);
+  const resetValue = [
+    ...(behavior.value ?? behavior.defaultValue ?? getNativeSelectValue(parts.nativeSelect)),
+  ];
   const itemByValue = new Map(itemRecords.map(({ element, item }) => [item.value, element]));
   const itemAligned = alignItemWithTrigger && behavior.multiple !== true;
   const positioning = itemAligned
@@ -152,6 +157,7 @@ function setupSelect(
       };
   parts.positioner.toggleAttribute("data-fui-item-aligned", itemAligned);
   if (itemAligned) parts.positioner.removeAttribute("data-fui-positioned");
+  let nativeField: NativeSelectFieldController | undefined;
   const machineProps: select.Props<FuiItem> = {
     ...behavior,
     collection,
@@ -163,6 +169,10 @@ function setupSelect(
     onOpenChange(details) {
       if (itemAligned) parts.positioner.removeAttribute("data-fui-positioned");
       onOpenChange?.(details);
+    },
+    onValueChange(details) {
+      nativeField?.syncFromMachine(details.value);
+      onValueChange?.(details);
     },
     positioning,
     translations: {
@@ -176,15 +186,22 @@ function setupSelect(
     machineProps,
     select.connect,
   );
-  let changingFromNative = false;
-  const handleNativeChange = (): void => {
-    if (changingFromNative) return;
-    changingFromNative = true;
-    zag.api.get().setValue(getNativeSelectValue(parts.nativeSelect));
-    changingFromNative = false;
-  };
-  parts.nativeSelect.addEventListener("input", handleNativeChange);
-  parts.nativeSelect.addEventListener("change", handleNativeChange);
+  nativeField = createNativeSelectField({
+    focusTarget: parts.trigger,
+    getValue: () => zag.api.get().value,
+    props: {
+      autoComplete: behavior.autoComplete,
+      disabled: behavior.disabled,
+      form: behavior.form,
+      multiple: behavior.multiple,
+      name: behavior.name,
+      required: behavior.required,
+    },
+    resetValue,
+    restore: setup.restoreNativeSelect,
+    select: parts.nativeSelect,
+    setValue: (value) => zag.api.get().setValue(value),
+  });
 
   zag.bind(root, (api) => api.getRootProps());
   zag.bind(parts.label, (api) => api.getLabelProps());
@@ -199,8 +216,6 @@ function setupSelect(
   if (parts.clearTrigger) {
     zag.bind(parts.clearTrigger, (api) => api.getClearTriggerProps());
   }
-  zag.bind(parts.nativeSelect, (api) => api.getHiddenSelectProps());
-
   for (const { element, item } of itemRecords) {
     zag.bind(element, (api) => api.getItemProps({ item }));
 
@@ -226,10 +241,6 @@ function setupSelect(
     parts.value.textContent = isPlaceholder ? placeholder : api.valueAsString;
     parts.value.toggleAttribute("data-placeholder-shown", isPlaceholder);
   });
-  const stopNativeSelectSync = effect(() => {
-    setNativeSelectValue(parts.nativeSelect, zag.api.get().value);
-  });
-
   linkDescription(parts.trigger, descriptionElement, errorElement);
 
   let started = false;
@@ -250,6 +261,7 @@ function setupSelect(
       if (destroyed) throwDestroyed("Select");
       if (!started) {
         zag.start();
+        nativeField.start();
         started = true;
       }
       return this;
@@ -258,13 +270,10 @@ function setupSelect(
       if (destroyed) return;
       destroyed = true;
       stopValueText();
-      stopNativeSelectSync();
-      parts.nativeSelect.removeEventListener("input", handleNativeChange);
-      parts.nativeSelect.removeEventListener("change", handleNativeChange);
-      const value = getNativeSelectValue(parts.nativeSelect);
+      nativeField.destroy();
       zag.destroy();
       if (setup.ownsRoot) root.remove();
-      else setup.cleanup?.(value);
+      else setup.cleanup?.();
     },
   };
 

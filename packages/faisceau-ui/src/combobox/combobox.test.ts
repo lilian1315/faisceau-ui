@@ -162,7 +162,9 @@ describe("Combobox", () => {
     document.body.append(form);
 
     const nativeSelect = root.querySelector("select")!;
+    const nativeInput = vi.fn();
     const nativeChange = vi.fn();
+    nativeSelect.addEventListener("input", nativeInput);
     nativeSelect.addEventListener("change", nativeChange);
     const controller = enhanceCombobox(root, { emptyLabel: "Aucune commande" });
 
@@ -186,12 +188,15 @@ describe("Combobox", () => {
     await flushMachine();
     expect(nativeSelect.value).toBe("test");
     expect(new FormData(form).get("command")).toBe("test");
+    expect(nativeInput).toHaveBeenCalledOnce();
     expect(nativeChange).toHaveBeenCalledOnce();
 
     nativeSelect.value = "build";
     nativeSelect.dispatchEvent(new Event("change", { bubbles: true }));
     await flushMachine();
     expect(controller.api.get().value).toEqual(["build"]);
+    expect(nativeInput).toHaveBeenCalledOnce();
+    expect(nativeChange).toHaveBeenCalledTimes(2);
 
     controller.destroy();
     expect(root.isConnected).toBe(true);

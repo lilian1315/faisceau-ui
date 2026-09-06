@@ -121,6 +121,8 @@ En mode enhance, l'attribut HTML natif suffit : `<select multiple>`. Les options
 
 Select et Combobox gardent un véritable `<select>` dans le document. Le contrôle natif porte le `name`, participe à `FormData`, applique `required` et `disabled`, et retrouve sa valeur initiale lors de `form.reset()`. Pour une Combobox, la valeur soumise est bien la valeur de l'option, pas son libellé visible.
 
+Une sélection effectuée depuis l'interface visuelle émet les événements natifs bouillonnants `input`, puis `change`, sur ce `<select>`. Les listeners déjà attachés à un markup amélioré continuent donc de fonctionner. Si la validation native échoue, le focus est transféré vers le trigger du Select ou le champ de la Combobox.
+
 ```ts
 const form = document.querySelector<HTMLFormElement>("#profile")!;
 

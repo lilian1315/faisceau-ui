@@ -8,6 +8,7 @@ import {
   captureAttributes,
   createClearIcon,
   createId,
+  createNativeSelectField,
   getNativeSelectValue,
   normalizeItems,
   queryPart,
@@ -15,9 +16,9 @@ import {
   readNativeSelect,
   requirePart,
   requireNativeSelect,
-  setNativeSelectValue,
   type FuiItem,
   type FuiItemInput,
+  type NativeSelectFieldController,
   type NativeSelectSource,
 } from "../shared/index.js";
 import { createComboboxMarkup, enhanceComboboxMarkup } from "./markup.js";
@@ -65,15 +66,14 @@ export function enhanceCombobox(
   const generated = enhanceComboboxMarkup(root, nativeSelect, resolvedOptions, source.items);
 
   return setupCombobox(root, resolvedOptions, {
-    cleanup(value) {
+    cleanup() {
       for (const element of generated) element.remove();
       restoreRoot();
-      restoreSelect();
-      setNativeSelectValue(nativeSelect, value);
     },
     items: source.items,
     nativeSelect,
     ownsRoot: false,
+    restoreNativeSelect: restoreSelect,
     start: true,
   });
 }
@@ -82,10 +82,11 @@ function setupCombobox(
   root: HTMLElement,
   options: ComboboxSetupOptions,
   setup: {
-    cleanup?: (value: string[]) => void;
+    cleanup?: () => void;
     items: FuiItem[];
     nativeSelect: HTMLSelectElement;
     ownsRoot: boolean;
+    restoreNativeSelect?: () => void;
     start: boolean;
   },
 ): ComboboxController {
@@ -131,7 +132,6 @@ function setupCombobox(
   const itemRecords = mapItems(parts.itemElements, setup.items, machineId);
   const itemByValue = new Map(setup.items.map((item) => [item.value, item]));
   const ids = createPartIds(machineId, root, parts, itemRecords);
-  configureNativeSelect(parts.nativeSelect, behavior);
   const resetValue = [
     ...(behavior.value ?? behavior.defaultValue ?? getNativeSelectValue(parts.nativeSelect)),
   ];
@@ -140,8 +140,7 @@ function setupCombobox(
   updateFilteredMarkup(itemRecords, initialItems, parts.empty);
 
   let updateCollection = (_inputValue: string): void => {};
-  let changingFromNative = false;
-  let syncNativeValue = (_value: readonly string[], _emit: boolean): void => {};
+  let nativeField: NativeSelectFieldController | undefined;
   const machineProps: combobox.Props<FuiItem> = {
     ...behavior,
     collection: createCollection(initialItems),
@@ -156,7 +155,7 @@ function setupCombobox(
       onInputValueChange?.(details);
     },
     onValueChange(details) {
-      syncNativeValue(details.value, !changingFromNative);
+      nativeField?.syncFromMachine(details.value);
       onValueChange?.(details);
     },
     openOnClick: behavior.openOnClick ?? true,
@@ -177,42 +176,21 @@ function setupCombobox(
     machineProps,
     combobox.connect,
   );
-
-  syncNativeValue = (value: readonly string[], emit: boolean): void => {
-    setNativeSelectValue(parts.nativeSelect, value);
-    if (!emit) return;
-
-    changingFromNative = true;
-    parts.nativeSelect.dispatchEvent(new Event("input", { bubbles: true }));
-    parts.nativeSelect.dispatchEvent(new Event("change", { bubbles: true }));
-    changingFromNative = false;
-  };
-  const handleNativeChange = (): void => {
-    if (changingFromNative) return;
-    changingFromNative = true;
-    zag.api.get().setValue(getNativeSelectValue(parts.nativeSelect));
-    changingFromNative = false;
-  };
-  const handleNativeInvalid = (event: Event): void => {
-    event.preventDefault();
-    parts.input.focus({ preventScroll: true });
-  };
-  const handleNativeFocus = (): void => {
-    parts.input.focus({ preventScroll: true });
-  };
-  const handleFormReset = (): void => {
-    queueMicrotask(() => {
-      if (destroyed) return;
-      changingFromNative = true;
-      zag.api.get().setValue(resetValue);
-      changingFromNative = false;
-    });
-  };
-
-  parts.nativeSelect.addEventListener("change", handleNativeChange);
-  parts.nativeSelect.addEventListener("focus", handleNativeFocus);
-  parts.nativeSelect.addEventListener("invalid", handleNativeInvalid);
-  let formElement: HTMLFormElement | null = null;
+  nativeField = createNativeSelectField({
+    focusTarget: parts.input,
+    getValue: () => zag.api.get().value,
+    props: {
+      disabled: behavior.disabled,
+      form: behavior.form,
+      multiple: behavior.multiple,
+      name: behavior.name,
+      required: behavior.required,
+    },
+    resetValue,
+    restore: setup.restoreNativeSelect,
+    select: parts.nativeSelect,
+    setValue: (value) => zag.api.get().setValue(value),
+  });
 
   let filterRevision = 0;
   let destroyed = false;
@@ -282,10 +260,6 @@ function setupCombobox(
       },
     );
   });
-  const stopNativeSelectSync = effect(() => {
-    setNativeSelectValue(parts.nativeSelect, zag.api.get().value);
-  });
-
   linkDescription(parts.input, descriptionElement, errorElement);
 
   let started = false;
@@ -304,8 +278,7 @@ function setupCombobox(
       if (destroyed) throwDestroyed("Combobox");
       if (!started) {
         zag.start();
-        formElement = parts.nativeSelect.form;
-        formElement?.addEventListener("reset", handleFormReset);
+        nativeField.start();
         started = true;
       }
       return this;
@@ -316,15 +289,10 @@ function setupCombobox(
       filterRevision += 1;
       stopClearVisibility();
       stopSelectedTags();
-      stopNativeSelectSync();
-      parts.nativeSelect.removeEventListener("change", handleNativeChange);
-      parts.nativeSelect.removeEventListener("focus", handleNativeFocus);
-      parts.nativeSelect.removeEventListener("invalid", handleNativeInvalid);
-      formElement?.removeEventListener("reset", handleFormReset);
-      const value = getNativeSelectValue(parts.nativeSelect);
+      nativeField.destroy();
       zag.destroy();
       if (setup.ownsRoot) root.remove();
-      else setup.cleanup?.(value);
+      else setup.cleanup?.();
     },
   };
 
@@ -421,19 +389,6 @@ function resolveEnhancedOptions(
     required: options.required ?? nativeSelect.required,
     ...(!hasExplicitValue ? { defaultValue: source.value } : {}),
   };
-}
-
-function configureNativeSelect(
-  nativeSelect: HTMLSelectElement,
-  behavior: Pick<combobox.Props<FuiItem>, "disabled" | "form" | "multiple" | "name" | "required">,
-): void {
-  nativeSelect.setAttribute("aria-hidden", "true");
-  nativeSelect.tabIndex = -1;
-  if (behavior.name !== undefined) nativeSelect.name = behavior.name;
-  if (behavior.form !== undefined) nativeSelect.setAttribute("form", behavior.form);
-  if (behavior.disabled !== undefined) nativeSelect.disabled = behavior.disabled;
-  if (behavior.multiple !== undefined) nativeSelect.multiple = behavior.multiple;
-  if (behavior.required !== undefined) nativeSelect.required = behavior.required;
 }
 
 function mapItems(

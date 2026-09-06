@@ -17,10 +17,13 @@ export { createId } from "./id.js";
 /** Native select helpers shared by form-compatible collection components. */
 export {
   captureAttributes,
+  createNativeSelectField,
   getNativeSelectValue,
   readNativeSelect,
   requireNativeSelect,
   setNativeSelectValue,
+  type NativeSelectFieldController,
+  type NativeSelectFieldProps,
   type NativeSelectSource,
 } from "./native-select.js";
 
