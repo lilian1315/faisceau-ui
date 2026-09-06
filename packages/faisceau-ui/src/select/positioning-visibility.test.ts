@@ -8,7 +8,7 @@ afterEach(() => {
 });
 
 describe("Select item-aligned positioning visibility", () => {
-  it("hides stale coordinates until the reopened popup is positioned", async () => {
+  it("hides the popup after Zag clears its coordinates until it is positioned", async () => {
     const onPositioned = vi.fn();
     const controller = createSelect({
       defaultValue: ["two"],
@@ -37,7 +37,7 @@ describe("Select item-aligned positioning visibility", () => {
 
     expect(controller.api.get().open).toBe(true);
     expect(content.hidden).toBe(false);
-    expect(positioner.style.getPropertyValue("--y")).toBe(previousY);
+    expect(positioner.style.getPropertyValue("--y")).toBe("");
     expect(positioner.hasAttribute("data-fui-positioned")).toBe(false);
     expect(getComputedStyle(positioner).visibility).toBe("hidden");
 

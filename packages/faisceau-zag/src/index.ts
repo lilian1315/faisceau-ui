@@ -1,4 +1,4 @@
-import type { Machine, MachineSchema, Service } from "@zag-js/core";
+import type { InputProps, Machine, MachineSchema, Service } from "@zag-js/core";
 import { normalizeProps, spreadProps, VanillaMachine, type Attrs } from "@zag-js/vanilla";
 import { effect, signal } from "faisceau";
 
@@ -64,7 +64,7 @@ let controllerId = 0;
  */
 export function createZagMachine<TSchema extends MachineSchema, TApi>(
   machine: Machine<TSchema>,
-  props: MaybeGetter<Partial<NoInfer<ZagMachineProps<TSchema>>>>,
+  props: MaybeGetter<InputProps<NoInfer<TSchema>>>,
   connect: (service: Service<NoInfer<TSchema>>, normalize: typeof normalizeProps) => TApi,
 ): ZagMachineController<ZagMachineProps<TSchema>, TApi> {
   type TProps = ZagMachineProps<TSchema>;
