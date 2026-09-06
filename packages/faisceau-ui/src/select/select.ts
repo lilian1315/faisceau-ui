@@ -10,6 +10,7 @@ import {
   createId,
   createNativeSelectField,
   getNativeSelectValue,
+  getLookupRoot,
   normalizeItems,
   queryPart,
   queryParts,
@@ -488,9 +489,4 @@ function addCallerClasses(element: Element, className: string | undefined): void
 
 function throwDestroyed(name: string): never {
   throw new Error(`[Faisceau UI] Cannot start or mount a destroyed ${name}.`);
-}
-
-function getLookupRoot(element: Element): Document | ShadowRoot {
-  const root = element.getRootNode();
-  return "getElementById" in root ? (root as Document | ShadowRoot) : element.ownerDocument;
 }

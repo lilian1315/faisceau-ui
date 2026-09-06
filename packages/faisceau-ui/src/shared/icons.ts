@@ -1,6 +1,7 @@
 import type { LucideIconData } from "@lucide/icons";
 import Check from "@lucide/icons/icons/check";
 import ChevronDown from "@lucide/icons/icons/chevron-down";
+import Minus from "@lucide/icons/icons/minus";
 import X from "@lucide/icons/icons/x";
 import { h } from "@lilian1315/create-element/faisceau";
 
@@ -12,6 +13,11 @@ export function createChevronDownIcon(): SVGSVGElement {
 /** Creates the decorative check mark used by selected items. */
 export function createCheckIcon(): SVGSVGElement {
   return createLucideIcon(Check, "fui-icon--check");
+}
+
+/** Creates the decorative minus used by indeterminate checkboxes. */
+export function createMinusIcon(): SVGSVGElement {
+  return createLucideIcon(Minus, "fui-icon--minus");
 }
 
 /** Creates the decorative X used by clear controls. */

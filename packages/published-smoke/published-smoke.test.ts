@@ -1,7 +1,12 @@
 import "@lilian1315/faisceau-ui/styles.css";
 
 import { afterEach, describe, expect, it } from "vite-plus/test";
-import { createSelect, enhanceCombobox } from "@lilian1315/faisceau-ui";
+import {
+  createCheckbox,
+  createSelect,
+  createTooltip,
+  enhanceCombobox,
+} from "@lilian1315/faisceau-ui";
 import { createCombobox as createComboboxFromSubpath } from "@lilian1315/faisceau-ui/combobox";
 import { enhanceSelect as enhanceSelectFromSubpath } from "@lilian1315/faisceau-ui/select";
 import { createZagMachine, normalizeProps } from "@lilian1315/faisceau-zag";
@@ -22,6 +27,8 @@ describe("published package contract", () => {
     combobox.destroy();
     expect(typeof enhanceCombobox).toBe("function");
     expect(typeof enhanceSelectFromSubpath).toBe("function");
+    expect(createCheckbox({ label: "Terms" }).root).toBeInstanceOf(HTMLElement);
+    expect(createTooltip({ content: "Help", trigger: "Info" }).root).toBeInstanceOf(HTMLElement);
     expect(typeof createZagMachine).toBe("function");
     expect(typeof normalizeProps).toBe("object");
 

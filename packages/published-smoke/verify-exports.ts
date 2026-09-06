@@ -37,6 +37,8 @@ const contracts = [
       ["@lilian1315/faisceau-ui", "./dist/index.mjs"],
       ["@lilian1315/faisceau-ui/select", "./dist/select/index.mjs"],
       ["@lilian1315/faisceau-ui/combobox", "./dist/combobox/index.mjs"],
+      ["@lilian1315/faisceau-ui/checkbox", "./dist/checkbox/index.mjs"],
+      ["@lilian1315/faisceau-ui/tooltip", "./dist/tooltip/index.mjs"],
       ["@lilian1315/faisceau-ui/styles.css", "./src/styles/index.css"],
       ["@lilian1315/faisceau-ui/package.json", "./package.json"],
     ],
@@ -47,6 +49,10 @@ const contracts = [
       "./dist/select/index.mjs",
       "./dist/combobox/index.d.mts",
       "./dist/combobox/index.mjs",
+      "./dist/checkbox/index.d.mts",
+      "./dist/checkbox/index.mjs",
+      "./dist/tooltip/index.d.mts",
+      "./dist/tooltip/index.mjs",
       "./src/styles/index.css",
       "./src/styles/index.d.ts",
       "./package.json",
@@ -83,10 +89,12 @@ for (const contract of contracts) {
   }
 }
 
-const [ui, select, combobox, zag] = await Promise.all([
+const [ui, select, combobox, checkbox, tooltip, zag] = await Promise.all([
   import("@lilian1315/faisceau-ui"),
   import("@lilian1315/faisceau-ui/select"),
   import("@lilian1315/faisceau-ui/combobox"),
+  import("@lilian1315/faisceau-ui/checkbox"),
+  import("@lilian1315/faisceau-ui/tooltip"),
   import("@lilian1315/faisceau-zag"),
 ]);
 
@@ -95,6 +103,10 @@ for (const [name, value] of Object.entries({
   createSelect: ui.createSelect,
   createSelectFromSubpath: select.createSelect,
   createComboboxFromSubpath: combobox.createCombobox,
+  createCheckbox: ui.createCheckbox,
+  createCheckboxFromSubpath: checkbox.createCheckbox,
+  createTooltip: ui.createTooltip,
+  createTooltipFromSubpath: tooltip.createTooltip,
   createZagMachine: zag.createZagMachine,
 })) {
   if (typeof value !== "function") throw new TypeError(`Published export ${name} is not callable`);

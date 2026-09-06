@@ -195,6 +195,46 @@ const combobox = enhanceCombobox(document.querySelector<HTMLElement>("#command-c
 
 Les valeurs d'option doivent être uniques. Les options `disabled` et les `<optgroup disabled>` sont reconnus. Un attribut `data-description` sur une option ajoute une seconde ligne à l'item généré. La valeur vide est réservée au placeholder et n'apparaît pas dans la liste.
 
+## Checkbox
+
+`createCheckbox` construit un contrôle relié à un véritable `input[type="checkbox"]`, compatible avec `FormData`, `required` et le reset natif :
+
+```ts
+import { createCheckbox } from "@lilian1315/faisceau-ui";
+
+createCheckbox({
+  label: "Accepter les conditions",
+  name: "terms",
+  required: true,
+  value: "accepted",
+}).mount(document.querySelector("#terms")!);
+```
+
+Pour l'enhancement, le conteneur contient uniquement l'input natif ; le label visible et le contrôle sont générés :
+
+```html
+<div id="newsletter">
+  <input type="checkbox" name="newsletter" aria-label="Recevoir la newsletter" />
+</div>
+```
+
+```ts
+import { enhanceCheckbox } from "@lilian1315/faisceau-ui";
+
+enhanceCheckbox(document.querySelector<HTMLElement>("#newsletter")!);
+```
+
+## Tooltip
+
+`createTooltip` génère un bouton et son infobulle accessible. `enhanceTooltip` peut utiliser le `title` d'un trigger existant ; l'attribut est temporairement retiré pour éviter la double infobulle puis restauré par `destroy()`.
+
+```ts
+import { createTooltip, enhanceTooltip } from "@lilian1315/faisceau-ui";
+
+createTooltip({ content: "Créer un document", trigger: "Créer" }).mount(document.body);
+enhanceTooltip(document.querySelector<HTMLElement>("[title]")!);
+```
+
 ## Thèmes et personnalisation
 
 Le thème clair est appliqué par défaut. Le thème sombre s'active sur la page entière ou sur un sous-arbre :
@@ -216,7 +256,7 @@ Toutes les classes appartenant à la bibliothèque commencent par `fui-`. Les at
 
 ## Cycle de vie
 
-Les quatre fonctions renvoient un contrôleur commun :
+Les huit fonctions renvoient un contrôleur commun :
 
 - `root` : élément racine du composant ;
 - `api` : valeur réactive Faisceau en lecture seule contenant l'API Zag courante, accessible avec `controller.api.get()` ;
@@ -225,7 +265,7 @@ Les quatre fonctions renvoient un contrôleur commun :
 - `start()` : démarre un composant dont le DOM a été inséré manuellement ;
 - `destroy()` : arrête les effets et écouteurs de façon idempotente.
 
-`destroy()` retire le markup produit par une fonction `create*`. Pour une fonction `enhance*`, seuls les éléments générés sont retirés : le conteneur et son `<select>` original restent dans le document avec la sélection courante.
+`destroy()` retire le markup produit par une fonction `create*`. Pour une fonction `enhance*`, seuls les éléments générés sont retirés et le markup natif est restauré.
 
 ```ts
 const select = createSelect({ label: "Mode", items: ["Simple", "Expert"] });

@@ -289,10 +289,16 @@ importers:
       '@lucide/icons':
         specifier: 'catalog:'
         version: 1.41.0
+      '@zag-js/checkbox':
+        specifier: 'catalog:'
+        version: 1.43.3
       '@zag-js/combobox':
         specifier: 'catalog:'
         version: 1.43.3
       '@zag-js/select':
+        specifier: 'catalog:'
+        version: 1.43.3
+      '@zag-js/tooltip':
         specifier: 'catalog:'
         version: 1.43.3
       faisceau:

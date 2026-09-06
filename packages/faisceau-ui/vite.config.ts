@@ -9,7 +9,13 @@ export default defineConfig({
     dts: {
       tsconfig: "tsconfig.build.json",
     },
-    entry: ["src/index.ts", "src/select/index.ts", "src/combobox/index.ts"],
+    entry: [
+      "src/index.ts",
+      "src/checkbox/index.ts",
+      "src/combobox/index.ts",
+      "src/select/index.ts",
+      "src/tooltip/index.ts",
+    ],
     format: ["esm"],
     sourcemap: true,
   },

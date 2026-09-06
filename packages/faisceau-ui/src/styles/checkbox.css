@@ -1,0 +1,75 @@
+@layer fui-components {
+  .fui-checkbox {
+    gap: var(--fui-space-1-5);
+  }
+
+  .fui-checkbox-field {
+    display: inline-flex;
+    align-items: center;
+    inline-size: fit-content;
+    min-block-size: var(--fui-control-height-coarse);
+    gap: var(--fui-space-2);
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .fui-checkbox-control {
+    display: inline-grid;
+    place-items: center;
+    inline-size: 1rem;
+    block-size: 1rem;
+    flex: none;
+    border: var(--fui-border-width) solid var(--fui-color-border);
+    border-radius: var(--fui-radius-sm);
+    background: var(--fui-color-surface);
+    color: var(--fui-color-background);
+    box-shadow: 0 1px 2px var(--fui-color-control-shadow);
+    transition:
+      background-color var(--fui-duration-fast) var(--fui-easing-standard),
+      border-color var(--fui-duration-fast) var(--fui-easing-standard),
+      box-shadow var(--fui-duration-fast) var(--fui-easing-standard);
+  }
+
+  .fui-checkbox-control[data-state="checked"],
+  .fui-checkbox-control[data-state="indeterminate"] {
+    border-color: var(--fui-color-foreground);
+    background: var(--fui-color-foreground);
+  }
+
+  .fui-checkbox-control[data-focus-visible] {
+    outline: var(--fui-focus-ring-width) solid var(--fui-color-ring);
+    outline-offset: var(--fui-focus-ring-offset);
+  }
+
+  .fui-checkbox-indicator .fui-icon {
+    inline-size: 0.75rem;
+    block-size: 0.75rem;
+  }
+
+  .fui-checkbox-indicator[data-state="checked"] .fui-icon--minus,
+  .fui-checkbox-indicator[data-state="indeterminate"] .fui-icon--check {
+    display: none;
+  }
+
+  .fui-checkbox-field[data-disabled] {
+    cursor: not-allowed;
+    opacity: 0.55;
+  }
+
+  .fui-checkbox-field[data-invalid] .fui-checkbox-control {
+    border-color: var(--fui-color-destructive);
+  }
+
+  .fui-checkbox-label {
+    color: var(--fui-color-foreground);
+    font-weight: var(--fui-font-weight-medium);
+    text-wrap: pretty;
+  }
+
+  @media (forced-colors: active) {
+    .fui-checkbox-control[data-state="checked"] {
+      background: Highlight;
+      color: HighlightText;
+    }
+  }
+}

@@ -14,5 +14,20 @@ export type {
   SelectOptions,
 } from "./select/index.js";
 
+export { createTooltip, enhanceTooltip } from "./tooltip/index.js";
+export type {
+  EnhanceTooltipOptions,
+  TooltipApi,
+  TooltipController,
+  TooltipOptions,
+} from "./tooltip/index.js";
+
 export type { FuiItem, FuiItemInput } from "./shared/index.js";
 export type { FuiController, FuiFieldOptions, FuiReactive } from "./types.js";
+export { createCheckbox, enhanceCheckbox } from "./checkbox/index.js";
+export type {
+  CheckboxApi,
+  CheckboxController,
+  CheckboxOptions,
+  EnhanceCheckboxOptions,
+} from "./checkbox/index.js";

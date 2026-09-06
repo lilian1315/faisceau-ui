@@ -14,6 +14,9 @@ export {
 /** Unique DOM id generation. */
 export { createId } from "./id.js";
 
+/** DOM lookup helpers shared by Zag-powered components. */
+export { getLookupRoot } from "./dom.js";
+
 /** Native select helpers shared by form-compatible collection components. */
 export {
   captureAttributes,
@@ -28,4 +31,10 @@ export {
 } from "./native-select.js";
 
 /** Lucide icons rendered through @lilian1315/create-element/faisceau. */
-export { createCheckIcon, createChevronDownIcon, createClearIcon, createXIcon } from "./icons.js";
+export {
+  createCheckIcon,
+  createChevronDownIcon,
+  createClearIcon,
+  createMinusIcon,
+  createXIcon,
+} from "./icons.js";

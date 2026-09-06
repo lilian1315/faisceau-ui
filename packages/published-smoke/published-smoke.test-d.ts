@@ -1,7 +1,9 @@
 import { assertType, expectTypeOf, test } from "vite-plus/test";
 import { createSelect, type FuiItemInput, type SelectController } from "@lilian1315/faisceau-ui";
 import type { ComboboxOptions } from "@lilian1315/faisceau-ui/combobox";
+import type { CheckboxOptions } from "@lilian1315/faisceau-ui/checkbox";
 import type { EnhanceSelectOptions } from "@lilian1315/faisceau-ui/select";
+import type { TooltipOptions } from "@lilian1315/faisceau-ui/tooltip";
 
 test("exposes the declarations shipped through every public UI entry", () => {
   const items = [
@@ -11,5 +13,7 @@ test("exposes the declarations shipped through every public UI entry", () => {
 
   assertType<ComboboxOptions>({ items, label: "Pays" });
   assertType<EnhanceSelectOptions>({ clearable: true });
+  assertType<CheckboxOptions>({ label: "Terms" });
+  assertType<TooltipOptions>({ content: "Help", trigger: "Info" });
   expectTypeOf(createSelect({ items, label: "Pays" })).toMatchTypeOf<SelectController>();
 });

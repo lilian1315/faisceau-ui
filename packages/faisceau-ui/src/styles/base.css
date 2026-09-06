@@ -34,6 +34,18 @@
     .fui-combobox-item-text,
     .fui-combobox-item-description,
     .fui-combobox-item-indicator,
+    .fui-checkbox,
+    .fui-checkbox-field,
+    .fui-checkbox-control,
+    .fui-checkbox-indicator,
+    .fui-checkbox-label,
+    .fui-native-checkbox,
+    .fui-tooltip-trigger,
+    .fui-tooltip-trigger--generated,
+    .fui-tooltip-positioner,
+    .fui-tooltip-content,
+    .fui-tooltip-arrow,
+    .fui-tooltip-arrow-tip,
     .fui-field-description,
     .fui-field-error,
     .fui-icon,
@@ -42,7 +54,7 @@
     box-sizing: border-box;
   }
 
-  :where(.fui-select, .fui-combobox) {
+  :where(.fui-select, .fui-combobox, .fui-checkbox) {
     display: grid;
     inline-size: 100%;
     max-inline-size: min(var(--fui-control-max-inline-size), 100%);
@@ -128,7 +140,7 @@
     border: 0;
   }
 
-  .fui-native-select {
+  :where(.fui-native-select, .fui-native-checkbox) {
     position: absolute;
     inline-size: 1px;
     block-size: 1px;

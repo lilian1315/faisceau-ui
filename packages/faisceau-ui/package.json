@@ -24,6 +24,14 @@
       "types": "./dist/combobox/index.d.mts",
       "import": "./dist/combobox/index.mjs"
     },
+    "./checkbox": {
+      "types": "./dist/checkbox/index.d.mts",
+      "import": "./dist/checkbox/index.mjs"
+    },
+    "./tooltip": {
+      "types": "./dist/tooltip/index.d.mts",
+      "import": "./dist/tooltip/index.mjs"
+    },
     "./styles.css": {
       "types": "./src/styles/index.d.ts",
       "default": "./src/styles/index.css"
@@ -42,8 +50,10 @@
     "@lilian1315/create-element": "catalog:",
     "@lilian1315/faisceau-zag": "workspace:*",
     "@lucide/icons": "catalog:",
+    "@zag-js/checkbox": "catalog:",
     "@zag-js/combobox": "catalog:",
     "@zag-js/select": "catalog:",
+    "@zag-js/tooltip": "catalog:",
     "faisceau": "catalog:"
   }
 }
