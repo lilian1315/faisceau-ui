@@ -1,0 +1,22 @@
+{
+  "name": "faisceau-ui-storybook",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "storybook build",
+    "dev": "storybook dev -p 6006 --no-open"
+  },
+  "dependencies": {
+    "@lilian1315/create-element": "catalog:",
+    "@lilian1315/faisceau-ui": "workspace:*",
+    "faisceau": "catalog:"
+  },
+  "devDependencies": {
+    "@storybook/addon-a11y": "10.6.0",
+    "@storybook/addon-docs": "10.6.0",
+    "@storybook/html-vite": "10.6.0",
+    "@types/node": "catalog:",
+    "storybook": "10.6.0"
+  }
+}

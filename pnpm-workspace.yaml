@@ -28,5 +28,8 @@ peerDependencyRules:
     - vite
   allowedVersions:
     vite: "*"
+    vite-plus: "*"
 minimumReleaseAgeExclude:
   - "@lilian1315/create-element@0.12.1"
+allowBuilds:
+  esbuild: true

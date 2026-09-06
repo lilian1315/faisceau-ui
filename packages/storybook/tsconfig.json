@@ -1,0 +1,9 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "jsxImportSource": "@lilian1315/create-element/faisceau",
+    "types": ["node"]
+  },
+  "include": [".storybook/**/*.ts", "src/**/*.ts", "src/**/*.tsx"]
+}
