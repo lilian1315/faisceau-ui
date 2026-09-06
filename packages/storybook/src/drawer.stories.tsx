@@ -4,11 +4,13 @@ import type { Meta, StoryObj } from "@storybook/html-vite";
 import { asDom, createStoryShell, trackController } from "./story.js";
 
 interface Args {
-  side: "top" | "right" | "bottom" | "left";
+  swipeDirection: "up" | "down" | "start" | "end";
 }
 const meta = {
-  args: { side: "right" },
-  argTypes: { side: { control: "inline-radio", options: ["top", "right", "bottom", "left"] } },
+  args: { swipeDirection: "end" },
+  argTypes: {
+    swipeDirection: { control: "inline-radio", options: ["up", "down", "start", "end"] },
+  },
   title: "Drawer/Anatomie",
 } satisfies Meta<Args>;
 export default meta;
@@ -20,7 +22,7 @@ export const CreeDeToutesPieces: Story = {
       eyebrow: "createDrawer",
       title: "Panneau latéral",
       description:
-        "Le Drawer réutilise la sémantique, le focus trap et la fermeture de Zag Dialog.",
+        "La machine Zag Drawer gère le focus, les snap points et les gestes de glissement.",
     });
     const host = asDom<HTMLDivElement>(<div />);
     story.canvas.append(host);
@@ -28,6 +30,8 @@ export const CreeDeToutesPieces: Story = {
       story.root,
       createDrawer({
         ...args,
+        snapPoints: [0.5, 1],
+        swipeArea: true,
         trigger: "Ouvrir le panneau",
         title: "Filtres",
         description: "Affinez les résultats affichés.",
@@ -35,7 +39,7 @@ export const CreeDeToutesPieces: Story = {
       }).mount(host),
     );
     story.setSource(
-      `createDrawer({ side: "${args.side}", trigger, title, content }).mount(target)`,
+      `createDrawer({ swipeDirection: "${args.swipeDirection}", snapPoints: [0.5, 1], swipeArea: true, trigger, title, content }).mount(target)`,
     );
     return story.root;
   },

@@ -1,8 +1,20 @@
-import type { DialogController, DialogMachineOptions, DialogViewOptions } from "../dialog/types.js";
+import type * as drawer from "@zag-js/drawer";
+import type { FuiController } from "../types.js";
 
-export type DrawerSide = "top" | "right" | "bottom" | "left";
-export type DrawerOptions = DialogMachineOptions & DialogViewOptions & { side?: DrawerSide };
-export type EnhanceDrawerOptions = DialogMachineOptions &
-  Partial<Omit<DialogViewOptions, "content" | "trigger">> & { side?: DrawerSide };
-export type DrawerController = DialogController;
-export type DrawerApi = DrawerController["api"] extends { get(): infer Api } ? Api : never;
+type DrawerMachineOptions = Omit<drawer.Props, "getRootNode" | "id" | "ids">;
+interface DrawerViewOptions {
+  id?: string;
+  className?: string;
+  title: string;
+  description?: string;
+  content: string;
+  trigger: string;
+  closeLabel?: string;
+  /** Generate an edge swipe area in addition to the visible trigger. */
+  swipeArea?: boolean;
+}
+export type DrawerOptions = DrawerMachineOptions & DrawerViewOptions;
+export type EnhanceDrawerOptions = DrawerMachineOptions &
+  Partial<Omit<DrawerViewOptions, "content" | "trigger">>;
+export type DrawerApi = drawer.Api;
+export type DrawerController = FuiController<DrawerApi>;

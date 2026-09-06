@@ -43,7 +43,6 @@ export type {
   DrawerApi,
   DrawerController,
   DrawerOptions,
-  DrawerSide,
   EnhanceDrawerOptions,
 } from "./drawer/index.js";
 export { createToaster, enhanceToaster } from "./toast/index.js";

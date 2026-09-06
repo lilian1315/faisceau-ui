@@ -239,15 +239,21 @@ enhanceTooltip(document.querySelector<HTMLElement>("[title]")!);
 
 Dialog et Drawer acceptent le même modèle : la variante `create*` construit tout le composant,
 tandis que `enhance*` part d'un trigger et d'un contenu existants marqués avec
-`data-fui-part="trigger"` et `data-fui-part="content"`. Drawer ajoute l'option `side`.
+`data-fui-part="trigger"` et `data-fui-part="content"`. Drawer utilise sa machine Zag dédiée :
+il expose directement `swipeDirection`, les snap points, le grabber et une zone de swipe optionnelle.
 
 ```ts
 import { createDialog, createDrawer, createToaster } from "@lilian1315/faisceau-ui";
 
 createDialog({ trigger: "Ouvrir", title: "Profil", content: "Contenu" }).mount(document.body);
-createDrawer({ trigger: "Filtres", title: "Filtres", content: "Contenu", side: "right" }).mount(
-  document.body,
-);
+createDrawer({
+  trigger: "Filtres",
+  title: "Filtres",
+  content: "Contenu",
+  swipeDirection: "end",
+  snapPoints: [0.5, 1],
+  swipeArea: true,
+}).mount(document.body);
 
 const toaster = createToaster({ placement: "bottom-end" }).mount(document.body);
 toaster.store.success({ title: "Enregistré", description: "Les changements sont conservés." });

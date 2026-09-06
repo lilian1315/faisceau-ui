@@ -229,6 +229,9 @@ catalogs:
     '@zag-js/dialog':
       specifier: 2.0.0-next.2
       version: 2.0.0-next.2
+    '@zag-js/drawer':
+      specifier: 2.0.0-next.2
+      version: 2.0.0-next.2
     '@zag-js/select':
       specifier: 2.0.0-next.2
       version: 2.0.0-next.2
@@ -302,6 +305,9 @@ importers:
         specifier: 'catalog:'
         version: 2.0.0-next.2
       '@zag-js/dialog':
+        specifier: 'catalog:'
+        version: 2.0.0-next.2
+      '@zag-js/drawer':
         specifier: 'catalog:'
         version: 2.0.0-next.2
       '@zag-js/select':
@@ -1730,6 +1736,9 @@ packages:
 
   '@zag-js/dom-query@2.0.0-next.2':
     resolution: {integrity: sha512-8X5ob4icV85lssFEq0yCIb6WKdTUR+kBbqXa73wuavHaHSLbdR1YycsZmJaJpoNXuz6oZTWmUyee4ZdtDRBaFg==}
+
+  '@zag-js/drawer@2.0.0-next.2':
+    resolution: {integrity: sha512-BU4LR4JLBA+uKyiViME/URkau/GHtdQ5fvnKSuw2eD62uv3AndyzA64HqTRo1kMuakOCX+nlUAMu/f/yZBR5cQ==}
 
   '@zag-js/focus-trap@2.0.0-next.2':
     resolution: {integrity: sha512-lVSRmuzDd4zpTwYt4MMZL22L2Kf4rIR2pzQrqLSZ9kiPykaMew5B4jGI/yTwFEl3+nBxgghZPIhzLebOJlOlLQ==}
@@ -3335,6 +3344,18 @@ snapshots:
   '@zag-js/dom-query@2.0.0-next.2':
     dependencies:
       '@zag-js/types': 2.0.0-next.2
+
+  '@zag-js/drawer@2.0.0-next.2':
+    dependencies:
+      '@zag-js/anatomy': 2.0.0-next.2
+      '@zag-js/aria-hidden': 2.0.0-next.2
+      '@zag-js/core': 2.0.0-next.2
+      '@zag-js/dismissable': 2.0.0-next.2
+      '@zag-js/dom-query': 2.0.0-next.2
+      '@zag-js/focus-trap': 2.0.0-next.2
+      '@zag-js/remove-scroll': 2.0.0-next.2
+      '@zag-js/types': 2.0.0-next.2
+      '@zag-js/utils': 2.0.0-next.2
 
   '@zag-js/focus-trap@2.0.0-next.2':
     dependencies:
