@@ -11,7 +11,8 @@ Le monorepo contient deux bibliothèques publiables :
 - `@lilian1315/faisceau-zag` : pont générique entre une machine Zag, les valeurs réactives Faisceau et des éléments DOM. Il gère le cycle de vie, les mises à jour et l'application réactive des props Zag.
 - `@lilian1315/faisceau-ui` : composants, markup et styles. Il utilise le pont précédent et les machines `@zag-js/select` et `@zag-js/combobox`.
 
-Le package privé `website` sert uniquement de démonstration locale.
+Le package privé `website` sert uniquement de démonstration locale. Le package privé
+`published-smoke` vérifie les artefacts et exports tels qu'ils seront consommés après publication.
 
 ## Installation
 
@@ -254,7 +255,7 @@ vp check
 vp run -r test
 vp run -r build
 
-# Exécuter toute la validation
+# Exécuter toute la validation, y compris le contrat du package publié dans Chrome
 vp run ready
 
 # Lancer le site de démonstration

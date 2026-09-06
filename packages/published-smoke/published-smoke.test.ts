@@ -1,0 +1,89 @@
+import "@lilian1315/faisceau-ui/styles.css";
+
+import { afterEach, describe, expect, it } from "vite-plus/test";
+import {
+  createSelect,
+  enhanceCombobox,
+  type FuiItemInput,
+  type SelectController,
+} from "@lilian1315/faisceau-ui";
+import {
+  createCombobox as createComboboxFromSubpath,
+  type ComboboxOptions,
+} from "@lilian1315/faisceau-ui/combobox";
+import {
+  enhanceSelect as enhanceSelectFromSubpath,
+  type EnhanceSelectOptions,
+} from "@lilian1315/faisceau-ui/select";
+import { createZagMachine, normalizeProps } from "@lilian1315/faisceau-zag";
+
+const items = [
+  { label: "France", value: "fr" },
+  { label: "Belgique", value: "be" },
+] as const satisfies readonly FuiItemInput[];
+
+const comboboxOptions = {
+  items,
+  label: "Pays",
+} satisfies ComboboxOptions;
+
+const enhanceOptions = {
+  clearable: true,
+} satisfies EnhanceSelectOptions;
+
+afterEach(() => {
+  document.body.replaceChildren();
+});
+
+describe("published package contract", () => {
+  it("resolves every public entry and runs a styled Select interaction in Chrome", async () => {
+    const combobox = createComboboxFromSubpath(comboboxOptions);
+    expect(combobox.root).toBeInstanceOf(HTMLElement);
+    combobox.destroy();
+    expect(typeof enhanceCombobox).toBe("function");
+    expect(typeof enhanceSelectFromSubpath).toBe("function");
+    expect(enhanceOptions.clearable).toBe(true);
+    expect(typeof createZagMachine).toBe("function");
+    expect(typeof normalizeProps).toBe("object");
+
+    const form = document.createElement("form");
+    document.body.append(form);
+    const controller: SelectController = createSelect({
+      alignItemWithTrigger: false,
+      items,
+      label: "Pays",
+      name: "country",
+      placeholder: "Choisir",
+    }).mount(form);
+    const trigger = requirePart<HTMLButtonElement>(controller.root, "trigger");
+
+    expect(getComputedStyle(controller.root).display).toBe("grid");
+    expect(getComputedStyle(trigger).borderStyle).toBe("solid");
+
+    trigger.click();
+    await flushMachine();
+    requireItem(controller.root, "be").click();
+    await flushMachine();
+
+    expect(controller.api.get().value).toEqual(["be"]);
+    expect(new FormData(form).get("country")).toBe("be");
+    controller.destroy();
+  });
+});
+
+function requirePart<T extends Element>(root: ParentNode, part: string): T {
+  const element = root.querySelector<T>(`[data-fui-part="${part}"]`);
+  if (!element) throw new Error(`Missing published part: ${part}`);
+  return element;
+}
+
+function requireItem(root: ParentNode, value: string): HTMLElement {
+  const item = root.querySelector<HTMLElement>(`[data-fui-part="item"][data-value="${value}"]`);
+  if (!item) throw new Error(`Missing published item: ${value}`);
+  return item;
+}
+
+async function flushMachine(): Promise<void> {
+  await Promise.resolve();
+  await new Promise((resolve) => setTimeout(resolve, 0));
+}

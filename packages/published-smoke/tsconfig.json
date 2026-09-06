@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "noEmit": true,
+    "strict": true,
+    "types": ["node"],
+    "verbatimModuleSyntax": true
+  },
+  "include": ["published-smoke.test.ts", "verify-exports.ts"]
+}
