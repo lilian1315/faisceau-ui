@@ -1,5 +1,12 @@
 # TODO
 
+## Date Picker
+
+- Implement `createDatePicker` and `enhanceDatePicker` with the dedicated Zag Next primitive.
+- Keep a native form value, cover single/range/multiple modes as supported by Zag, and document the
+  minimal enhancement markup.
+- Add Chrome behavior tests, type tests, Storybook stories, styles, and published export coverage.
+
 ## Move item-aligned Select positioning upstream to Zag
 
 - Propose a native `alignItemWithTrigger` option for `@zag-js/select`.

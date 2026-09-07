@@ -1,3 +1,43 @@
+## Faisceau UI project instructions
+
+Faisceau UI is a browser-only TypeScript component library. It combines Zag state machines,
+Faisceau reactivity, DOM created with `@lilian1315/create-element/faisceau`, and vanilla CSS.
+
+### Required conventions
+
+- Use the dedicated Zag machine when one exists, pinned to the workspace's Zag Next version.
+- Keep component-owned CSS classes prefixed with `fui-` and DOM parts named with
+  `data-fui-part`.
+- Use Lucide through the shared icon helpers; keep icons decorative unless they convey meaning.
+- Provide both `create*` and `enhance*` when a component can reasonably adopt existing markup.
+- A created controller starts after insertion through `mount()` or `start()`. An enhanced
+  controller starts immediately and restores caller-owned markup and attributes on `destroy()`.
+- Form controls participate in native `FormData`, validation, reset, and `input`/`change`
+  semantics. Keep the native control in the document.
+- Public component options and controller APIs may remain Zag-shaped while the package is
+  unpublished. Prefer the current Zag vocabulary over compatibility aliases.
+- Use relative `.js` specifiers in TypeScript and `import type` for type-only imports.
+- Build Storybook stories in TSX with `@lilian1315/create-element/faisceau`.
+- Run browser behavior tests in the configured Vitest `chrome` project. Put type assertions in
+  `*.test-d.ts`; enable them through Vitest configuration rather than CLI flags.
+- The supported workflow excludes `vp view`.
+
+### Context pointers
+
+- Architecture: before changing package boundaries, the Zag adapter, controller lifecycle, DOM
+  ownership, native-form behavior, or public API policy, read `docs/architecture.md`.
+- Component work: before adding or substantially changing a component, follow
+  `docs/component-authoring.md` through its completion criteria.
+
+### Completion
+
+- Use `vp check` during development.
+- Use `vp run ready` before handoff. It checks formatting, lint and types, runs package tests,
+  builds every package, and verifies the published-package contract.
+- If a new public entry makes the initial typecheck resolve stale declarations, run
+  `vp run -r build` once, then rerun `vp run ready`.
+- Preserve unrelated worktree changes. Commit only when explicitly requested.
+
 <!--VITE PLUS START-->
 
 # Using Vite+, the Unified Toolchain for the Web
