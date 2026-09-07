@@ -10,7 +10,16 @@ const preview: Preview = {
     layout: "centered",
     options: {
       storySort: {
-        order: ["Introduction", "Checkbox", "Select", "Combobox", "Tooltip"],
+        order: [
+          "Introduction",
+          "Checkbox",
+          "Select",
+          "Combobox",
+          "Tooltip",
+          "Dialog",
+          "Drawer",
+          "Toast",
+        ],
       },
     },
   },

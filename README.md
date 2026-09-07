@@ -2,14 +2,16 @@
 
 Faisceau UI est une bibliothèque de composants DOM accessibles pour navigateurs modernes. Elle associe les machines d'état de [Zag.js](https://zagjs.com/) à [`@lilian1315/create-element`](https://github.com/lilian1315/create-element) et [`faisceau`](https://github.com/lilian1315/faisceau), sans dépendre d'un framework. Son apparence s'inspire de shadcn/ui, avec du CSS vanilla, les icônes open source de [Lucide](https://lucide.dev/) et des classes internes préfixées par `fui-`.
 
-Le premier lot fournit un Select et une Combobox. Chaque composant peut construire son propre DOM ou adopter un markup HTML déjà présent.
+La bibliothèque fournit actuellement Select, Combobox, Checkbox, Tooltip, Dialog, Drawer et
+Toast. Chaque composant peut construire son propre DOM ou adopter un markup HTML déjà présent.
 
 ## Architecture
 
 Le monorepo contient deux bibliothèques publiables :
 
 - `@lilian1315/faisceau-zag` : pont générique entre une machine Zag, les valeurs réactives Faisceau et des éléments DOM. Il gère le cycle de vie, les mises à jour et l'application réactive des props Zag.
-- `@lilian1315/faisceau-ui` : composants, markup et styles. Il utilise le pont précédent et les machines `@zag-js/select` et `@zag-js/combobox`.
+- `@lilian1315/faisceau-ui` : composants, markup et styles. Il utilise le pont précédent et une
+  machine Zag dédiée pour chaque composant lorsqu'elle existe.
 
 Le package privé `website` sert uniquement de démonstration locale. Le package privé
 `published-smoke` vérifie les artefacts et exports tels qu'ils seront consommés après publication.
@@ -26,7 +28,9 @@ Importer une fois la feuille de styles globale depuis le point d'entrée de l'ap
 import "@lilian1315/faisceau-ui/styles.css";
 ```
 
-Les composants sont aussi disponibles depuis les sous-chemins `@lilian1315/faisceau-ui/select` et `@lilian1315/faisceau-ui/combobox`.
+Chaque composant est également disponible depuis son sous-chemin, par exemple
+`@lilian1315/faisceau-ui/select`, `@lilian1315/faisceau-ui/dialog` ou
+`@lilian1315/faisceau-ui/toast`.
 
 Pour utiliser directement le pont de bas niveau :
 
@@ -34,7 +38,9 @@ Pour utiliser directement le pont de bas niveau :
 pnpm add @lilian1315/faisceau-zag @zag-js/vanilla faisceau
 ```
 
-Le pont suit l'adapter Vanilla officiel et déclare ses runtimes en peer dependencies. Cette version est testée avec `@zag-js/vanilla` 1.43.x et `faisceau` 0.3.x. Le projet cible uniquement les navigateurs modernes ; le rendu serveur ne fait pas partie de son contrat.
+Le pont suit l'adapter Vanilla officiel et déclare ses runtimes en peer dependencies. Cette
+version utilise Zag `2.0.0-next.2` et Faisceau 0.3.x. Le projet cible uniquement les navigateurs
+modernes ; le rendu serveur ne fait pas partie de son contrat.
 
 ## Créer un Select
 

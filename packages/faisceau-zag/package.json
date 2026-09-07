@@ -34,7 +34,7 @@
     "faisceau": "catalog:"
   },
   "peerDependencies": {
-    "@zag-js/vanilla": "^1.43.3",
+    "@zag-js/vanilla": "2.0.0-next.2",
     "faisceau": "^0.3.2"
   }
 }
