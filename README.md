@@ -13,8 +13,7 @@ Le monorepo contient deux bibliothèques publiables :
 - `@lilian1315/faisceau-ui` : composants, markup et styles. Il utilise le pont précédent et une
   machine Zag dédiée pour chaque composant lorsqu'elle existe.
 
-Le package privé `website` sert uniquement de démonstration locale. Le package privé
-`published-smoke` vérifie les artefacts et exports tels qu'ils seront consommés après publication.
+Le package privé `published-smoke` vérifie les artefacts et exports tels qu'ils seront consommés après publication.
 
 ## Installation
 

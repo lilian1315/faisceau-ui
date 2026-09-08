@@ -41,7 +41,6 @@ Each public component has a root export and a package subpath. Styles ship separ
 ### Private packages
 
 - `storybook` documents constructed and enhanced variants in TSX and runs the accessibility addon.
-- `website` is a small local demonstration, not the component reference.
 - `published-smoke` validates files, subpath resolution, generated declarations, CSS inclusion, and
   one real Chrome interaction through the public package surface.
 

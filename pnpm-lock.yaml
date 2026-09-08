@@ -401,19 +401,6 @@ importers:
         specifier: 10.6.0
         version: 10.6.0(@types/react@19.2.18)(react@19.2.8)(vite-plus@0.3.0(@types/node@26.4.1)(@vitest/browser-playwright@4.1.11)(@voidzero-dev/vite-plus-core@0.3.0(@types/node@26.4.1)(esbuild@0.28.2)(jiti@2.7.0)(typescript@7.0.2)(yaml@2.9.0))(esbuild@0.28.2)(happy-dom@20.13.2)(jiti@2.7.0)(typescript@7.0.2)(yaml@2.9.0))
 
-  packages/website:
-    dependencies:
-      '@lilian1315/faisceau-ui':
-        specifier: workspace:*
-        version: link:../faisceau-ui
-    devDependencies:
-      vite:
-        specifier: 'catalog:'
-        version: '@voidzero-dev/vite-plus-core@0.3.0(@types/node@26.4.1)(esbuild@0.28.2)(jiti@2.7.0)(typescript@7.0.2)(yaml@2.9.0)'
-      vite-plus:
-        specifier: 'catalog:'
-        version: 0.3.0(@types/node@26.4.1)(@vitest/browser-playwright@4.1.11)(@voidzero-dev/vite-plus-core@0.3.0(@types/node@26.4.1)(esbuild@0.28.2)(jiti@2.7.0)(typescript@7.0.2)(yaml@2.9.0))(esbuild@0.28.2)(happy-dom@20.13.2)(jiti@2.7.0)(typescript@7.0.2)(yaml@2.9.0)
-
 packages:
 
   '@adobe/css-tools@4.5.0':
