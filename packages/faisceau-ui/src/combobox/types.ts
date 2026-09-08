@@ -43,4 +43,7 @@ export type EnhanceComboboxOptions = ComboboxMachineOptions &
   };
 
 export type ComboboxApi = combobox.Api;
-export type ComboboxController = FuiController<ComboboxApi>;
+export interface ComboboxController extends FuiController<ComboboxApi> {
+  /** Replaces the authoritative suggestion collection. */
+  setItems(items: readonly FuiItemInput[]): void;
+}

@@ -93,6 +93,40 @@ export function getNativeSelectValue(select: HTMLSelectElement): string[] {
   return Array.from(select.selectedOptions, (option) => option.value).filter(Boolean);
 }
 
+/** Reconciles native options by value while preserving retained option nodes and selection. */
+export function reconcileNativeSelectOptions(
+  select: HTMLSelectElement,
+  items: readonly FuiItem[],
+  placeholder: string,
+): void {
+  const selected = new Set(getNativeSelectValue(select));
+  const existing = new Map(
+    Array.from(select.options)
+      .filter((option) => option.value !== "")
+      .map((option) => [option.value, option]),
+  );
+  const empty = select.multiple
+    ? null
+    : (Array.from(select.options).find((option) => option.value === "") ??
+      new Option(placeholder, ""));
+  const options = items.map((item) => {
+    const option = existing.get(item.value) ?? new Option();
+    option.value = item.value;
+    option.textContent = item.label;
+    option.disabled = item.disabled ?? false;
+    option.selected = selected.has(item.value);
+    if (item.description) option.dataset.description = item.description;
+    else delete option.dataset.description;
+    return option;
+  });
+  if (empty) {
+    empty.textContent = placeholder;
+    empty.hidden = true;
+    empty.selected = selected.size === 0;
+  }
+  select.replaceChildren(...(empty ? [empty, ...options] : options));
+}
+
 /**
  * Owns the native form protocol shared by collection fields.
  *

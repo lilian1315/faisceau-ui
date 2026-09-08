@@ -30,6 +30,39 @@ describe("Toast", () => {
     toaster.destroy();
     expect(root.className).toBe("consumer-region");
   });
+
+  it("reconciles visible content when a toast is updated", async () => {
+    const toaster = createToaster({ duration: Infinity }).mount(document.body);
+    const firstAction = vi.fn();
+    const nextAction = vi.fn();
+    const id = toaster.create({
+      action: { label: "Retry", onClick: firstAction },
+      title: "First title",
+    });
+    await flushMachine();
+
+    toaster.store.update(id, {
+      action: { label: "Undo", onClick: nextAction },
+      description: "Updated description",
+      title: "Updated title",
+    });
+    await flushMachine();
+
+    const notification = toaster.root.querySelector<HTMLElement>('[data-fui-part="root"]')!;
+    expect(notification.querySelector('[data-fui-part="title"]')?.textContent).toBe(
+      "Updated title",
+    );
+    expect(notification.querySelector('[data-fui-part="description"]')?.textContent).toBe(
+      "Updated description",
+    );
+    const action = notification.querySelector<HTMLButtonElement>(
+      '[data-fui-part="action-trigger"]',
+    )!;
+    expect(action.textContent).toBe("Undo");
+    action.click();
+    expect(firstAction).not.toHaveBeenCalled();
+    expect(nextAction).toHaveBeenCalledOnce();
+  });
 });
 
 async function flushMachine(): Promise<void> {

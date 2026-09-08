@@ -106,7 +106,7 @@ function createView(options: SelectViewOptions, items: readonly FuiItem[]): Sele
   const list = h(
     "ul",
     { class: "fui-select-list", data: { fuiPart: "list" } },
-    items.map(createItem),
+    items.map(createSelectItem),
   );
   const content = h("div", { class: "fui-select-content", data: { fuiPart: "content" } }, list);
   const positioner = h(
@@ -168,7 +168,7 @@ function createNativeSelect(options: SelectOptions, items: readonly FuiItem[]): 
   return nativeSelect;
 }
 
-function createItem(item: FuiItem): HTMLLIElement {
+export function createSelectItem(item: FuiItem): HTMLLIElement {
   const text = h(
     "span",
     { class: "fui-select-item-text", data: { fuiPart: "item-text" } },

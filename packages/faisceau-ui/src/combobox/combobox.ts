@@ -14,15 +14,18 @@ import {
   normalizeItems,
   queryPart,
   queryParts,
+  reconcileNativeSelectOptions,
+  reconcileKeyedValues,
   readNativeSelect,
   requirePart,
   requireNativeSelect,
+  setNativeSelectValue,
   type FuiItem,
   type FuiItemInput,
   type NativeSelectFieldController,
   type NativeSelectSource,
 } from "../shared/index.js";
-import { createComboboxMarkup, enhanceComboboxMarkup } from "./markup.ts";
+import { createComboboxItem, createComboboxMarkup, enhanceComboboxMarkup } from "./markup.ts";
 import type { ComboboxController, ComboboxOptions, EnhanceComboboxOptions } from "./types.ts";
 
 interface ComboboxParts {
@@ -64,11 +67,15 @@ export function enhanceCombobox(
   const resolvedOptions = resolveEnhancedOptions(options, nativeSelect, source);
   const restoreRoot = captureAttributes(root);
   const restoreSelect = captureAttributes(nativeSelect);
+  const originalOptions = Array.from(nativeSelect.childNodes, (node) => node.cloneNode(true));
   const generated = enhanceComboboxMarkup(root, nativeSelect, resolvedOptions, source.items);
 
   return setupCombobox(root, resolvedOptions, {
     cleanup() {
+      const value = getNativeSelectValue(nativeSelect);
       for (const element of generated) element.remove();
+      nativeSelect.replaceChildren(...originalOptions);
+      setNativeSelectValue(nativeSelect, value);
       restoreRoot();
     },
     items: source.items,
@@ -131,7 +138,8 @@ function setupCombobox(
   if (errorElement) errorElement.setAttribute("role", "alert");
 
   const itemRecords = mapItems(parts.itemElements, setup.items, machineId);
-  const itemByValue = new Map(setup.items.map((item) => [item.value, item]));
+  let currentItems = [...setup.items];
+  let itemByValue = new Map(currentItems.map((item) => [item.value, item]));
   const ids = createPartIds(machineId, root, parts, itemRecords);
   const resetValue = [
     ...(behavior.value ?? behavior.defaultValue ?? getNativeSelectValue(parts.nativeSelect)),
@@ -196,7 +204,7 @@ function setupCombobox(
   let filterRevision = 0;
   let destroyed = false;
   updateCollection = (inputValue): void => {
-    const filteredItems = getFilteredItems(setup.items, inputValue, filter);
+    const filteredItems = getFilteredItems(currentItems, inputValue, filter);
     updateFilteredMarkup(itemRecords, filteredItems, parts.empty);
     const revision = ++filterRevision;
 
@@ -219,23 +227,28 @@ function setupCombobox(
     zag.bind(parts.clearTrigger, (api) => api.getClearTriggerProps());
   }
 
-  for (const { element, item } of itemRecords) {
-    zag.bind(element, (api) => api.getItemProps({ item }));
+  const itemDisposers = new Map<string, () => void>();
+  const bindItem = (element: HTMLElement, item: FuiItem): void => {
+    const disposers = [zag.bind(element, (api) => api.getItemProps({ item }))];
 
     const text = queryPart<HTMLElement>(element, "item-text");
     if (text) {
       addFuiClasses(text, "fui-combobox-item-text");
-      zag.bind(text, (api) => api.getItemTextProps({ item }));
+      disposers.push(zag.bind(text, (api) => api.getItemTextProps({ item })));
     }
 
     const indicator = queryPart<HTMLElement>(element, "item-indicator");
     if (indicator) {
       addFuiClasses(indicator, "fui-combobox-item-indicator");
-      zag.bind(indicator, (api) => api.getItemIndicatorProps({ item }));
+      disposers.push(zag.bind(indicator, (api) => api.getItemIndicatorProps({ item })));
     }
 
     const itemDescription = queryPart<HTMLElement>(element, "item-description");
     if (itemDescription) addFuiClasses(itemDescription, "fui-combobox-item-description");
+    itemDisposers.set(item.value, () => disposers.forEach((dispose) => dispose()));
+  };
+  for (const { element, item } of itemRecords) {
+    bindItem(element, item);
   }
 
   const stopClearVisibility = effect(() => {
@@ -269,6 +282,46 @@ function setupCombobox(
     get started() {
       return started;
     },
+    setItems(inputs) {
+      if (destroyed) throwDestroyed("Combobox");
+      currentItems = normalizeItems(inputs);
+      itemByValue = new Map(currentItems.map((item) => [item.value, item]));
+      const nextValues = new Set(itemByValue.keys());
+      const elements = new Map(
+        queryParts<HTMLElement>(parts.list, "item").map((element) => [
+          element.dataset.value!,
+          element,
+        ]),
+      );
+      const ordered = reconcileKeyedValues({
+        create: (item) => createComboboxItem(item),
+        current: elements,
+        destroy: (element, value) => {
+          itemDisposers.get(value)?.();
+          itemDisposers.delete(value);
+          element.remove();
+        },
+        getKey: (item) => item.value,
+        inputs: currentItems,
+        update: (element, item) => {
+          itemDisposers.get(item.value)?.();
+          const fresh = createComboboxItem(item);
+          element.replaceChildren(...fresh.childNodes);
+          element.dataset.value = item.value;
+          element.toggleAttribute("data-disabled", item.disabled === true);
+          element.className = "fui-combobox-item";
+          element.id ||= `${machineId}:item:${item.value}`;
+          bindItem(element, item);
+        },
+      });
+      parts.list.append(...ordered);
+      const value = zag.api.get().value.filter((entry) => nextValues.has(entry));
+      const valueChanged = value.length !== zag.api.get().value.length;
+      if (valueChanged) nativeField.syncFromMachine(value);
+      reconcileNativeSelectOptions(parts.nativeSelect, currentItems, behavior.placeholder ?? "");
+      if (valueChanged) zag.api.get().setValue(value);
+      updateCollection(zag.api.get().inputValue);
+    },
     mount(target) {
       if (destroyed) throwDestroyed("Combobox");
       target.append(root);
@@ -289,6 +342,8 @@ function setupCombobox(
       filterRevision += 1;
       stopClearVisibility();
       stopSelectedTags();
+      for (const dispose of itemDisposers.values()) dispose();
+      itemDisposers.clear();
       nativeField.destroy();
       zag.destroy();
       if (setup.ownsRoot) root.remove();

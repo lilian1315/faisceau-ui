@@ -14,15 +14,18 @@ import {
   normalizeItems,
   queryPart,
   queryParts,
+  reconcileNativeSelectOptions,
+  reconcileKeyedValues,
   readNativeSelect,
   requirePart,
   requireNativeSelect,
+  setNativeSelectValue,
   type FuiItem,
   type FuiItemInput,
   type NativeSelectFieldController,
   type NativeSelectSource,
 } from "../shared/index.js";
-import { createSelectMarkup, enhanceSelectMarkup } from "./markup.ts";
+import { createSelectItem, createSelectMarkup, enhanceSelectMarkup } from "./markup.ts";
 import type { EnhanceSelectOptions, SelectController, SelectOptions } from "./types.ts";
 
 interface SelectParts {
@@ -63,11 +66,15 @@ export function enhanceSelect(
   const resolvedOptions = resolveEnhancedOptions(options, nativeSelect, source);
   const restoreRoot = captureAttributes(root);
   const restoreSelect = captureAttributes(nativeSelect);
+  const originalOptions = Array.from(nativeSelect.childNodes, (node) => node.cloneNode(true));
   const generated = enhanceSelectMarkup(root, nativeSelect, resolvedOptions, source.items);
 
   return setupSelect(root, resolvedOptions, {
     cleanup() {
+      const value = getNativeSelectValue(nativeSelect);
       for (const element of generated) element.remove();
+      nativeSelect.replaceChildren(...originalOptions);
+      setNativeSelectValue(nativeSelect, value);
       restoreRoot();
     },
     items: source.items,
@@ -200,23 +207,28 @@ function setupSelect(
   if (parts.clearTrigger) {
     zag.bind(parts.clearTrigger, (api) => api.getClearTriggerProps());
   }
-  for (const { element, item } of itemRecords) {
-    zag.bind(element, (api) => api.getItemProps({ item }));
+  const itemDisposers = new Map<string, () => void>();
+  const bindItem = (element: HTMLElement, item: FuiItem): void => {
+    const disposers = [zag.bind(element, (api) => api.getItemProps({ item }))];
 
     const text = queryPart<HTMLElement>(element, "item-text");
     if (text) {
       addFuiClasses(text, "fui-select-item-text");
-      zag.bind(text, (api) => api.getItemTextProps({ item }));
+      disposers.push(zag.bind(text, (api) => api.getItemTextProps({ item })));
     }
 
     const indicator = queryPart<HTMLElement>(element, "item-indicator");
     if (indicator) {
       addFuiClasses(indicator, "fui-select-item-indicator");
-      zag.bind(indicator, (api) => api.getItemIndicatorProps({ item }));
+      disposers.push(zag.bind(indicator, (api) => api.getItemIndicatorProps({ item })));
     }
 
     const itemDescription = queryPart<HTMLElement>(element, "item-description");
     if (itemDescription) addFuiClasses(itemDescription, "fui-select-item-description");
+    itemDisposers.set(item.value, () => disposers.forEach((dispose) => dispose()));
+  };
+  for (const { element, item } of itemRecords) {
+    bindItem(element, item);
   }
 
   const stopValueText = effect(() => {
@@ -236,6 +248,41 @@ function setupSelect(
     get started() {
       return started;
     },
+    setItems(inputs) {
+      if (destroyed) throwDestroyed("Select");
+      const nextItems = normalizeItems(inputs);
+      const nextValues = new Set(nextItems.map((item) => item.value));
+      const elements = new Map(
+        queryParts<HTMLElement>(parts.list, "item").map((element) => [
+          element.dataset.value!,
+          element,
+        ]),
+      );
+      const ordered = reconcileKeyedValues({
+        create: (item) => createSelectItem(item),
+        current: elements,
+        destroy: (element, value) => {
+          itemDisposers.get(value)?.();
+          itemDisposers.delete(value);
+          element.remove();
+        },
+        getKey: (item) => item.value,
+        inputs: nextItems,
+        update: (element, item) => {
+          itemDisposers.get(item.value)?.();
+          updateItemElement(element, item, "select");
+          element.id ||= `${machineId}:item:${item.value}`;
+          bindItem(element, item);
+        },
+      });
+      parts.list.append(...ordered);
+      const value = zag.api.get().value.filter((entry) => nextValues.has(entry));
+      const valueChanged = value.length !== zag.api.get().value.length;
+      if (valueChanged) nativeField.syncFromMachine(value);
+      reconcileNativeSelectOptions(parts.nativeSelect, nextItems, placeholder);
+      zag.updateProps({ collection: createCollection(nextItems) });
+      if (valueChanged) zag.api.get().setValue(value);
+    },
     mount(target) {
       if (destroyed) throwDestroyed("Select");
       target.append(root);
@@ -254,6 +301,8 @@ function setupSelect(
       if (destroyed) return;
       destroyed = true;
       stopValueText();
+      for (const dispose of itemDisposers.values()) dispose();
+      itemDisposers.clear();
       nativeField.destroy();
       zag.destroy();
       if (setup.ownsRoot) root.remove();
@@ -429,6 +478,14 @@ function createCollection(items: readonly FuiItem[]) {
     itemToString: (item) => item.label,
     itemToValue: (item) => item.value,
   });
+}
+
+function updateItemElement(element: HTMLElement, item: FuiItem, component: "select"): void {
+  const fresh = createSelectItem(item);
+  element.replaceChildren(...fresh.childNodes);
+  element.dataset.value = item.value;
+  element.toggleAttribute("data-disabled", item.disabled === true);
+  element.className = `fui-${component}-item`;
 }
 
 function ensureMessage(

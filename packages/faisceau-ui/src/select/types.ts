@@ -35,4 +35,7 @@ export type EnhanceSelectOptions = SelectMachineOptions &
   };
 
 export type SelectApi = select.Api;
-export type SelectController = FuiController<SelectApi>;
+export interface SelectController extends FuiController<SelectApi> {
+  /** Replaces the available items while preserving retained item identity. */
+  setItems(items: readonly FuiItemInput[]): void;
+}

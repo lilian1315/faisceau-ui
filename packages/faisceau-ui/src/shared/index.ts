@@ -1,5 +1,10 @@
 /** Shared item types and normalization helpers for collection components. */
 export { type FuiItem, type FuiItemInput, normalizeItems } from "./items.ts";
+export {
+  createKeyedReconciler,
+  reconcileKeyedValues,
+  type KeyedReconciler,
+} from "./keyed-reconciler.ts";
 
 /** DOM part discovery helpers. All owned class names are validated as `fui-*`. */
 export {
@@ -22,6 +27,7 @@ export {
   captureAttributes,
   createNativeSelectField,
   getNativeSelectValue,
+  reconcileNativeSelectOptions,
   readNativeSelect,
   requireNativeSelect,
   setNativeSelectValue,

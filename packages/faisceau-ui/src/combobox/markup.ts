@@ -110,7 +110,7 @@ function createView(options: ComboboxViewOptions, items: readonly FuiItem[]): Co
   const list = h(
     "ul",
     { class: "fui-combobox-list", data: { fuiPart: "list" } },
-    items.map(createItem),
+    items.map(createComboboxItem),
   );
   const empty = h(
     "p",
@@ -187,7 +187,7 @@ function createNativeSelect(
   return nativeSelect;
 }
 
-function createItem(item: FuiItem): HTMLLIElement {
+export function createComboboxItem(item: FuiItem): HTMLLIElement {
   const text = h(
     "span",
     { class: "fui-combobox-item-text", data: { fuiPart: "item-text" } },

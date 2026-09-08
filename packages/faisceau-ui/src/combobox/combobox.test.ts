@@ -7,6 +7,37 @@ afterEach(() => {
 });
 
 describe("Combobox", () => {
+  it("reconciles its authoritative collection and retained item nodes", async () => {
+    const controller = createCombobox({
+      defaultValue: ["be"],
+      items: [
+        { label: "Belgique", value: "be" },
+        { label: "France", value: "fr" },
+      ],
+      label: "Pays",
+    }).mount(document.body);
+    const retained = controller.root.querySelector<HTMLElement>(
+      '[data-fui-part="item"][data-value="be"]',
+    )!;
+
+    controller.setItems([
+      { label: "Belgium", value: "be" },
+      { label: "Switzerland", value: "ch" },
+    ]);
+    controller.api.get().setInputValue("");
+    await flushMachine();
+
+    expect(controller.root.querySelector('[data-fui-part="item"][data-value="be"]')).toBe(retained);
+    expect(retained.textContent).toContain("Belgium");
+    expect(controller.api.get().collection.items.map((item) => item.value)).toEqual(["be", "ch"]);
+    expect(
+      Array.from(
+        controller.root.querySelector<HTMLSelectElement>("select")!.options,
+        (o) => o.value,
+      ),
+    ).toEqual(["", "be", "ch"]);
+    controller.destroy();
+  });
   it("filters its collection and exposes an empty state", async () => {
     const controller = createCombobox({
       description: "Choisissez une ville française",

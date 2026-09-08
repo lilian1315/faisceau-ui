@@ -299,6 +299,46 @@ describe("Select", () => {
     ).toBe(true);
     controller.destroy();
   });
+
+  it("reconciles items, native options, order, and invalidated selection", async () => {
+    const controller = createSelect({
+      defaultValue: ["be"],
+      items: ["France", { label: "Belgique", value: "be" }],
+      label: "Pays",
+      name: "country",
+    }).mount(document.body);
+    const retained = requireItem(controller.root, "be");
+    const nativeSelect = requirePart<HTMLSelectElement>(controller.root, "native-select");
+    const nativeChange = vi.fn();
+    nativeSelect.addEventListener("change", nativeChange);
+
+    controller.setItems([
+      { description: "Updated", label: "Belgium", value: "be" },
+      { label: "Switzerland", value: "ch" },
+    ]);
+    await flushMachine();
+
+    expect(requireItem(controller.root, "be")).toBe(retained);
+    expect(retained.textContent).toContain("Belgium");
+    expect(Array.from(nativeSelect.options, (o) => o.value)).toEqual(["", "be", "ch"]);
+    controller.setItems([{ label: "Switzerland", value: "ch" }]);
+    await flushMachine();
+    expect(controller.api.get().value).toEqual([]);
+    expect(nativeChange).toHaveBeenCalledOnce();
+  });
+
+  it("restores enhanced options after dynamic updates", () => {
+    const root = document.createElement("div");
+    root.innerHTML = '<select aria-label="Country"><option value="fr">France</option></select>';
+    document.body.append(root);
+    const select = root.querySelector("select")!;
+    const controller = enhanceSelect(root);
+    controller.setItems([{ label: "Belgium", value: "be" }]);
+    controller.destroy();
+    expect(Array.from(select.options, (option) => [option.value, option.textContent])).toEqual([
+      ["fr", "France"],
+    ]);
+  });
 });
 
 function requirePart<T extends Element = HTMLElement>(root: ParentNode, part: string): T {

@@ -5,6 +5,7 @@ import * as toast from "@zag-js/toast";
 import {
   addFuiClasses,
   captureAttributes,
+  createKeyedReconciler,
   createId,
   createXIcon,
   getLookupRoot,
@@ -46,25 +47,19 @@ function setupToaster(
     toast.group.connect,
   );
   group.bind(root, (api) => api.getGroupProps({ label }));
-  const items = new Map<string, ToastItem>();
+  const items = createKeyedReconciler<ToastOptions, string, ToastItem>({
+    create: (data, index) => createToastItem(root, data, index, group.service),
+    destroy: (item) => item.destroy(),
+    getKey: (data) => data.id!,
+    update: (item, data, index) => item.update(data, index),
+  });
   let unsubscribe = (): void => {};
   let started = false;
   let destroyed = false;
 
   const render = (toasts: ToastOptions[]): void => {
-    const visible = new Set<string>();
-    toasts.forEach((data, index) => {
-      if (!data.id) return;
-      visible.add(data.id);
-      if (!items.has(data.id))
-        items.set(data.id, createToastItem(root, data, index, group.service));
-      else items.get(data.id)!.update(data, index);
-    });
-    for (const [itemId, item] of items) {
-      if (visible.has(itemId)) continue;
-      item.destroy();
-      items.delete(itemId);
-    }
+    const ordered = items.reconcile(toasts.filter((toast) => toast.id));
+    root.append(...ordered.map((item) => item.root));
   };
 
   const controller: ToasterController = {
@@ -100,8 +95,7 @@ function setupToaster(
       if (destroyed) return;
       destroyed = true;
       unsubscribe();
-      for (const item of items.values()) item.destroy();
-      items.clear();
+      items.destroy();
       group.destroy();
       if (ownsRoot) root.remove();
       else restoreRoot();
@@ -122,7 +116,7 @@ function createToastItem(
     { class: "fui-toast-title", data: { fuiPart: "title" } },
     data.title ?? "",
   );
-  const description = data.description
+  let description = data.description
     ? h(
         "div",
         { class: "fui-toast-description", data: { fuiPart: "description" } },
@@ -135,7 +129,7 @@ function createToastItem(
     type: "button",
   });
   close.append(createXIcon());
-  const action = data.action
+  let action = data.action
     ? h(
         "button",
         { class: "fui-toast-action", data: { fuiPart: "action-trigger" }, type: "button" },
@@ -161,18 +155,61 @@ function createToastItem(
     },
     toast.connect,
   );
-  machine.bind(element, (api) => api.getRootProps());
-  machine.bind(title, (api) => api.getTitleProps());
-  if (description) machine.bind(description, (api) => api.getDescriptionProps());
-  machine.bind(close, (api) => api.getCloseTriggerProps());
-  if (action) machine.bind(action, (api) => api.getActionTriggerProps());
+  const permanentBindings = [
+    machine.bind(element, (api) => api.getRootProps()),
+    machine.bind(title, (api) => api.getTitleProps()),
+    machine.bind(close, (api) => api.getCloseTriggerProps()),
+  ];
+  let disposeDescription = description
+    ? machine.bind(description, (api) => api.getDescriptionProps())
+    : undefined;
+  let disposeAction = action
+    ? machine.bind(action, (api) => api.getActionTriggerProps())
+    : undefined;
   machine.start();
   return {
     root: element,
     update(nextData, nextIndex) {
+      title.textContent = nextData.title ?? "";
+      if (nextData.description) {
+        if (!description) {
+          description = h("div", {
+            class: "fui-toast-description",
+            data: { fuiPart: "description" },
+          });
+          title.after(description);
+          disposeDescription = machine.bind(description, (api) => api.getDescriptionProps());
+        }
+        description.textContent = nextData.description;
+      } else if (description) {
+        disposeDescription?.();
+        disposeDescription = undefined;
+        description.remove();
+        description = null;
+      }
+      if (nextData.action) {
+        if (!action) {
+          action = h("button", {
+            class: "fui-toast-action",
+            data: { fuiPart: "action-trigger" },
+            type: "button",
+          });
+          close.before(action);
+          disposeAction = machine.bind(action, (api) => api.getActionTriggerProps());
+        }
+        action.textContent = nextData.action.label;
+      } else if (action) {
+        disposeAction?.();
+        disposeAction = undefined;
+        action.remove();
+        action = null;
+      }
       machine.updateProps({ ...nextData, index: nextIndex });
     },
     destroy() {
+      for (const dispose of permanentBindings) dispose();
+      disposeDescription?.();
+      disposeAction?.();
       machine.destroy();
       element.remove();
     },
