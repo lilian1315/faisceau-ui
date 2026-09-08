@@ -23,7 +23,6 @@ import {
   type NativeSelectSource,
 } from "../shared/index.js";
 import { createSelectMarkup, enhanceSelectMarkup } from "./markup.ts";
-import { createItemAlignedPositioning } from "./positioning.ts";
 import type { EnhanceSelectOptions, SelectController, SelectOptions } from "./types.ts";
 
 interface SelectParts {
@@ -136,31 +135,11 @@ function setupSelect(
   const resetValue = [
     ...(behavior.value ?? behavior.defaultValue ?? getNativeSelectValue(parts.nativeSelect)),
   ];
-  const itemByValue = new Map(itemRecords.map(({ element, item }) => [item.value, element]));
   const itemAligned = alignItemWithTrigger && behavior.multiple !== true;
-  const positioning = itemAligned
-    ? createItemAlignedPositioning({
-        fallbackGutter: 6,
-        getSelectedItem: () => {
-          const selectedValue = getNativeSelectValue(parts.nativeSelect)[0];
-          return selectedValue === undefined ? null : (itemByValue.get(selectedValue) ?? null);
-        },
-        positioner: parts.positioner,
-        requested: requestedPositioning,
-        trigger: parts.trigger,
-        valueText: parts.value,
-      })
-    : {
-        gutter: 6,
-        placement: "bottom-start" as const,
-        sameWidth: true,
-        ...requestedPositioning,
-      };
-  parts.positioner.toggleAttribute("data-fui-item-aligned", itemAligned);
-  if (itemAligned) parts.positioner.removeAttribute("data-fui-positioned");
   let nativeField: NativeSelectFieldController | undefined;
   const machineProps: select.Props<FuiItem> = {
     ...behavior,
+    alignItemWithTrigger: itemAligned,
     collection,
     getRootNode: () => getLookupRoot(root),
     id: machineId,
@@ -168,14 +147,18 @@ function setupSelect(
     invalid: behavior.invalid ?? errorElement !== null,
     name: behavior.name ?? (parts.nativeSelect.name || undefined),
     onOpenChange(details) {
-      if (itemAligned) parts.positioner.removeAttribute("data-fui-positioned");
       onOpenChange?.(details);
     },
     onValueChange(details) {
       nativeField?.syncFromMachine(details.value);
       onValueChange?.(details);
     },
-    positioning,
+    positioning: {
+      gutter: 6,
+      placement: "bottom-start",
+      sameWidth: true,
+      ...requestedPositioning,
+    },
     translations: {
       ...behavior.translations,
       clearTriggerLabel:

@@ -253,7 +253,7 @@ describe("Select", () => {
       alignItemWithTrigger: false,
       items: ["One"],
       label: "Regular",
-    });
+    }).mount(document.body);
     const aligned = createSelect({
       defaultValue: ["One"],
       items: ["One"],
@@ -264,23 +264,21 @@ describe("Select", () => {
       items: ["One", "Two"],
       label: "Multiple",
       multiple: true,
-    });
-    const alignedPositioner = requirePart<HTMLElement>(aligned.root, "positioner");
+    }).mount(document.body);
 
-    expect(requirePart(regular.root, "positioner").hasAttribute("data-fui-item-aligned")).toBe(
-      false,
-    );
-    expect(alignedPositioner.hasAttribute("data-fui-item-aligned")).toBe(true);
-    expect(requirePart(multiple.root, "positioner").hasAttribute("data-fui-item-aligned")).toBe(
-      false,
-    );
-
-    requirePart<HTMLButtonElement>(aligned.root, "trigger").click();
+    regular.api.get().setOpen(true);
+    aligned.api.get().setOpen(true);
+    multiple.api.get().setOpen(true);
     await flushPositioning();
 
     expect(aligned.api.get().open).toBe(true);
-    expect(alignedPositioner.style.getPropertyValue("--x")).not.toBe("");
-    expect(alignedPositioner.style.getPropertyValue("--y")).not.toBe("");
+    expect(requirePart(aligned.root, "content").hasAttribute("data-align-with-trigger")).toBe(true);
+    expect(requirePart(regular.root, "content").hasAttribute("data-align-with-trigger")).toBe(
+      false,
+    );
+    expect(requirePart(multiple.root, "content").hasAttribute("data-align-with-trigger")).toBe(
+      false,
+    );
 
     regular.destroy();
     aligned.destroy();

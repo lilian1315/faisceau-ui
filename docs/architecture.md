@@ -102,13 +102,7 @@ same invariant; component files retain only their Zag-specific mapping.
 | Drawer    | `@zag-js/drawer`   | Trigger and content parts | No          | Logical swipe direction, snap points, grabber, swipe area |
 | Toast     | `@zag-js/toast`    | Existing empty region     | No          | Group service, child machines, public toast store         |
 
-## Select positioning exception
-
-Select aligns the selected item's text with the trigger by default. The behavior uses a local
-virtual-anchor and visibility guard because Zag does not currently own this coordination. Multiple
-mode always disables it. `TODO.md` tracks moving the feature upstream; remove the local positioning
-module only after the Zag replacement covers reopening, fallback placement, RTL, viewports, and
-coarse pointers.
+Select enables Zag's native selected-item alignment by default. Multiple mode disables it.
 
 ## Testing and publication boundaries
 
