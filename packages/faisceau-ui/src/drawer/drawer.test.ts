@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from "vite-plus/test";
 
-import { createDrawer } from "./drawer.js";
+import { createDrawer } from "./drawer.ts";
 
 afterEach(() => document.body.replaceChildren());
 

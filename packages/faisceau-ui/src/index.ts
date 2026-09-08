@@ -1,55 +1,55 @@
-export { createCombobox, enhanceCombobox } from "./combobox/index.js";
+export { createCombobox, enhanceCombobox } from "./combobox/index.ts";
 export type {
   ComboboxApi,
   ComboboxController,
   ComboboxOptions,
   EnhanceComboboxOptions,
-} from "./combobox/index.js";
+} from "./combobox/index.ts";
 
-export { createSelect, enhanceSelect } from "./select/index.js";
+export { createSelect, enhanceSelect } from "./select/index.ts";
 export type {
   EnhanceSelectOptions,
   SelectApi,
   SelectController,
   SelectOptions,
-} from "./select/index.js";
+} from "./select/index.ts";
 
-export { createTooltip, enhanceTooltip } from "./tooltip/index.js";
+export { createTooltip, enhanceTooltip } from "./tooltip/index.ts";
 export type {
   EnhanceTooltipOptions,
   TooltipApi,
   TooltipController,
   TooltipOptions,
-} from "./tooltip/index.js";
+} from "./tooltip/index.ts";
 
-export type { FuiItem, FuiItemInput } from "./shared/index.js";
-export type { FuiController, FuiFieldOptions, FuiReactive } from "./types.js";
-export { createCheckbox, enhanceCheckbox } from "./checkbox/index.js";
+export type { FuiItem, FuiItemInput } from "./shared/index.ts";
+export type { FuiController, FuiFieldOptions, FuiReactive } from "./types.ts";
+export { createCheckbox, enhanceCheckbox } from "./checkbox/index.ts";
 export type {
   CheckboxApi,
   CheckboxController,
   CheckboxOptions,
   EnhanceCheckboxOptions,
-} from "./checkbox/index.js";
-export { createDialog, enhanceDialog } from "./dialog/index.js";
+} from "./checkbox/index.ts";
+export { createDialog, enhanceDialog } from "./dialog/index.ts";
 export type {
   DialogApi,
   DialogController,
   DialogOptions,
   EnhanceDialogOptions,
-} from "./dialog/index.js";
-export { createDrawer, enhanceDrawer } from "./drawer/index.js";
+} from "./dialog/index.ts";
+export { createDrawer, enhanceDrawer } from "./drawer/index.ts";
 export type {
   DrawerApi,
   DrawerController,
   DrawerOptions,
   EnhanceDrawerOptions,
-} from "./drawer/index.js";
-export { createToaster, enhanceToaster } from "./toast/index.js";
+} from "./drawer/index.ts";
+export { createToaster, enhanceToaster } from "./toast/index.ts";
 export type {
   ToasterController,
   ToasterOptions,
   ToastOptions,
   ToastPlacement,
   ToastStore,
-} from "./toast/index.js";
+} from "./toast/index.ts";

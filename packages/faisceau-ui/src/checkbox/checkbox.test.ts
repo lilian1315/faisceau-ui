@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vite-plus/test";
 
-import { createCheckbox, enhanceCheckbox } from "./checkbox.js";
+import { createCheckbox, enhanceCheckbox } from "./checkbox.ts";
 
 afterEach(() => {
   document.body.replaceChildren();

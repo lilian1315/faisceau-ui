@@ -2,7 +2,7 @@ import { assertType, expectTypeOf, test } from "vite-plus/test";
 import * as checkbox from "@zag-js/checkbox";
 import * as combobox from "@zag-js/combobox";
 
-import { createZagMachine } from "./index.js";
+import { createZagMachine } from "./index.ts";
 
 test("couples the machine and connector through one Zag schema", () => {
   const controller = createZagMachine(checkbox.machine, { id: "terms" }, checkbox.connect);

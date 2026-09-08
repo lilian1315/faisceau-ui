@@ -6,7 +6,7 @@ import {
   createClearIcon,
   type FuiItem,
 } from "../shared/index.js";
-import type { EnhanceSelectOptions, SelectOptions } from "./types.js";
+import type { EnhanceSelectOptions, SelectOptions } from "./types.ts";
 
 export interface SelectMarkup {
   readonly root: HTMLElement;

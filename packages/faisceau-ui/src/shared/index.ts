@@ -1,5 +1,5 @@
 /** Shared item types and normalization helpers for collection components. */
-export { type FuiItem, type FuiItemInput, normalizeItems } from "./items.js";
+export { type FuiItem, type FuiItemInput, normalizeItems } from "./items.ts";
 
 /** DOM part discovery helpers. All owned class names are validated as `fui-*`. */
 export {
@@ -9,13 +9,13 @@ export {
   queryParts,
   requirePart,
   requireParts,
-} from "./parts.js";
+} from "./parts.ts";
 
 /** Unique DOM id generation. */
-export { createId } from "./id.js";
+export { createId } from "./id.ts";
 
 /** DOM lookup helpers shared by Zag-powered components. */
-export { getLookupRoot } from "./dom.js";
+export { getLookupRoot } from "./dom.ts";
 
 /** Native select helpers shared by form-compatible collection components. */
 export {
@@ -37,4 +37,4 @@ export {
   createClearIcon,
   createMinusIcon,
   createXIcon,
-} from "./icons.js";
+} from "./icons.ts";

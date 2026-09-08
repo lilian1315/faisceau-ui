@@ -3,8 +3,8 @@ import { createZagMachine } from "@lilian1315/faisceau-zag";
 import * as tooltip from "@zag-js/tooltip";
 
 import { addFuiClasses, captureAttributes, createId, getLookupRoot } from "../shared/index.js";
-import { createTooltipPopup } from "./markup.js";
-import type { EnhanceTooltipOptions, TooltipController, TooltipOptions } from "./types.js";
+import { createTooltipPopup } from "./markup.ts";
+import type { EnhanceTooltipOptions, TooltipController, TooltipOptions } from "./types.ts";
 
 interface TooltipSetup {
   cleanup?: () => void;

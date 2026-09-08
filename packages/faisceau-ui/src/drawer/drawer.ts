@@ -8,7 +8,7 @@ import {
   createXIcon,
   getLookupRoot,
 } from "../shared/index.js";
-import type { DrawerController, DrawerOptions, EnhanceDrawerOptions } from "./types.js";
+import type { DrawerController, DrawerOptions, EnhanceDrawerOptions } from "./types.ts";
 
 interface DrawerView {
   backdrop: HTMLElement;

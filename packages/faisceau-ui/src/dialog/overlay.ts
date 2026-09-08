@@ -9,8 +9,8 @@ import {
   createXIcon,
   getLookupRoot,
 } from "../shared/index.js";
-import { createOverlayView, type OverlayVariant, type OverlayView } from "./markup.js";
-import type { DialogController, DialogMachineOptions } from "./types.js";
+import { createOverlayView, type OverlayVariant, type OverlayView } from "./markup.ts";
+import type { DialogController, DialogMachineOptions } from "./types.ts";
 
 interface SetupOptions extends DialogMachineOptions {
   className?: string;

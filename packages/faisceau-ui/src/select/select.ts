@@ -22,9 +22,9 @@ import {
   type NativeSelectFieldController,
   type NativeSelectSource,
 } from "../shared/index.js";
-import { createSelectMarkup, enhanceSelectMarkup } from "./markup.js";
-import { createItemAlignedPositioning } from "./positioning.js";
-import type { EnhanceSelectOptions, SelectController, SelectOptions } from "./types.js";
+import { createSelectMarkup, enhanceSelectMarkup } from "./markup.ts";
+import { createItemAlignedPositioning } from "./positioning.ts";
+import type { EnhanceSelectOptions, SelectController, SelectOptions } from "./types.ts";
 
 interface SelectParts {
   label: HTMLLabelElement;

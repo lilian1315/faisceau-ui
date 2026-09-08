@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vite-plus/test";
 
-import { createTooltip, enhanceTooltip } from "./tooltip.js";
+import { createTooltip, enhanceTooltip } from "./tooltip.ts";
 
 afterEach(() => {
   document.body.replaceChildren();

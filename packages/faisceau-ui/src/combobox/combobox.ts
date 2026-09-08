@@ -22,8 +22,8 @@ import {
   type NativeSelectFieldController,
   type NativeSelectSource,
 } from "../shared/index.js";
-import { createComboboxMarkup, enhanceComboboxMarkup } from "./markup.js";
-import type { ComboboxController, ComboboxOptions, EnhanceComboboxOptions } from "./types.js";
+import { createComboboxMarkup, enhanceComboboxMarkup } from "./markup.ts";
+import type { ComboboxController, ComboboxOptions, EnhanceComboboxOptions } from "./types.ts";
 
 interface ComboboxParts {
   label: HTMLLabelElement;

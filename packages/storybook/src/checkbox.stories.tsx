@@ -1,7 +1,7 @@
 import { createCheckbox, enhanceCheckbox } from "@lilian1315/faisceau-ui";
 import type { Meta, StoryObj } from "@storybook/html-vite";
 
-import { asDom, createStoryShell, trackController } from "./story.js";
+import { asDom, createStoryShell, trackController } from "./story.tsx";
 
 interface CheckboxStoryArgs {
   checked: boolean;

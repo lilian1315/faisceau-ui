@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vite-plus/test";
 
-import { createItemAlignedPositioning } from "./positioning.js";
+import { createItemAlignedPositioning } from "./positioning.ts";
 
 describe("Select item-aligned positioning", () => {
   it("aligns the selected item text with the trigger value", () => {

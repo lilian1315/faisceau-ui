@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vite-plus/test";
 
-import { createDialog, enhanceDialog } from "./dialog.js";
+import { createDialog, enhanceDialog } from "./dialog.ts";
 
 afterEach(() => document.body.replaceChildren());
 

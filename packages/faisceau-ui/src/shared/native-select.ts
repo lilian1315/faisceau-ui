@@ -1,5 +1,5 @@
-import type { FuiItem } from "./items.js";
-import { normalizeItems } from "./items.js";
+import type { FuiItem } from "./items.ts";
+import { normalizeItems } from "./items.ts";
 import { effect } from "faisceau";
 
 export interface NativeSelectSource {

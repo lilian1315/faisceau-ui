@@ -4,7 +4,7 @@ import * as combobox from "@zag-js/combobox";
 import * as tooltip from "@zag-js/tooltip";
 import { signal } from "faisceau";
 
-import { createZagMachine } from "./index.js";
+import { createZagMachine } from "./index.ts";
 
 afterEach(() => {
   document.body.replaceChildren();

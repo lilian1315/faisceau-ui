@@ -1,5 +1,5 @@
-import { createOverlay, enhanceOverlay } from "./overlay.js";
-import type { DialogController, DialogOptions, EnhanceDialogOptions } from "./types.js";
+import { createOverlay, enhanceOverlay } from "./overlay.ts";
+import type { DialogController, DialogOptions, EnhanceDialogOptions } from "./types.ts";
 
 export function createDialog(options: DialogOptions): DialogController {
   return createOverlay(options, "dialog");

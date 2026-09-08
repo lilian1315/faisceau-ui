@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vite-plus/test";
 
-import { createSelect, enhanceSelect } from "./select.js";
+import { createSelect, enhanceSelect } from "./select.ts";
 
 afterEach(() => {
   document.body.replaceChildren();

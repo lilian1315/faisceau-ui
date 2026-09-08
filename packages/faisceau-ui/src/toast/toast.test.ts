@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vite-plus/test";
 
-import { createToaster, enhanceToaster } from "./toast.js";
+import { createToaster, enhanceToaster } from "./toast.ts";
 
 afterEach(() => document.body.replaceChildren());
 

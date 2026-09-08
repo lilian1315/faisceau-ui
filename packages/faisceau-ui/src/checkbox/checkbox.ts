@@ -3,8 +3,8 @@ import { createZagMachine } from "@lilian1315/faisceau-zag";
 import * as checkbox from "@zag-js/checkbox";
 
 import { addFuiClasses, captureAttributes, createId, getLookupRoot } from "../shared/index.js";
-import { createCheckboxView, createFieldMessage } from "./markup.js";
-import type { CheckboxController, CheckboxOptions, EnhanceCheckboxOptions } from "./types.js";
+import { createCheckboxView, createFieldMessage } from "./markup.ts";
+import type { CheckboxController, CheckboxOptions, EnhanceCheckboxOptions } from "./types.ts";
 
 interface CheckboxSetup {
   cleanup?: () => void;

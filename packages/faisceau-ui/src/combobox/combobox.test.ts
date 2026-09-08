@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vite-plus/test";
 
-import { createCombobox, enhanceCombobox } from "./combobox.js";
+import { createCombobox, enhanceCombobox } from "./combobox.ts";
 
 afterEach(() => {
   document.body.replaceChildren();

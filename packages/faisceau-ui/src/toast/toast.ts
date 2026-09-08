@@ -9,7 +9,7 @@ import {
   createXIcon,
   getLookupRoot,
 } from "../shared/index.js";
-import type { ToasterController, ToasterOptions, ToastOptions } from "./types.js";
+import type { ToasterController, ToasterOptions, ToastOptions } from "./types.ts";
 
 interface ToastItem {
   destroy(): void;

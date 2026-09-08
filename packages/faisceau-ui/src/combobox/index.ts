@@ -1,7 +1,7 @@
-export { createCombobox, enhanceCombobox } from "./combobox.js";
+export { createCombobox, enhanceCombobox } from "./combobox.ts";
 export type {
   ComboboxApi,
   ComboboxController,
   ComboboxOptions,
   EnhanceComboboxOptions,
-} from "./types.js";
+} from "./types.ts";

@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vite-plus/test";
 import type { Machine, MachineSchema } from "@zag-js/core";
 import { signal } from "faisceau";
 
-import { createZagMachine, normalizeProps, type ZagDomProps } from "./index.js";
+import { createZagMachine, normalizeProps, type ZagDomProps } from "./index.ts";
 
 type TestState = "closed" | "open";
 

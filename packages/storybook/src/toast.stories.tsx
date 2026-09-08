@@ -1,7 +1,7 @@
 import { createToaster, enhanceToaster } from "@lilian1315/faisceau-ui";
 import type { Meta, StoryObj } from "@storybook/html-vite";
 
-import { asDom, createStoryShell, trackController } from "./story.js";
+import { asDom, createStoryShell, trackController } from "./story.tsx";
 
 const meta = { title: "Toast/Anatomie" } satisfies Meta;
 export default meta;

@@ -6,7 +6,7 @@ import {
   createClearIcon,
   type FuiItem,
 } from "../shared/index.js";
-import type { ComboboxOptions, EnhanceComboboxOptions } from "./types.js";
+import type { ComboboxOptions, EnhanceComboboxOptions } from "./types.ts";
 
 export interface ComboboxMarkup {
   readonly root: HTMLElement;
