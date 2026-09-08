@@ -16,11 +16,10 @@ Faisceau reactivity, DOM created with `@lilian1315/create-element/faisceau`, and
   semantics. Keep the native control in the document.
 - Public component options and controller APIs may remain Zag-shaped while the package is
   unpublished. Prefer the current Zag vocabulary over compatibility aliases.
-- Use relative `.js` specifiers in TypeScript and `import type` for type-only imports.
+- Use relative `.ts` or `.tsx` specifiers in TypeScript and `import type` for type-only imports.
 - Build Storybook stories in TSX with `@lilian1315/create-element/faisceau`.
 - Run browser behavior tests in the configured Vitest `chrome` project. Put type assertions in
-  `*.test-d.ts`; enable them through Vitest configuration rather than CLI flags.
-- The supported workflow excludes `vp view`.
+  `*.test-d.ts`
 
 ### Context pointers
 
@@ -36,7 +35,6 @@ Faisceau reactivity, DOM created with `@lilian1315/create-element/faisceau`, and
   builds every package, and verifies the published-package contract.
 - If a new public entry makes the initial typecheck resolve stale declarations, run
   `vp run -r build` once, then rerun `vp run ready`.
-- Preserve unrelated worktree changes. Commit only when explicitly requested.
 
 <!--VITE PLUS START-->
 

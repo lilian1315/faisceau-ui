@@ -119,7 +119,3 @@ Type tests live in `*.test-d.ts` and are enabled in package configuration.
 Source tests do not prove the package is publishable. Any public entry change must also update and
 pass `published-smoke`, which checks the packed files and imports the generated ESM/declaration
 subpaths as a consumer would.
-
-The HTML architecture report at the repository root is a historical review. Its native-form,
-published-smoke, and typed-adapter recommendations have been implemented; its old counts and API
-recommendations are not current policy.
