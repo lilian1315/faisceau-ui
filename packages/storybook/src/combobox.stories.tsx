@@ -106,23 +106,23 @@ export const MarkupExistant: Story = {
       eyebrow: "enhanceCombobox",
       title: "Progressive enhancement",
     });
-    const root = asDom<HTMLDivElement>(
-      <div>
-        <select aria-label={args.label} name="command" required={args.required}>
-          <option value="search">Rechercher</option>
-          <option value="create">Créer un document</option>
-          <option value="share">Partager</option>
-          <option value="archive">Archiver</option>
-        </select>
-      </div>,
-    );
-    story.setSource(`<div>
-  <select name="command" aria-label="${args.label}"${args.required ? " required" : ""}>
-    <option value="search">Rechercher</option>
-    <option value="create">Créer un document</option>
-    <option value="share">Partager</option>
-    <option value="archive">Archiver</option>
-  </select>
+    const template = createCombobox({
+      description: args.description,
+      items: ["Rechercher", "Créer un document", "Partager", "Archiver"],
+      label: args.label,
+      name: "command",
+      required: args.required,
+    });
+    const root = template.root.cloneNode(true) as HTMLDivElement;
+    template.destroy();
+    story.setSource(`<div class="fui-field">
+  <label class="fui-field-label">${args.label}</label>
+  <div class="fui-combobox">
+    <select class="fui-native-select" name="command">…</select>
+    <div class="fui-combobox-control">…</div>
+    <div class="fui-combobox-positioner">…</div>
+  </div>
+  <p class="fui-field-description">${args.description}</p>
 </div>`);
     story.canvas.append(root);
     const controller = enhanceCombobox(root, {

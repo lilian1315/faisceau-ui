@@ -20,6 +20,10 @@
       "types": "./dist/select/index.d.mts",
       "import": "./dist/select/index.mjs"
     },
+    "./field": {
+      "types": "./dist/field/index.d.mts",
+      "import": "./dist/field/index.mjs"
+    },
     "./combobox": {
       "types": "./dist/combobox/index.d.mts",
       "import": "./dist/combobox/index.mjs"

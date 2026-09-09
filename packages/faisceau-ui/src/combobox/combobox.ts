@@ -3,8 +3,9 @@ import { createZagMachine } from "@lilian1315/faisceau-zag";
 import * as combobox from "@zag-js/combobox";
 import { effect } from "faisceau";
 
+import { createField, enhanceField } from "../field/index.ts";
+import type { FieldControlContext, FieldControlFactory } from "../field/index.ts";
 import {
-  addFuiClasses,
   captureAttributes,
   createClearIcon,
   createId,
@@ -12,12 +13,9 @@ import {
   getNativeSelectValue,
   getLookupRoot,
   normalizeItems,
-  queryPart,
-  queryParts,
   reconcileNativeSelectOptions,
   reconcileKeyedValues,
   readNativeSelect,
-  requirePart,
   requireNativeSelect,
   setNativeSelectValue,
   type FuiItem,
@@ -25,7 +23,7 @@ import {
   type NativeSelectFieldController,
   type NativeSelectSource,
 } from "../shared/index.js";
-import { createComboboxItem, createComboboxMarkup, enhanceComboboxMarkup } from "./markup.ts";
+import { createComboboxItem, createComboboxMarkup } from "./markup.ts";
 import type { ComboboxController, ComboboxOptions, EnhanceComboboxOptions } from "./types.ts";
 
 interface ComboboxParts {
@@ -47,48 +45,74 @@ type ComboboxSetupOptions = EnhanceComboboxOptions & { items?: readonly FuiItemI
 
 /** Builds a Combobox tree. Call `.mount(target)` to insert it and start Zag. */
 export function createCombobox(options: ComboboxOptions): ComboboxController {
-  const items = normalizeItems(options.items);
-  const markup = createComboboxMarkup(options, items);
-  return setupCombobox(markup.root, options, {
-    items,
-    nativeSelect: markup.nativeSelect,
-    ownsRoot: true,
-    start: false,
+  return createField({
+    ...fieldOptions(options),
+    control: comboboxField(options),
+    label: options.label,
   });
 }
 
-/** Enhances a container holding one native select and generates the visual UI. */
+/** Enhances a fully-authored Field containing a direct `.fui-combobox` child. */
 export function enhanceCombobox(
   root: HTMLElement,
   options: EnhanceComboboxOptions = {},
 ): ComboboxController {
-  const nativeSelect = requireNativeSelect(root, "Combobox");
-  const source = readNativeSelect(nativeSelect);
-  const resolvedOptions = resolveEnhancedOptions(options, nativeSelect, source);
-  const restoreRoot = captureAttributes(root);
-  const restoreSelect = captureAttributes(nativeSelect);
-  const originalOptions = Array.from(nativeSelect.childNodes, (node) => node.cloneNode(true));
-  const generated = enhanceComboboxMarkup(root, nativeSelect, resolvedOptions, source.items);
-
-  return setupCombobox(root, resolvedOptions, {
-    cleanup() {
-      const value = getNativeSelectValue(nativeSelect);
-      for (const element of generated) element.remove();
-      nativeSelect.replaceChildren(...originalOptions);
-      setNativeSelectValue(nativeSelect, value);
-      restoreRoot();
-    },
-    items: source.items,
-    nativeSelect,
-    ownsRoot: false,
-    restoreNativeSelect: restoreSelect,
-    start: true,
+  return enhanceField(root, {
+    ...fieldOptions(options),
+    control: comboboxField(options),
   });
+}
+
+function comboboxField(options: ComboboxSetupOptions): FieldControlFactory<ComboboxController> {
+  return {
+    rootClass: "fui-combobox",
+    create(context) {
+      if (!("items" in options) || options.items === undefined) {
+        throw new Error("[Faisceau UI] Combobox creation requires options.items.");
+      }
+      const items = normalizeItems(options.items);
+      const markup = createComboboxMarkup(options as ComboboxOptions, items);
+      return setupCombobox(markup.root, options, context, {
+        items,
+        nativeSelect: markup.nativeSelect,
+        ownsRoot: true,
+        start: false,
+      });
+    },
+    enhance(controlRoot, context) {
+      const nativeSelect = requireNativeSelect(controlRoot, "Combobox");
+      requireRootClass(controlRoot, "fui-combobox", "Combobox");
+      requireRootClass(nativeSelect, "fui-native-select", "Combobox");
+      const source = readNativeSelect(nativeSelect);
+      const resolvedOptions = resolveEnhancedOptions(
+        { ...options, label: options.label ?? context.label.textContent?.trim() },
+        nativeSelect,
+        source,
+      );
+      const restoreRoot = captureAttributes(controlRoot);
+      const restoreSelect = captureAttributes(nativeSelect);
+      const originalOptions = Array.from(nativeSelect.childNodes, (node) => node.cloneNode(true));
+      return setupCombobox(controlRoot, resolvedOptions, context, {
+        cleanup() {
+          const value = getNativeSelectValue(nativeSelect);
+          nativeSelect.replaceChildren(...originalOptions);
+          setNativeSelectValue(nativeSelect, value);
+          restoreRoot();
+        },
+        items: source.items,
+        nativeSelect,
+        ownsRoot: false,
+        restoreNativeSelect: restoreSelect,
+        start: true,
+      });
+    },
+  };
 }
 
 function setupCombobox(
   root: HTMLElement,
   options: ComboboxSetupOptions,
+  fieldContext: FieldControlContext,
   setup: {
     cleanup?: () => void;
     items: FuiItem[];
@@ -99,44 +123,28 @@ function setupCombobox(
   },
 ): ComboboxController {
   const {
-    className,
+    className: _className,
     clearLabel,
-    description,
     emptyLabel,
-    errorMessage,
     filter = defaultFilter,
     getRemoveLabel = defaultRemoveLabel,
     id: requestedId,
     items: _items,
-    label: nextLabel,
+    label: _label,
     onInputValueChange,
     onValueChange,
     ...behavior
   } = options;
-  const parts = resolveParts(root, setup.nativeSelect, setup.items, emptyLabel);
-  const machineId = requestedId ?? createId("combobox");
+  const parts = resolveParts(root, setup.nativeSelect, setup.items, fieldContext.label, emptyLabel);
+  const machineId = requestedId ?? fieldContext.id ?? createId("combobox");
 
   root.dataset.fuiComponent = "combobox";
-  root.dataset.fuiPart ||= "root";
   root.toggleAttribute("data-fui-multiple", behavior.multiple === true);
-  addFuiClasses(root, "fui-combobox");
-  addCallerClasses(root, className);
-
-  if (nextLabel !== undefined) parts.label.textContent = nextLabel;
   if (!parts.label.textContent?.trim()) {
     throw new Error("[Faisceau UI] Combobox requires a visible, non-empty label.");
   }
 
   if (emptyLabel !== undefined) parts.empty.textContent = emptyLabel;
-  const descriptionElement = ensureMessage(
-    root,
-    "description",
-    description,
-    "fui-field-description",
-  );
-  const errorElement = ensureMessage(root, "error", errorMessage, "fui-field-error");
-  if (errorElement) errorElement.setAttribute("role", "alert");
-
   const itemRecords = mapItems(parts.itemElements, setup.items, machineId);
   let currentItems = [...setup.items];
   let itemByValue = new Map(currentItems.map((item) => [item.value, item]));
@@ -157,7 +165,7 @@ function setupCombobox(
     id: machineId,
     ids,
     inputBehavior: behavior.inputBehavior ?? "autohighlight",
-    invalid: behavior.invalid ?? errorElement !== null,
+    invalid: behavior.invalid ?? fieldContext.invalid,
     name: undefined,
     onInputValueChange(details) {
       updateCollection(details.inputValue);
@@ -189,7 +197,7 @@ function setupCombobox(
     focusTarget: parts.input,
     getValue: () => zag.api.get().value,
     props: {
-      disabled: behavior.disabled,
+      disabled: behavior.disabled ?? fieldContext.disabled,
       form: behavior.form,
       multiple: behavior.multiple,
       name: behavior.name,
@@ -231,20 +239,15 @@ function setupCombobox(
   const bindItem = (element: HTMLElement, item: FuiItem): void => {
     const disposers = [zag.bind(element, (api) => api.getItemProps({ item }))];
 
-    const text = queryPart<HTMLElement>(element, "item-text");
+    const text = queryClass<HTMLElement>(element, "fui-combobox-item-text");
     if (text) {
-      addFuiClasses(text, "fui-combobox-item-text");
       disposers.push(zag.bind(text, (api) => api.getItemTextProps({ item })));
     }
 
-    const indicator = queryPart<HTMLElement>(element, "item-indicator");
+    const indicator = queryClass<HTMLElement>(element, "fui-combobox-item-indicator");
     if (indicator) {
-      addFuiClasses(indicator, "fui-combobox-item-indicator");
       disposers.push(zag.bind(indicator, (api) => api.getItemIndicatorProps({ item })));
     }
-
-    const itemDescription = queryPart<HTMLElement>(element, "item-description");
-    if (itemDescription) addFuiClasses(itemDescription, "fui-combobox-item-description");
     itemDisposers.set(item.value, () => disposers.forEach((dispose) => dispose()));
   };
   for (const { element, item } of itemRecords) {
@@ -273,7 +276,9 @@ function setupCombobox(
       },
     );
   });
-  linkDescription(parts.input, descriptionElement, errorElement);
+  if (fieldContext.describedBy) {
+    parts.input.setAttribute("aria-describedby", fieldContext.describedBy);
+  }
 
   let started = false;
   const controller: ComboboxController = {
@@ -288,7 +293,7 @@ function setupCombobox(
       itemByValue = new Map(currentItems.map((item) => [item.value, item]));
       const nextValues = new Set(itemByValue.keys());
       const elements = new Map(
-        queryParts<HTMLElement>(parts.list, "item").map((element) => [
+        queryClasses<HTMLElement>(parts.list, "fui-combobox-item").map((element) => [
           element.dataset.value!,
           element,
         ]),
@@ -359,50 +364,23 @@ function resolveParts(
   root: HTMLElement,
   nativeSelect: HTMLSelectElement,
   items: readonly FuiItem[],
+  label: HTMLLabelElement,
   emptyLabel?: string,
 ): ComboboxParts {
-  const label = requirePart<HTMLLabelElement>(root, "label");
-  const control = requirePart<HTMLElement>(root, "control");
-  const input = requirePart<HTMLInputElement>(root, "input");
-  const selection = requirePart<HTMLElement>(root, "selection");
-  const trigger = requirePart<HTMLButtonElement>(root, "trigger");
-  const positioner = requirePart<HTMLElement>(root, "positioner");
-  const content = requirePart<HTMLElement>(root, "content");
-  const list = requirePart<HTMLElement>(root, "list");
-  let empty = queryPart<HTMLElement>(root, "empty");
-
-  if (empty === null) {
-    empty = h(
-      "p",
-      {
-        class: "fui-combobox-empty",
-        data: { fuiPart: "empty" },
-        hidden: true,
-      },
-      emptyLabel ?? "No results",
-    );
-    content.append(empty);
-  }
-
-  addFuiClasses(label, "fui-combobox-label");
-  addFuiClasses(control, "fui-combobox-control");
-  addFuiClasses(input, "fui-combobox-input");
-  addFuiClasses(trigger, "fui-combobox-trigger");
-  addFuiClasses(positioner, "fui-combobox-positioner");
-  addFuiClasses(content, "fui-combobox-content");
-  addFuiClasses(list, "fui-combobox-list");
-  addFuiClasses(empty, "fui-combobox-empty");
-  addFuiClasses(nativeSelect, "fui-native-select");
-  nativeSelect.dataset.fuiPart = "native-select";
-
-  const clearTrigger = queryPart<HTMLButtonElement>(root, "clear-trigger");
-  if (clearTrigger) addFuiClasses(clearTrigger, "fui-combobox-clear-trigger");
-
-  const itemElements = queryParts<HTMLElement>(root, "item");
+  const control = requireClass<HTMLElement>(root, "fui-combobox-control", "Combobox");
+  const input = requireClass<HTMLInputElement>(root, "fui-combobox-input", "Combobox");
+  const selection = requireClass<HTMLElement>(root, "fui-combobox-selection", "Combobox");
+  const trigger = requireClass<HTMLButtonElement>(root, "fui-combobox-trigger", "Combobox");
+  const positioner = requireClass<HTMLElement>(root, "fui-combobox-positioner", "Combobox");
+  const content = requireClass<HTMLElement>(root, "fui-combobox-content", "Combobox");
+  const list = requireClass<HTMLElement>(root, "fui-combobox-list", "Combobox");
+  const empty = requireClass<HTMLElement>(root, "fui-combobox-empty", "Combobox");
+  if (emptyLabel !== undefined) empty.textContent = emptyLabel;
+  const clearTrigger = queryClass<HTMLButtonElement>(root, "fui-combobox-clear-trigger");
+  const itemElements = queryClasses<HTMLElement>(root, "fui-combobox-item");
   if (items.length > 0 && itemElements.length === 0) {
-    throw new Error('[Faisceau UI] Combobox items require `[data-fui-part="item"]` markup.');
+    throw new Error("[Faisceau UI] Combobox items require `.fui-combobox-item` markup.");
   }
-  for (const item of itemElements) addFuiClasses(item, "fui-combobox-item");
 
   return {
     label,
@@ -546,17 +524,13 @@ function renderSelectedTags(
   remove: (value: string) => void,
 ): void {
   const tags = items.map((item) => {
-    const label = h(
-      "span",
-      { class: "fui-combobox-tag-label", data: { fuiPart: "tag-label" } },
-      item.label,
-    );
+    const label = h("span", { class: "fui-combobox-tag-label" }, item.label);
     const removeTrigger = h(
       "button",
       {
         "aria-label": getRemoveLabel(item),
         class: "fui-combobox-tag-remove",
-        data: { fuiPart: "tag-remove", value: item.value },
+        data: { value: item.value },
         disabled,
         type: "button",
       },
@@ -568,7 +542,7 @@ function renderSelectedTags(
       "span",
       {
         class: "fui-combobox-tag",
-        data: { fuiPart: "tag", value: item.value },
+        data: { value: item.value },
       },
       label,
       removeTrigger,
@@ -589,43 +563,44 @@ function updateFilteredMarkup(
   empty.hidden = filteredItems.length > 0;
 }
 
-function ensureMessage(
-  root: HTMLElement,
-  part: "description" | "error",
-  text: string | undefined,
-  className: `fui-${string}`,
-): HTMLElement | null {
-  let element = queryPart<HTMLElement>(root, part);
-  if (element === null && text !== undefined) {
-    element = h("p", { class: className, data: { fuiPart: part } }, text);
-    root.append(element);
-  }
-  if (element) {
-    addFuiClasses(element, className);
-    if (text !== undefined) element.textContent = text;
-  }
-  return element;
+function fieldOptions(options: ComboboxSetupOptions) {
+  return {
+    className: options.className,
+    description: options.description,
+    disabled: options.disabled,
+    errorMessage: options.errorMessage,
+    id: options.id,
+    invalid: options.invalid,
+    label: options.label,
+  };
 }
 
-function linkDescription(
-  control: HTMLElement,
-  description: HTMLElement | null,
-  error: HTMLElement | null,
-): void {
-  const ids = [description, error]
-    .filter((element): element is HTMLElement => element !== null)
-    .map((element, index) => {
-      element.id ||= `${control.id}:message:${index}`;
-      return element.id;
-    });
-  const existing = control.getAttribute("aria-describedby")?.split(/\s+/).filter(Boolean) ?? [];
-  const describedBy = [...new Set([...existing, ...ids])];
-  if (describedBy.length > 0) control.setAttribute("aria-describedby", describedBy.join(" "));
+function queryClass<T extends Element>(root: ParentNode, className: string): T | null {
+  return root.querySelector<T>(`.${className}`);
 }
 
-function addCallerClasses(element: Element, className: string | undefined): void {
-  const tokens = className?.split(/\s+/).filter(Boolean) ?? [];
-  if (tokens.length > 0) element.classList.add(...tokens);
+function queryClasses<T extends Element>(root: ParentNode, className: string): T[] {
+  return Array.from(root.querySelectorAll<T>(`.${className}`));
+}
+
+function requireClass<T extends Element>(
+  root: ParentNode,
+  className: string,
+  component: string,
+): T {
+  const elements = queryClasses<T>(root, className);
+  if (elements.length !== 1) {
+    throw new Error(
+      `[Faisceau UI] ${component} enhancement requires exactly one \`.${className}\` element; found ${elements.length}.`,
+    );
+  }
+  return elements[0]!;
+}
+
+function requireRootClass(root: Element, className: string, component: string): void {
+  if (!root.classList.contains(className)) {
+    throw new Error(`[Faisceau UI] ${component} enhancement requires \`.${className}\`.`);
+  }
 }
 
 function throwDestroyed(name: string): never {

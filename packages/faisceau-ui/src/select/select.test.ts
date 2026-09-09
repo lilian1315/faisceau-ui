@@ -106,7 +106,9 @@ describe("Select", () => {
     const nativeSelect = requirePart<HTMLSelectElement>(controller.root, "native-select");
 
     expect(nativeSelect.multiple).toBe(true);
-    expect(controller.root.hasAttribute("data-fui-multiple")).toBe(true);
+    expect(controller.root.querySelector(".fui-select")?.hasAttribute("data-fui-multiple")).toBe(
+      true,
+    );
     expect(
       controller.root.querySelector('[role="listbox"]')?.getAttribute("aria-multiselectable"),
     ).toBe("true");
@@ -133,18 +135,21 @@ describe("Select", () => {
     controller.destroy();
   });
 
-  it("enhances only a container and its native select", async () => {
+  it("enhances a fully-authored Field and restores caller-owned markup", async () => {
     const form = document.createElement("form");
-    const root = document.createElement("div");
-    root.className = "product-field";
+    const root = createSelectFieldMarkup({
+      defaultValue: ["simple"],
+      items: [
+        { description: "Réglages essentiels", label: "Simple", value: "simple" },
+        { label: "Expert", value: "expert" },
+      ],
+      label: "Mode",
+      name: "mode",
+      placeholder: "Choisir un mode",
+      required: true,
+    });
+    root.classList.add("product-field");
     root.setAttribute("data-owner", "application");
-    root.innerHTML = `
-      <select aria-label="Mode" name="mode" required>
-        <option value="">Choisir un mode</option>
-        <option value="simple" data-description="Réglages essentiels" selected>Simple</option>
-        <option value="expert">Expert</option>
-      </select>
-    `;
     form.append(root);
     document.body.append(form);
 
@@ -158,7 +163,8 @@ describe("Select", () => {
     expect(controller.root).toBe(root);
     expect(requirePart(root, "native-select")).toBe(nativeSelect);
     expect(root.classList).toContain("product-field");
-    expect(root.classList).toContain("fui-select");
+    expect(root.classList).toContain("fui-field");
+    expect(root.querySelector(":scope > .fui-select")).not.toBeNull();
     expect(root.getAttribute("data-owner")).toBe("application");
     expect(requirePart(root, "item-description").classList).toContain(
       "fui-select-item-description",
@@ -183,23 +189,24 @@ describe("Select", () => {
 
     controller.destroy();
     expect(root.isConnected).toBe(true);
-    expect(root.children).toHaveLength(1);
-    expect(root.firstElementChild).toBe(nativeSelect);
-    expect(root.className).toBe("product-field");
+    expect(root.className).toBe("fui-field product-field");
     expect(nativeSelect.name).toBe("mode");
     expect(nativeSelect.value).toBe("expert");
   });
 
   it("derives multiple mode from enhanced native markup", async () => {
     const form = document.createElement("form");
-    const root = document.createElement("div");
-    root.innerHTML = `
-      <select aria-label="Pays" name="countries" multiple>
-        <option value="fr" selected>France</option>
-        <option value="be" selected>Belgique</option>
-        <option value="ch">Suisse</option>
-      </select>
-    `;
+    const root = createSelectFieldMarkup({
+      defaultValue: ["fr", "be"],
+      items: [
+        { label: "France", value: "fr" },
+        { label: "Belgique", value: "be" },
+        { label: "Suisse", value: "ch" },
+      ],
+      label: "Pays",
+      multiple: true,
+      name: "countries",
+    });
     form.append(root);
     document.body.append(form);
 
@@ -218,6 +225,36 @@ describe("Select", () => {
     expect(controller.api.get().value).toEqual(["ch"]);
     expect(new FormData(form).getAll("countries")).toEqual(["ch"]);
     expect(nativeChange).toHaveBeenCalledOnce();
+    controller.destroy();
+  });
+
+  it("uses data-placeholder without reserving every empty option value", async () => {
+    const root = createSelectFieldMarkup({
+      items: [
+        { label: "No preference", value: "" },
+        { label: "France", value: "fr" },
+      ],
+      label: "Country",
+      name: "country",
+      placeholder: "Choose a country",
+    });
+    document.body.append(root);
+    const nativeSelect = requirePart<HTMLSelectElement>(root, "native-select");
+    const controller = enhanceSelect(root);
+
+    expect(controller.api.get().collection.items.map((item) => item.value)).toEqual(["", "fr"]);
+    expect(nativeSelect.options[0]?.hasAttribute("data-placeholder")).toBe(true);
+    expect(nativeSelect.options[0]?.textContent).toBe("Choose a country");
+
+    controller.api.get().setValue([""]);
+    await flushMachine();
+    expect(controller.api.get().value).toEqual([""]);
+    expect(nativeSelect.options[0]?.selected).toBe(false);
+    expect(nativeSelect.options[1]?.selected).toBe(true);
+
+    controller.api.get().clearValue();
+    await flushMachine();
+    expect(nativeSelect.options[0]?.selected).toBe(true);
     controller.destroy();
   });
 
@@ -328,29 +365,49 @@ describe("Select", () => {
   });
 
   it("restores enhanced options after dynamic updates", () => {
-    const root = document.createElement("div");
-    root.innerHTML = '<select aria-label="Country"><option value="fr">France</option></select>';
+    const root = createSelectFieldMarkup({
+      items: [{ label: "France", value: "fr" }],
+      label: "Country",
+    });
     document.body.append(root);
     const select = root.querySelector("select")!;
     const controller = enhanceSelect(root);
     controller.setItems([{ label: "Belgium", value: "be" }]);
     controller.destroy();
     expect(Array.from(select.options, (option) => [option.value, option.textContent])).toEqual([
+      ["", "Select an option"],
       ["fr", "France"],
     ]);
   });
 });
 
 function requirePart<T extends Element = HTMLElement>(root: ParentNode, part: string): T {
-  const element = root.querySelector<T>(`[data-fui-part="${part}"]`);
+  const className =
+    part === "label" || part === "description" || part === "error"
+      ? `fui-field-${part}`
+      : part === "native-select"
+        ? "fui-native-select"
+        : `fui-select-${part}`;
+  const element = root.querySelector<T>(`.${className}`);
   if (!element) throw new Error(`Missing test part: ${part}`);
   return element;
 }
 
 function requireItem(root: ParentNode, value: string): HTMLElement {
-  const item = root.querySelector<HTMLElement>(`[data-fui-part="item"][data-value="${value}"]`);
+  const item = root.querySelector<HTMLElement>(`.fui-select-item[data-value="${value}"]`);
   if (!item) throw new Error(`Missing test item: ${value}`);
   return item;
+}
+
+function createSelectFieldMarkup(options: Parameters<typeof createSelect>[0]): HTMLElement {
+  const template = createSelect(options);
+  const root = template.root.cloneNode(true) as HTMLElement;
+  template.destroy();
+  const selectedValues = new Set(options.defaultValue ?? options.value ?? []);
+  for (const option of root.querySelector<HTMLSelectElement>("select")?.options ?? []) {
+    option.selected = selectedValues.has(option.value);
+  }
+  return root;
 }
 
 async function flushMachine(): Promise<void> {

@@ -63,8 +63,9 @@ back to `ownerDocument` for this Storybook and test case.
 
 ## Markup and styling contract
 
-- `data-fui-part` names stable semantic parts used by setup code and consumer styling.
-- Library-owned classes are single `fui-*` tokens; `addFuiClasses()` enforces this invariant.
+- Structural `fui-*` classes are the stable anatomy used by setup code, enhancement, and consumer
+  styling. Zag-owned `data-*` attributes describe behavior and state rather than duplicating anatomy.
+- Library-owned classes are single `fui-*` tokens; enhancement validates them before mutation.
 - Consumer classes are additive and are restored by enhanced controllers.
 - CSS is vanilla and layered. `tokens.css` defines semantic `--fui-*` variables; component sheets
   consume those variables.
@@ -78,6 +79,8 @@ Select and Combobox retain one real `<select>` as the submitted control. Checkbo
 `input[type="checkbox"]`. The native element owns `name`, `form`, `required`, `disabled`, submitted
 values, and browser validation.
 
+`Field` owns the visible label, description, error, accessible relationships, and the lifecycle of
+one direct control child. Control factories keep Field independent from the catalog of form controls.
 `createNativeSelectField()` centralizes the collection-field protocol:
 
 - machine changes update native selected options and emit bubbling `input`, then `change`;

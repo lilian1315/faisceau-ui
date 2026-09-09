@@ -152,18 +152,26 @@ form.addEventListener("submit", (event) => {
 
 ## Améliorer un markup existant
 
-Les fonctions `enhanceSelect` et `enhanceCombobox` demandent seulement un conteneur avec un `<select>` natif et ses `<option>`. Le script lit les options, génère le label, le contrôle, la liste et les icônes, puis démarre immédiatement le composant. Le `<select>` fourni reste le contrôle du formulaire.
+Les fonctions `enhanceSelect`, `enhanceCombobox` et `enhanceCheckbox` adoptent un `Field` entièrement
+structuré. Les classes `fui-*` constituent le contrat d'anatomie et doivent être présentes avant
+l'appel. Le contrôle natif reste dans le document et conserve la soumission, la validation et le
+reset du formulaire.
 
 ### Select existant
 
 ```html
 <form id="settings">
-  <div id="mode-select">
-    <select name="display-mode" aria-label="Mode d'affichage" required>
-      <option value="">Choisir un mode</option>
-      <option value="simple" selected>Simple</option>
-      <option value="expert" data-description="Affiche tous les réglages">Expert</option>
-    </select>
+  <div class="fui-field" id="mode-select">
+    <label class="fui-field-label">Mode d'affichage</label>
+    <div class="fui-select">
+      <select class="fui-native-select" name="display-mode" required>
+        <option value="" data-placeholder>Choisir un mode</option>
+        <option value="simple" selected>Simple</option>
+        <option value="expert" data-description="Affiche tous les réglages">Expert</option>
+      </select>
+      <div class="fui-select-control">…</div>
+      <div class="fui-select-positioner">…</div>
+    </div>
   </div>
 </form>
 ```
@@ -171,22 +179,27 @@ Les fonctions `enhanceSelect` et `enhanceCombobox` demandent seulement un conten
 ```ts
 import { enhanceSelect } from "@lilian1315/faisceau-ui";
 
-const select = enhanceSelect(document.querySelector<HTMLElement>("#mode-select")!, {
-  clearable: true,
-});
+const select = enhanceSelect(document.querySelector<HTMLElement>("#mode-select")!);
 ```
 
-Le label visible vient de `aria-label`, la valeur initiale de l'option `selected` et le placeholder de l'option dont la valeur est vide. Chacun peut aussi être remplacé avec les options `label`, `defaultValue` et `placeholder`.
+La valeur initiale vient de l'option `selected`. Le placeholder vient de l'unique option
+`value=""` portant `data-placeholder`. Une option `value=""` sans ce marqueur reste un item
+sélectionnable normal.
 
 ### Combobox existante
 
 ```html
-<div id="command-combobox">
-  <select name="command" aria-label="Commande">
-    <option value="">Rechercher une commande</option>
-    <option value="build">Build</option>
-    <option value="test">Test</option>
-  </select>
+<div class="fui-field" id="command-combobox">
+  <label class="fui-field-label">Commande</label>
+  <div class="fui-combobox">
+    <select class="fui-native-select" name="command">
+      <option value="" data-placeholder>Rechercher une commande</option>
+      <option value="build">Build</option>
+      <option value="test">Test</option>
+    </select>
+    <div class="fui-combobox-control">…</div>
+    <div class="fui-combobox-positioner">…</div>
+  </div>
 </div>
 ```
 
@@ -198,7 +211,9 @@ const combobox = enhanceCombobox(document.querySelector<HTMLElement>("#command-c
 });
 ```
 
-Les valeurs d'option doivent être uniques. Les options `disabled` et les `<optgroup disabled>` sont reconnus. Un attribut `data-description` sur une option ajoute une seconde ligne à l'item généré. La valeur vide est réservée au placeholder et n'apparaît pas dans la liste.
+Les valeurs des options représentant des items doivent être uniques. Les items visuels doivent porter les mêmes `data-value`
+que les options natives. Les options `disabled` et les `<optgroup disabled>` sont reconnues ; la
+seule l'option vide portant `data-placeholder` est réservée au placeholder.
 
 ## Checkbox
 
@@ -215,11 +230,15 @@ createCheckbox({
 }).mount(document.querySelector("#terms")!);
 ```
 
-Pour l'enhancement, le conteneur contient uniquement l'input natif ; le label visible et le contrôle sont générés :
+Pour l'enhancement, le `Field` et le contrôle visuel sont déjà présents :
 
 ```html
-<div id="newsletter">
-  <input type="checkbox" name="newsletter" aria-label="Recevoir la newsletter" />
+<div class="fui-field" id="newsletter">
+  <label class="fui-field-label">Recevoir la newsletter</label>
+  <div class="fui-checkbox">
+    <input class="fui-native-checkbox" type="checkbox" name="newsletter" />
+    <span class="fui-checkbox-control"><span class="fui-checkbox-indicator"></span></span>
+  </div>
 </div>
 ```
 

@@ -24,6 +24,14 @@ export type {
 
 export type { FuiItem, FuiItemInput } from "./shared/index.ts";
 export type { FuiController, FuiFieldOptions, FuiReactive } from "./types.ts";
+export { createField, enhanceField } from "./field/index.ts";
+export type {
+  EnhanceFieldOptions,
+  FieldControlContext,
+  FieldControlFactory,
+  FieldController,
+  FieldOptions,
+} from "./field/index.ts";
 export { createCheckbox, enhanceCheckbox } from "./checkbox/index.ts";
 export type {
   CheckboxApi,

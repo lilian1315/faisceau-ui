@@ -28,9 +28,10 @@ export type SelectOptions = SelectMachineOptions &
     label: string;
   };
 
-/** Options for enhancing a container that owns one native select. */
+/** Options for enhancing a fully-authored Field with a direct Select child. */
 export type EnhanceSelectOptions = SelectMachineOptions &
   SelectViewOptions & {
+    /** Optionally replaces the authored Field label while enhanced. */
     label?: string;
   };
 

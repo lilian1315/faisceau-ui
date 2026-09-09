@@ -6,7 +6,7 @@ import {
   createClearIcon,
   type FuiItem,
 } from "../shared/index.js";
-import type { ComboboxOptions, EnhanceComboboxOptions } from "./types.ts";
+import type { ComboboxOptions } from "./types.ts";
 
 export interface ComboboxMarkup {
   readonly root: HTMLElement;
@@ -16,18 +16,13 @@ export interface ComboboxMarkup {
 
 interface ComboboxViewOptions {
   readonly clearLabel?: string;
-  readonly description?: string;
   readonly emptyLabel?: string;
-  readonly errorMessage?: string;
-  readonly label: string;
   readonly multiple?: boolean;
   readonly placeholder?: string;
 }
 
 interface ComboboxView {
-  readonly label: HTMLLabelElement;
   readonly control: HTMLElement;
-  readonly messages: HTMLElement[];
   readonly positioner: HTMLElement;
 }
 
@@ -37,7 +32,6 @@ export function createComboboxMarkup(
 ): ComboboxMarkup {
   const root = h("div", {
     class: "fui-combobox",
-    data: { fuiComponent: "combobox", fuiPart: "root" },
   });
   const nativeSelect = createNativeSelect(options, items);
   root.append(nativeSelect);
@@ -46,46 +40,22 @@ export function createComboboxMarkup(
   return { root, nativeSelect, generated };
 }
 
-export function enhanceComboboxMarkup(
-  root: HTMLElement,
-  nativeSelect: HTMLSelectElement,
-  options: EnhanceComboboxOptions & { label: string },
-  items: readonly FuiItem[],
-): HTMLElement[] {
-  nativeSelect.classList.add("fui-native-select");
-  nativeSelect.dataset.fuiPart = "native-select";
-  return appendView(root, nativeSelect, createView(options, items));
-}
-
 function createView(options: ComboboxViewOptions, items: readonly FuiItem[]): ComboboxView {
-  const label = h(
-    "label",
-    { class: "fui-combobox-label", data: { fuiPart: "label" } },
-    options.label,
-  );
   const input = h("input", {
     class: "fui-combobox-input",
-    data: { fuiPart: "input" },
     placeholder: options.placeholder,
     type: "text",
   });
   const selection = h("span", {
     class: "fui-combobox-selection",
-    data: { fuiPart: "selection" },
     hidden: true,
   });
-  const field = h(
-    "span",
-    { class: "fui-combobox-field", data: { fuiPart: "field" } },
-    selection,
-    input,
-  );
+  const field = h("span", { class: "fui-combobox-field" }, selection, input);
   const clearTrigger = h(
     "button",
     {
       "aria-label": options.clearLabel ?? "Clear selection",
       class: "fui-combobox-clear-trigger",
-      data: { fuiPart: "clear-trigger" },
       hidden: true,
       type: "button",
     },
@@ -95,45 +65,24 @@ function createView(options: ComboboxViewOptions, items: readonly FuiItem[]): Co
     "button",
     {
       class: "fui-combobox-trigger",
-      data: { fuiPart: "trigger" },
       type: "button",
     },
     createChevronDownIcon(),
   );
-  const control = h(
-    "div",
-    { class: "fui-combobox-control", data: { fuiPart: "control" } },
-    field,
-    clearTrigger,
-    trigger,
-  );
-  const list = h(
-    "ul",
-    { class: "fui-combobox-list", data: { fuiPart: "list" } },
-    items.map(createComboboxItem),
-  );
+  const control = h("div", { class: "fui-combobox-control" }, field, clearTrigger, trigger);
+  const list = h("ul", { class: "fui-combobox-list" }, items.map(createComboboxItem));
   const empty = h(
     "p",
     {
       class: "fui-combobox-empty",
-      data: { fuiPart: "empty" },
       hidden: true,
     },
     options.emptyLabel ?? "No results",
   );
-  const content = h(
-    "div",
-    { class: "fui-combobox-content", data: { fuiPart: "content" } },
-    list,
-    empty,
-  );
-  const positioner = h(
-    "div",
-    { class: "fui-combobox-positioner", data: { fuiPart: "positioner" } },
-    content,
-  );
+  const content = h("div", { class: "fui-combobox-content" }, list, empty);
+  const positioner = h("div", { class: "fui-combobox-positioner" }, content);
 
-  return { label, control, messages: createFieldMessages(options), positioner };
+  return { control, positioner };
 }
 
 function appendView(
@@ -141,9 +90,9 @@ function appendView(
   nativeSelect: HTMLSelectElement,
   view: ComboboxView,
 ): HTMLElement[] {
-  const generated = [view.label, view.control, ...view.messages, view.positioner];
-  root.prepend(view.label, view.control);
-  nativeSelect.after(...view.messages, view.positioner);
+  const generated = [view.control, view.positioner];
+  root.prepend(view.control);
+  nativeSelect.after(view.positioner);
   return generated;
 }
 
@@ -156,7 +105,11 @@ function createNativeSelect(
   const optionElements: HTMLOptionElement[] = [];
 
   if (!options.multiple) {
-    const placeholder = h("option", { value: "" }, options.placeholder ?? "Select an option");
+    const placeholder = h(
+      "option",
+      { data: { placeholder: "" }, value: "" },
+      options.placeholder ?? "Select an option",
+    );
     placeholder.hidden = true;
     placeholder.selected = selectedValues.size === 0;
     placeholder.defaultSelected = selectedValues.size === 0;
@@ -174,7 +127,6 @@ function createNativeSelect(
     "select",
     {
       class: "fui-native-select",
-      data: { fuiPart: "native-select" },
       disabled: options.disabled,
       multiple: options.multiple,
       name: options.name,
@@ -188,11 +140,7 @@ function createNativeSelect(
 }
 
 export function createComboboxItem(item: FuiItem): HTMLLIElement {
-  const text = h(
-    "span",
-    { class: "fui-combobox-item-text", data: { fuiPart: "item-text" } },
-    item.label,
-  );
+  const text = h("span", { class: "fui-combobox-item-text" }, item.label);
   const children: Node[] = [text];
 
   if (item.description) {
@@ -201,7 +149,6 @@ export function createComboboxItem(item: FuiItem): HTMLLIElement {
         "span",
         {
           class: "fui-combobox-item-description",
-          data: { fuiPart: "item-description" },
         },
         item.description,
       ),
@@ -213,7 +160,6 @@ export function createComboboxItem(item: FuiItem): HTMLLIElement {
       "span",
       {
         class: "fui-combobox-item-indicator",
-        data: { fuiPart: "item-indicator" },
       },
       createCheckIcon(),
     ),
@@ -225,32 +171,9 @@ export function createComboboxItem(item: FuiItem): HTMLLIElement {
       class: "fui-combobox-item",
       data: {
         disabled: item.disabled,
-        fuiPart: "item",
         value: item.value,
       },
     },
     children,
   );
-}
-
-function createFieldMessages(options: ComboboxViewOptions): HTMLElement[] {
-  const messages: HTMLElement[] = [];
-
-  if (options.description) {
-    messages.push(
-      h(
-        "p",
-        { class: "fui-field-description", data: { fuiPart: "description" } },
-        options.description,
-      ),
-    );
-  }
-
-  if (options.errorMessage) {
-    messages.push(
-      h("p", { class: "fui-field-error", data: { fuiPart: "error" } }, options.errorMessage),
-    );
-  }
-
-  return messages;
 }

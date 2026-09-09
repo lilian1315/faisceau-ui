@@ -17,7 +17,7 @@ describe("Combobox", () => {
       label: "Pays",
     }).mount(document.body);
     const retained = controller.root.querySelector<HTMLElement>(
-      '[data-fui-part="item"][data-value="be"]',
+      '.fui-combobox-item[data-value="be"]',
     )!;
 
     controller.setItems([
@@ -27,7 +27,7 @@ describe("Combobox", () => {
     controller.api.get().setInputValue("");
     await flushMachine();
 
-    expect(controller.root.querySelector('[data-fui-part="item"][data-value="be"]')).toBe(retained);
+    expect(controller.root.querySelector('.fui-combobox-item[data-value="be"]')).toBe(retained);
     expect(retained.textContent).toContain("Belgium");
     expect(controller.api.get().collection.items.map((item) => item.value)).toEqual(["be", "ch"]);
     expect(
@@ -65,9 +65,7 @@ describe("Combobox", () => {
     await flushMachine();
 
     expect(requirePart<HTMLElement>(controller.root, "empty").hidden).toBe(false);
-    expect(controller.root.querySelectorAll('[data-fui-part="item"]:not([hidden])')).toHaveLength(
-      0,
-    );
+    expect(controller.root.querySelectorAll(".fui-combobox-item:not([hidden])")).toHaveLength(0);
     controller.destroy();
   });
 
@@ -144,7 +142,9 @@ describe("Combobox", () => {
     const nativeSelect = requirePart<HTMLSelectElement>(controller.root, "native-select");
 
     expect(nativeSelect.multiple).toBe(true);
-    expect(controller.root.hasAttribute("data-fui-multiple")).toBe(true);
+    expect(controller.root.querySelector(".fui-combobox")?.hasAttribute("data-fui-multiple")).toBe(
+      true,
+    );
     expect(
       controller.root.querySelector('[role="listbox"]')?.getAttribute("aria-multiselectable"),
     ).toBe("true");
@@ -178,17 +178,20 @@ describe("Combobox", () => {
     controller.destroy();
   });
 
-  it("enhances only a container and its native select", async () => {
+  it("enhances a fully-authored Field and restores caller-owned markup", async () => {
     const form = document.createElement("form");
-    const root = document.createElement("section");
-    root.className = "search-command";
-    root.innerHTML = `
-      <select aria-label="Commande" name="command">
-        <option value="">Rechercher une commande</option>
-        <option value="build" data-description="Compile le projet" selected>Build</option>
-        <option value="test">Test</option>
-      </select>
-    `;
+    const root = createComboboxFieldMarkup({
+      defaultValue: ["build"],
+      emptyLabel: "Aucune commande",
+      items: [
+        { description: "Compile le projet", label: "Build", value: "build" },
+        { label: "Test", value: "test" },
+      ],
+      label: "Commande",
+      name: "command",
+      placeholder: "Rechercher une commande",
+    });
+    root.classList.add("search-command");
     form.append(root);
     document.body.append(form);
 
@@ -197,12 +200,13 @@ describe("Combobox", () => {
     const nativeChange = vi.fn();
     nativeSelect.addEventListener("input", nativeInput);
     nativeSelect.addEventListener("change", nativeChange);
-    const controller = enhanceCombobox(root, { emptyLabel: "Aucune commande" });
+    const controller = enhanceCombobox(root);
 
     expect(controller.started).toBe(true);
     expect(requirePart(root, "native-select")).toBe(nativeSelect);
     expect(root.classList).toContain("search-command");
-    expect(root.classList).toContain("fui-combobox");
+    expect(root.classList).toContain("fui-field");
+    expect(root.querySelector(":scope > .fui-combobox")).not.toBeNull();
     expect(requirePart(root, "item-description").classList).toContain(
       "fui-combobox-item-description",
     );
@@ -231,23 +235,24 @@ describe("Combobox", () => {
 
     controller.destroy();
     expect(root.isConnected).toBe(true);
-    expect(root.children).toHaveLength(1);
-    expect(root.firstElementChild).toBe(nativeSelect);
-    expect(root.className).toBe("search-command");
+    expect(root.className).toBe("fui-field search-command");
     expect(nativeSelect.name).toBe("command");
     expect(nativeSelect.value).toBe("build");
   });
 
   it("derives multiple mode and selected tags from enhanced native markup", async () => {
     const form = document.createElement("form");
-    const root = document.createElement("div");
-    root.innerHTML = `
-      <select aria-label="Commandes" name="commands" multiple>
-        <option value="build" selected>Build</option>
-        <option value="check">Check</option>
-        <option value="test" selected>Test</option>
-      </select>
-    `;
+    const root = createComboboxFieldMarkup({
+      defaultValue: ["build", "test"],
+      items: [
+        { label: "Build", value: "build" },
+        { label: "Check", value: "check" },
+        { label: "Test", value: "test" },
+      ],
+      label: "Commandes",
+      multiple: true,
+      name: "commands",
+    });
     form.append(root);
     document.body.append(form);
 
@@ -276,22 +281,39 @@ function requirePart<T extends Element = HTMLElement>(
   value?: string,
 ): T {
   const valueSelector = value === undefined ? "" : `[data-value="${value}"]`;
-  const element = root.querySelector<T>(`[data-fui-part="${part}"]${valueSelector}`);
+  const className =
+    part === "label" || part === "description" || part === "error"
+      ? `fui-field-${part}`
+      : part === "native-select"
+        ? "fui-native-select"
+        : `fui-combobox-${part}`;
+  const element = root.querySelector<T>(`.${className}${valueSelector}`);
   if (!element) throw new Error(`Missing test part: ${part}`);
   return element;
 }
 
 function requireTags(root: ParentNode): string[] {
   return Array.from(
-    root.querySelectorAll<HTMLElement>('[data-fui-part="tag-label"]'),
+    root.querySelectorAll<HTMLElement>(".fui-combobox-tag-label"),
     (element) => element.textContent ?? "",
   );
 }
 
 function requireItem(root: ParentNode, value: string): HTMLElement {
-  const item = root.querySelector<HTMLElement>(`[data-fui-part="item"][data-value="${value}"]`);
+  const item = root.querySelector<HTMLElement>(`.fui-combobox-item[data-value="${value}"]`);
   if (!item) throw new Error(`Missing test item: ${value}`);
   return item;
+}
+
+function createComboboxFieldMarkup(options: Parameters<typeof createCombobox>[0]): HTMLElement {
+  const template = createCombobox(options);
+  const root = template.root.cloneNode(true) as HTMLElement;
+  template.destroy();
+  const selectedValues = new Set(options.defaultValue ?? options.value ?? []);
+  for (const option of root.querySelector<HTMLSelectElement>("select")?.options ?? []) {
+    option.selected = selectedValues.has(option.value);
+  }
+  return root;
 }
 
 async function flushMachine(): Promise<void> {

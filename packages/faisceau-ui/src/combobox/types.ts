@@ -36,9 +36,10 @@ interface ComboboxViewOptions extends FuiFieldOptions {
 /** Options for markup built entirely by Faisceau UI. */
 export type ComboboxOptions = ComboboxMachineOptions & ComboboxViewOptions;
 
-/** Options for enhancing a container that owns one native select. */
+/** Options for enhancing a fully-authored Field with a direct Combobox child. */
 export type EnhanceComboboxOptions = ComboboxMachineOptions &
   Omit<ComboboxViewOptions, "items" | "label"> & {
+    /** Optionally replaces the authored Field label while enhanced. */
     label?: string;
   };
 

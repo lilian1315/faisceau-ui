@@ -12,10 +12,10 @@ interface CheckboxViewOptions extends FuiFieldOptions {
 /** Options for a checkbox built entirely by Faisceau UI. */
 export type CheckboxOptions = CheckboxMachineOptions & CheckboxViewOptions;
 
-/** Options for enhancing a container that owns one native checkbox. */
+/** Options for enhancing a fully-authored Field with a direct Checkbox child. */
 export type EnhanceCheckboxOptions = Omit<CheckboxMachineOptions, "defaultChecked"> &
   FuiFieldOptions & {
-    /** Falls back to the native input's aria-label. */
+    /** Optionally replaces the authored Field label while enhanced. */
     label?: string;
   };
 

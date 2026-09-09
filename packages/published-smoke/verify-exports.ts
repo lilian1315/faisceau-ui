@@ -35,6 +35,7 @@ const contracts = [
     directory: "../faisceau-ui",
     exports: [
       ["@lilian1315/faisceau-ui", "./dist/index.mjs"],
+      ["@lilian1315/faisceau-ui/field", "./dist/field/index.mjs"],
       ["@lilian1315/faisceau-ui/select", "./dist/select/index.mjs"],
       ["@lilian1315/faisceau-ui/combobox", "./dist/combobox/index.mjs"],
       ["@lilian1315/faisceau-ui/checkbox", "./dist/checkbox/index.mjs"],
@@ -48,6 +49,8 @@ const contracts = [
     files: [
       "./dist/index.d.mts",
       "./dist/index.mjs",
+      "./dist/field/index.d.mts",
+      "./dist/field/index.mjs",
       "./dist/select/index.d.mts",
       "./dist/select/index.mjs",
       "./dist/combobox/index.d.mts",
@@ -98,20 +101,24 @@ for (const contract of contracts) {
   }
 }
 
-const [ui, select, combobox, checkbox, tooltip, dialog, drawer, toast, zag] = await Promise.all([
-  import("@lilian1315/faisceau-ui"),
-  import("@lilian1315/faisceau-ui/select"),
-  import("@lilian1315/faisceau-ui/combobox"),
-  import("@lilian1315/faisceau-ui/checkbox"),
-  import("@lilian1315/faisceau-ui/tooltip"),
-  import("@lilian1315/faisceau-ui/dialog"),
-  import("@lilian1315/faisceau-ui/drawer"),
-  import("@lilian1315/faisceau-ui/toast"),
-  import("@lilian1315/faisceau-zag"),
-]);
+const [ui, field, select, combobox, checkbox, tooltip, dialog, drawer, toast, zag] =
+  await Promise.all([
+    import("@lilian1315/faisceau-ui"),
+    import("@lilian1315/faisceau-ui/field"),
+    import("@lilian1315/faisceau-ui/select"),
+    import("@lilian1315/faisceau-ui/combobox"),
+    import("@lilian1315/faisceau-ui/checkbox"),
+    import("@lilian1315/faisceau-ui/tooltip"),
+    import("@lilian1315/faisceau-ui/dialog"),
+    import("@lilian1315/faisceau-ui/drawer"),
+    import("@lilian1315/faisceau-ui/toast"),
+    import("@lilian1315/faisceau-zag"),
+  ]);
 
 for (const [name, value] of Object.entries({
   createCombobox: ui.createCombobox,
+  createField: ui.createField,
+  createFieldFromSubpath: field.createField,
   createSelect: ui.createSelect,
   createSelectFromSubpath: select.createSelect,
   createComboboxFromSubpath: combobox.createCombobox,

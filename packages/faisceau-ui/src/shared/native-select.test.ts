@@ -1,13 +1,51 @@
 import { afterEach, describe, expect, it, vi } from "vite-plus/test";
 import { signal } from "faisceau";
 
-import { captureAttributes, createNativeSelectField } from "./native-select.js";
+import {
+  captureAttributes,
+  createNativeSelectField,
+  getNativeSelectValue,
+  readNativeSelect,
+  setNativeSelectValue,
+} from "./native-select.js";
 
 afterEach(() => {
   document.body.replaceChildren();
 });
 
 describe("native select field", () => {
+  it("distinguishes an explicit placeholder from a selectable empty value", () => {
+    const select = document.createElement("select");
+    select.innerHTML = `
+      <option value="" data-placeholder selected>Choose a value</option>
+      <option value="">No value</option>
+      <option value="one">One</option>
+    `;
+
+    const source = readNativeSelect(select);
+    expect(source.placeholder).toBe("Choose a value");
+    expect(source.items.map(({ label, value }) => ({ label, value }))).toEqual([
+      { label: "No value", value: "" },
+      { label: "One", value: "one" },
+    ]);
+    expect(source.value).toEqual([]);
+
+    setNativeSelectValue(select, [""]);
+    expect(getNativeSelectValue(select)).toEqual([""]);
+    expect(select.options[0]?.selected).toBe(false);
+    expect(select.options[1]?.selected).toBe(true);
+
+    setNativeSelectValue(select, []);
+    expect(select.options[0]?.selected).toBe(true);
+    expect(getNativeSelectValue(select)).toEqual([]);
+  });
+
+  it("rejects an invalid placeholder marker", () => {
+    const select = document.createElement("select");
+    select.innerHTML = '<option value="one" data-placeholder>One</option>';
+    expect(() => readNativeSelect(select)).toThrow(/must have an empty value/);
+  });
+
   it("synchronizes both directions and emits one native event pair for machine changes", () => {
     const { form, select, visualControl } = createFixture();
     const value = signal<string[]>(["one"]);

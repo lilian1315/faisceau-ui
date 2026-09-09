@@ -49,13 +49,23 @@ export function requireNativeSelect(root: HTMLElement, component: string): HTMLS
   return selects[0];
 }
 
-/** Reads items, placeholder text and the initial value from native options. */
+/** Reads items, an explicitly-marked placeholder and the initial value from native options. */
 export function readNativeSelect(select: HTMLSelectElement): NativeSelectSource {
   const options = Array.from(select.options);
-  const placeholder = options.find((option) => option.value === "")?.label.trim() || undefined;
+  const placeholders = options.filter((option) => option.hasAttribute("data-placeholder"));
+  if (placeholders.length > 1) {
+    throw new Error(
+      `[Faisceau UI] Native select enhancement accepts at most one option with data-placeholder; found ${placeholders.length}.`,
+    );
+  }
+  const placeholderOption = placeholders[0];
+  if (placeholderOption && placeholderOption.value !== "") {
+    throw new Error("[Faisceau UI] An option with data-placeholder must have an empty value.");
+  }
+  const placeholder = placeholderOption?.label.trim() || undefined;
   const items = normalizeItems(
     options
-      .filter((option) => option.value !== "")
+      .filter((option) => option !== placeholderOption)
       .map((option) => {
         const group = option.parentElement;
         const description = option.dataset.description?.trim();
@@ -70,7 +80,9 @@ export function readNativeSelect(select: HTMLSelectElement): NativeSelectSource 
         };
       }),
   );
-  const value = Array.from(select.selectedOptions, (option) => option.value).filter(Boolean);
+  const value = Array.from(select.selectedOptions)
+    .filter((option) => option !== placeholderOption)
+    .map((option) => option.value);
 
   return { items, placeholder, value };
 }
@@ -78,19 +90,24 @@ export function readNativeSelect(select: HTMLSelectElement): NativeSelectSource 
 /** Applies a value to the native select without emitting synthetic DOM events. */
 export function setNativeSelectValue(select: HTMLSelectElement, value: readonly string[]): void {
   const selectedValues = new Set(value);
+  const placeholder = findPlaceholderOption(select);
 
   for (const option of select.options) {
-    option.selected = selectedValues.has(option.value);
+    option.selected = option !== placeholder && selectedValues.has(option.value);
   }
 
-  if (!select.multiple && value.length === 0) {
-    select.value = "";
+  if (value.length === 0) {
+    if (placeholder) placeholder.selected = true;
+    else select.selectedIndex = -1;
   }
 }
 
-/** Returns every non-empty value currently selected by a native select. */
+/** Returns selected values, excluding only the explicitly-marked placeholder option. */
 export function getNativeSelectValue(select: HTMLSelectElement): string[] {
-  return Array.from(select.selectedOptions, (option) => option.value).filter(Boolean);
+  const placeholder = findPlaceholderOption(select);
+  return Array.from(select.selectedOptions)
+    .filter((option) => option !== placeholder)
+    .map((option) => option.value);
 }
 
 /** Reconciles native options by value while preserving retained option nodes and selection. */
@@ -100,15 +117,13 @@ export function reconcileNativeSelectOptions(
   placeholder: string,
 ): void {
   const selected = new Set(getNativeSelectValue(select));
+  const placeholderOption = findPlaceholderOption(select);
   const existing = new Map(
     Array.from(select.options)
-      .filter((option) => option.value !== "")
+      .filter((option) => option !== placeholderOption)
       .map((option) => [option.value, option]),
   );
-  const empty = select.multiple
-    ? null
-    : (Array.from(select.options).find((option) => option.value === "") ??
-      new Option(placeholder, ""));
+  const empty = select.multiple ? null : (placeholderOption ?? new Option(placeholder, ""));
   const options = items.map((item) => {
     const option = existing.get(item.value) ?? new Option();
     option.value = item.value;
@@ -121,6 +136,7 @@ export function reconcileNativeSelectOptions(
   });
   if (empty) {
     empty.textContent = placeholder;
+    empty.dataset.placeholder = "";
     empty.hidden = true;
     empty.selected = selected.size === 0;
   }
@@ -248,6 +264,10 @@ function configureNativeSelect(select: HTMLSelectElement, props: NativeSelectFie
   if (props.multiple !== undefined) select.multiple = props.multiple;
   if (props.required !== undefined) select.required = props.required;
   if (props.autoComplete !== undefined) select.setAttribute("autocomplete", props.autoComplete);
+}
+
+function findPlaceholderOption(select: HTMLSelectElement): HTMLOptionElement | undefined {
+  return Array.from(select.options).find((option) => option.hasAttribute("data-placeholder"));
 }
 
 function valuesEqual(left: readonly string[], right: readonly string[]): boolean {

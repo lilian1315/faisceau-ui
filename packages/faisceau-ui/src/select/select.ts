@@ -1,23 +1,19 @@
-import { h } from "@lilian1315/create-element/faisceau";
 import { createZagMachine } from "@lilian1315/faisceau-zag";
 import * as select from "@zag-js/select";
 import { effect } from "faisceau";
 
+import { createField, enhanceField } from "../field/index.ts";
+import type { FieldControlContext, FieldControlFactory } from "../field/index.ts";
 import {
-  addFuiClasses,
   captureAttributes,
-  createClearIcon,
   createId,
   createNativeSelectField,
   getNativeSelectValue,
   getLookupRoot,
   normalizeItems,
-  queryPart,
-  queryParts,
   reconcileNativeSelectOptions,
   reconcileKeyedValues,
   readNativeSelect,
-  requirePart,
   requireNativeSelect,
   setNativeSelectValue,
   type FuiItem,
@@ -25,7 +21,7 @@ import {
   type NativeSelectFieldController,
   type NativeSelectSource,
 } from "../shared/index.js";
-import { createSelectItem, createSelectMarkup, enhanceSelectMarkup } from "./markup.ts";
+import { createSelectItem, createSelectMarkup } from "./markup.ts";
 import type { EnhanceSelectOptions, SelectController, SelectOptions } from "./types.ts";
 
 interface SelectParts {
@@ -46,48 +42,74 @@ type SelectSetupOptions = EnhanceSelectOptions & { items?: readonly FuiItemInput
 
 /** Builds a Select tree. Call `.mount(target)` to insert it and start Zag. */
 export function createSelect(options: SelectOptions): SelectController {
-  const items = normalizeItems(options.items);
-  const markup = createSelectMarkup(options, items);
-  return setupSelect(markup.root, options, {
-    items,
-    nativeSelect: markup.nativeSelect,
-    ownsRoot: true,
-    start: false,
+  return createField({
+    ...fieldOptions(options),
+    control: selectField(options),
+    label: options.label,
   });
 }
 
-/** Enhances a container holding one native select and generates the visual UI. */
+/** Enhances a fully-authored Field containing a direct `.fui-select` child. */
 export function enhanceSelect(
   root: HTMLElement,
   options: EnhanceSelectOptions = {},
 ): SelectController {
-  const nativeSelect = requireNativeSelect(root, "Select");
-  const source = readNativeSelect(nativeSelect);
-  const resolvedOptions = resolveEnhancedOptions(options, nativeSelect, source);
-  const restoreRoot = captureAttributes(root);
-  const restoreSelect = captureAttributes(nativeSelect);
-  const originalOptions = Array.from(nativeSelect.childNodes, (node) => node.cloneNode(true));
-  const generated = enhanceSelectMarkup(root, nativeSelect, resolvedOptions, source.items);
-
-  return setupSelect(root, resolvedOptions, {
-    cleanup() {
-      const value = getNativeSelectValue(nativeSelect);
-      for (const element of generated) element.remove();
-      nativeSelect.replaceChildren(...originalOptions);
-      setNativeSelectValue(nativeSelect, value);
-      restoreRoot();
-    },
-    items: source.items,
-    nativeSelect,
-    ownsRoot: false,
-    restoreNativeSelect: restoreSelect,
-    start: true,
+  return enhanceField(root, {
+    ...fieldOptions(options),
+    control: selectField(options),
   });
+}
+
+function selectField(options: SelectSetupOptions): FieldControlFactory<SelectController> {
+  return {
+    rootClass: "fui-select",
+    create(context) {
+      if (!("items" in options) || options.items === undefined) {
+        throw new Error("[Faisceau UI] Select creation requires options.items.");
+      }
+      const items = normalizeItems(options.items);
+      const markup = createSelectMarkup(options as SelectOptions, items);
+      return setupSelect(markup.root, options, context, {
+        items,
+        nativeSelect: markup.nativeSelect,
+        ownsRoot: true,
+        start: false,
+      });
+    },
+    enhance(controlRoot, context) {
+      const nativeSelect = requireNativeSelect(controlRoot, "Select");
+      requireRootClass(controlRoot, "fui-select", "Select");
+      requireRootClass(nativeSelect, "fui-native-select", "Select");
+      const source = readNativeSelect(nativeSelect);
+      const resolvedOptions = resolveEnhancedOptions(
+        { ...options, label: options.label ?? context.label.textContent?.trim() },
+        nativeSelect,
+        source,
+      );
+      const restoreRoot = captureAttributes(controlRoot);
+      const restoreSelect = captureAttributes(nativeSelect);
+      const originalOptions = Array.from(nativeSelect.childNodes, (node) => node.cloneNode(true));
+      return setupSelect(controlRoot, resolvedOptions, context, {
+        cleanup() {
+          const value = getNativeSelectValue(nativeSelect);
+          nativeSelect.replaceChildren(...originalOptions);
+          setNativeSelectValue(nativeSelect, value);
+          restoreRoot();
+        },
+        items: source.items,
+        nativeSelect,
+        ownsRoot: false,
+        restoreNativeSelect: restoreSelect,
+        start: true,
+      });
+    },
+  };
 }
 
 function setupSelect(
   root: HTMLElement,
   options: SelectSetupOptions,
+  field: FieldControlContext,
   setup: {
     cleanup?: () => void;
     items: FuiItem[];
@@ -99,42 +121,33 @@ function setupSelect(
 ): SelectController {
   const {
     alignItemWithTrigger = true,
-    className,
+    className: _className,
     clearLabel,
     clearable,
-    description,
-    errorMessage,
     id: requestedId,
     items: _items,
-    label: nextLabel,
+    label: _label,
     onOpenChange,
     onValueChange,
     placeholder = "Select an option",
     positioning: requestedPositioning,
     ...behavior
   } = options;
-  const parts = resolveParts(root, setup.nativeSelect, setup.items, clearable ?? false, clearLabel);
-  const machineId = requestedId ?? createId("select");
+  const parts = resolveParts(
+    root,
+    setup.nativeSelect,
+    setup.items,
+    field.label,
+    clearable ?? false,
+    clearLabel,
+  );
+  const machineId = requestedId ?? field.id ?? createId("select");
 
   root.dataset.fuiComponent = "select";
-  root.dataset.fuiPart ||= "root";
   root.toggleAttribute("data-fui-multiple", behavior.multiple === true);
-  addFuiClasses(root, "fui-select");
-  addCallerClasses(root, className);
-
-  if (nextLabel !== undefined) parts.label.textContent = nextLabel;
   if (!parts.label.textContent?.trim()) {
     throw new Error("[Faisceau UI] Select requires a visible, non-empty label.");
   }
-
-  const descriptionElement = ensureMessage(
-    root,
-    "description",
-    description,
-    "fui-field-description",
-  );
-  const errorElement = ensureMessage(root, "error", errorMessage, "fui-field-error");
-  if (errorElement) errorElement.setAttribute("role", "alert");
 
   const itemRecords = mapItems(parts.itemElements, setup.items, machineId);
   const ids = createPartIds(machineId, root, parts, itemRecords);
@@ -151,7 +164,7 @@ function setupSelect(
     getRootNode: () => getLookupRoot(root),
     id: machineId,
     ids,
-    invalid: behavior.invalid ?? errorElement !== null,
+    invalid: behavior.invalid ?? field.invalid,
     name: behavior.name ?? (parts.nativeSelect.name || undefined),
     onOpenChange(details) {
       onOpenChange?.(details);
@@ -182,7 +195,7 @@ function setupSelect(
     getValue: () => zag.api.get().value,
     props: {
       autoComplete: behavior.autoComplete,
-      disabled: behavior.disabled,
+      disabled: behavior.disabled ?? field.disabled,
       form: behavior.form,
       multiple: behavior.multiple,
       name: behavior.name,
@@ -211,20 +224,16 @@ function setupSelect(
   const bindItem = (element: HTMLElement, item: FuiItem): void => {
     const disposers = [zag.bind(element, (api) => api.getItemProps({ item }))];
 
-    const text = queryPart<HTMLElement>(element, "item-text");
+    const text = queryClass<HTMLElement>(element, "fui-select-item-text");
     if (text) {
-      addFuiClasses(text, "fui-select-item-text");
       disposers.push(zag.bind(text, (api) => api.getItemTextProps({ item })));
     }
 
-    const indicator = queryPart<HTMLElement>(element, "item-indicator");
+    const indicator = queryClass<HTMLElement>(element, "fui-select-item-indicator");
     if (indicator) {
-      addFuiClasses(indicator, "fui-select-item-indicator");
       disposers.push(zag.bind(indicator, (api) => api.getItemIndicatorProps({ item })));
     }
 
-    const itemDescription = queryPart<HTMLElement>(element, "item-description");
-    if (itemDescription) addFuiClasses(itemDescription, "fui-select-item-description");
     itemDisposers.set(item.value, () => disposers.forEach((dispose) => dispose()));
   };
   for (const { element, item } of itemRecords) {
@@ -237,7 +246,7 @@ function setupSelect(
     parts.value.textContent = isPlaceholder ? placeholder : api.valueAsString;
     parts.value.toggleAttribute("data-placeholder-shown", isPlaceholder);
   });
-  linkDescription(parts.trigger, descriptionElement, errorElement);
+  if (field.describedBy) parts.trigger.setAttribute("aria-describedby", field.describedBy);
 
   let started = false;
   let destroyed = false;
@@ -253,7 +262,7 @@ function setupSelect(
       const nextItems = normalizeItems(inputs);
       const nextValues = new Set(nextItems.map((item) => item.value));
       const elements = new Map(
-        queryParts<HTMLElement>(parts.list, "item").map((element) => [
+        queryClasses<HTMLElement>(parts.list, "fui-select-item").map((element) => [
           element.dataset.value!,
           element,
         ]),
@@ -318,52 +327,30 @@ function resolveParts(
   root: HTMLElement,
   nativeSelect: HTMLSelectElement,
   items: readonly FuiItem[],
+  label: HTMLLabelElement,
   clearable: boolean,
   clearLabel?: string,
 ): SelectParts {
-  const label = requirePart<HTMLLabelElement>(root, "label");
-  const control = requirePart<HTMLElement>(root, "control");
-  const trigger = requirePart<HTMLButtonElement>(root, "trigger");
-  const value = requirePart<HTMLElement>(root, "value");
-  const positioner = requirePart<HTMLElement>(root, "positioner");
-  const content = requirePart<HTMLElement>(root, "content");
-  const list = requirePart<HTMLElement>(root, "list");
-  let clearTrigger = queryPart<HTMLButtonElement>(root, "clear-trigger");
+  const control = requireClass<HTMLElement>(root, "fui-select-control", "Select");
+  const trigger = requireClass<HTMLButtonElement>(root, "fui-select-trigger", "Select");
+  const value = requireClass<HTMLElement>(root, "fui-select-value", "Select");
+  const positioner = requireClass<HTMLElement>(root, "fui-select-positioner", "Select");
+  const content = requireClass<HTMLElement>(root, "fui-select-content", "Select");
+  const list = requireClass<HTMLElement>(root, "fui-select-list", "Select");
+  const clearTrigger = queryClass<HTMLButtonElement>(root, "fui-select-clear-trigger");
 
   if (clearable && clearTrigger === null) {
-    clearTrigger = h(
-      "button",
-      {
-        "aria-label": clearLabel ?? "Clear selection",
-        class: "fui-select-clear-trigger",
-        data: { fuiPart: "clear-trigger" },
-        type: "button",
-      },
-      createClearIcon(),
+    throw new Error(
+      "[Faisceau UI] Select enhancement with clearable enabled requires `.fui-select-clear-trigger`.",
     );
-    control.append(clearTrigger);
   }
+  if (clearTrigger && clearLabel) clearTrigger.setAttribute("aria-label", clearLabel);
 
-  addFuiClasses(label, "fui-select-label");
-  addFuiClasses(control, "fui-select-control");
-  addFuiClasses(trigger, "fui-select-trigger");
-  addFuiClasses(value, "fui-select-value");
-  addFuiClasses(positioner, "fui-select-positioner");
-  addFuiClasses(content, "fui-select-content");
-  addFuiClasses(list, "fui-select-list");
-
-  const indicator = queryPart<HTMLElement>(root, "indicator");
-  if (indicator) addFuiClasses(indicator, "fui-select-indicator");
-  if (clearTrigger) addFuiClasses(clearTrigger, "fui-select-clear-trigger");
-
-  const itemElements = queryParts<HTMLElement>(root, "item");
+  const indicator = queryClass<HTMLElement>(root, "fui-select-indicator");
+  const itemElements = queryClasses<HTMLElement>(root, "fui-select-item");
   if (items.length > 0 && itemElements.length === 0) {
-    throw new Error('[Faisceau UI] Select items require `[data-fui-part="item"]` markup.');
+    throw new Error("[Faisceau UI] Select items require `.fui-select-item` markup.");
   }
-  for (const item of itemElements) addFuiClasses(item, "fui-select-item");
-
-  addFuiClasses(nativeSelect, "fui-native-select");
-  nativeSelect.dataset.fuiPart = "native-select";
 
   return {
     label,
@@ -488,43 +475,44 @@ function updateItemElement(element: HTMLElement, item: FuiItem, component: "sele
   element.className = `fui-${component}-item`;
 }
 
-function ensureMessage(
-  root: HTMLElement,
-  part: "description" | "error",
-  text: string | undefined,
-  className: `fui-${string}`,
-): HTMLElement | null {
-  let element = queryPart<HTMLElement>(root, part);
-  if (element === null && text !== undefined) {
-    element = h("p", { class: className, data: { fuiPart: part } }, text);
-    root.append(element);
-  }
-  if (element) {
-    addFuiClasses(element, className);
-    if (text !== undefined) element.textContent = text;
-  }
-  return element;
+function fieldOptions(options: SelectSetupOptions) {
+  return {
+    className: options.className,
+    description: options.description,
+    disabled: options.disabled,
+    errorMessage: options.errorMessage,
+    id: options.id,
+    invalid: options.invalid,
+    label: options.label,
+  };
 }
 
-function linkDescription(
-  control: HTMLElement,
-  description: HTMLElement | null,
-  error: HTMLElement | null,
-): void {
-  const ids = [description, error]
-    .filter((element): element is HTMLElement => element !== null)
-    .map((element, index) => {
-      element.id ||= `${control.id}:message:${index}`;
-      return element.id;
-    });
-  const existing = control.getAttribute("aria-describedby")?.split(/\s+/).filter(Boolean) ?? [];
-  const describedBy = [...new Set([...existing, ...ids])];
-  if (describedBy.length > 0) control.setAttribute("aria-describedby", describedBy.join(" "));
+function queryClass<T extends Element>(root: ParentNode, className: string): T | null {
+  return root.querySelector<T>(`.${className}`);
 }
 
-function addCallerClasses(element: Element, className: string | undefined): void {
-  const tokens = className?.split(/\s+/).filter(Boolean) ?? [];
-  if (tokens.length > 0) element.classList.add(...tokens);
+function queryClasses<T extends Element>(root: ParentNode, className: string): T[] {
+  return Array.from(root.querySelectorAll<T>(`.${className}`));
+}
+
+function requireClass<T extends Element>(
+  root: ParentNode,
+  className: string,
+  component: string,
+): T {
+  const elements = queryClasses<T>(root, className);
+  if (elements.length !== 1) {
+    throw new Error(
+      `[Faisceau UI] ${component} enhancement requires exactly one \`.${className}\` element; found ${elements.length}.`,
+    );
+  }
+  return elements[0]!;
+}
+
+function requireRootClass(root: Element, className: string, component: string): void {
+  if (!root.classList.contains(className)) {
+    throw new Error(`[Faisceau UI] ${component} enhancement requires \`.${className}\`.`);
+  }
 }
 
 function throwDestroyed(name: string): never {

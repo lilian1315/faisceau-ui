@@ -23,8 +23,9 @@ Use `packages/faisceau-ui/src/<component>/` with:
 - `index.ts` for the public subpath;
 - `<component>.test.ts` for browser behavior.
 
-Build DOM with `h` from `@lilian1315/create-element/faisceau`. Give relevant nodes lowercase
-`data-fui-part` names and add owned classes through `addFuiClasses()`. Add icons to the shared Lucide
+Build DOM with `h` from `@lilian1315/create-element/faisceau`. Give structural nodes one stable
+`fui-*` class; these classes are both the public anatomy and the enhancement lookup contract. Reserve
+`data-*` attributes for Zag behavior/state or actual application data. Add icons to the shared Lucide
 helpers instead of embedding custom SVG.
 
 Bind every Zag prop getter before starting the machine. Supply the shared `getLookupRoot(root)`
@@ -42,10 +43,10 @@ For `create*`:
 
 For `enhance*`:
 
-- validate required native elements or `data-fui-part` nodes with an actionable `[Faisceau UI]`
+- validate required native elements and structural `fui-*` classes with an actionable `[Faisceau UI]`
   error;
 - snapshot caller-owned attributes before adding Zag props;
-- generate only missing structural nodes;
+- require the complete structural anatomy before mutation; do not generate missing structural nodes;
 - start after the enhanced tree is assembled;
 - restore attributes, original node position, and caller-owned content in `destroy()`.
 

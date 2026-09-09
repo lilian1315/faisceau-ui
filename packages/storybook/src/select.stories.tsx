@@ -104,25 +104,28 @@ export const MarkupExistant: Story = {
       eyebrow: "enhanceSelect",
       title: "Progressive enhancement",
     });
-    const root = asDom<HTMLDivElement>(
-      <div>
-        <select aria-label={args.label} name="environment" required={args.required}>
-          <option value="">Aucun environnement</option>
-          <option value="dev">Développement</option>
-          <option selected value="staging">
-            Préproduction
-          </option>
-          <option value="production">Production</option>
-        </select>
-      </div>,
-    );
-    story.setSource(`<div>
-  <select name="environment" aria-label="${args.label}"${args.required ? " required" : ""}>
-    <option value="">Aucun environnement</option>
-    <option value="dev">Développement</option>
-    <option value="staging" selected>Préproduction</option>
-    <option value="production">Production</option>
-  </select>
+    const template = createSelect({
+      defaultValue: ["staging"],
+      description: args.description,
+      items: [
+        { label: "Développement", value: "dev" },
+        { label: "Préproduction", value: "staging" },
+        { label: "Production", value: "production" },
+      ],
+      label: args.label,
+      name: "environment",
+      required: args.required,
+    });
+    const root = template.root.cloneNode(true) as HTMLDivElement;
+    template.destroy();
+    story.setSource(`<div class="fui-field">
+  <label class="fui-field-label">${args.label}</label>
+  <div class="fui-select">
+    <select class="fui-native-select" name="environment">…</select>
+    <div class="fui-select-control">…</div>
+    <div class="fui-select-positioner">…</div>
+  </div>
+  <p class="fui-field-description">${args.description}</p>
 </div>`);
     story.canvas.append(root);
     const controller = enhanceSelect(root, {

@@ -30,7 +30,7 @@ describe("Checkbox", () => {
       value: "accepted",
     }).mount(form);
     const input = controller.root.querySelector<HTMLInputElement>('input[type="checkbox"]')!;
-    const control = controller.root.querySelector<HTMLElement>('[data-fui-part="control"]')!;
+    const control = controller.root.querySelector<HTMLElement>(".fui-checkbox-control")!;
 
     expect(input.checked).toBe(true);
     expect(new FormData(form).get("terms")).toBe("accepted");
@@ -49,16 +49,23 @@ describe("Checkbox", () => {
     controller.destroy();
   });
 
-  it("enhances only a container and native checkbox, then restores them", async () => {
-    const root = document.createElement("div");
-    root.className = "consumer-root";
-    root.innerHTML = '<input type="checkbox" name="newsletter" aria-label="Newsletter" checked>';
+  it("enhances a fully-authored Field, then restores it", async () => {
+    const template = createCheckbox({
+      defaultChecked: true,
+      description: "Monthly updates",
+      label: "Newsletter",
+      name: "newsletter",
+    });
+    const root = template.root.cloneNode(true) as HTMLElement;
+    template.destroy();
+    root.querySelector<HTMLInputElement>('input[type="checkbox"]')!.checked = true;
+    root.classList.add("consumer-root");
     document.body.append(root);
     const input = root.querySelector<HTMLInputElement>("input")!;
 
     const controller = enhanceCheckbox(root, { description: "Monthly updates" });
-    expect(root.dataset.fuiComponent).toBe("checkbox");
-    expect(input.dataset.fuiPart).toBe("native-input");
+    expect(root.querySelector<HTMLElement>(".fui-checkbox")?.dataset.fuiComponent).toBe("checkbox");
+    expect(input.classList).toContain("fui-native-checkbox");
     expect(controller.api.get().checked).toBe(true);
 
     input.click();
@@ -66,9 +73,8 @@ describe("Checkbox", () => {
     expect(controller.api.get().checked).toBe(false);
 
     controller.destroy();
-    expect(root.className).toBe("consumer-root");
-    expect(root.firstElementChild).toBe(input);
-    expect(input.getAttribute("aria-label")).toBe("Newsletter");
+    expect(root.className).toBe("fui-field consumer-root");
+    expect(root.querySelector(":scope > .fui-checkbox")).not.toBeNull();
     expect(input.checked).toBe(true);
   });
 });

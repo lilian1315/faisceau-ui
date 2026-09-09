@@ -92,18 +92,16 @@ export const MarkupExistant: Story = {
       eyebrow: "enhanceCheckbox",
       title: "Progressive enhancement",
     });
-    const root = asDom<HTMLDivElement>(
-      <div>
-        <input
-          aria-label={args.label}
-          checked={args.checked}
-          name="notifications"
-          required={args.required}
-          type="checkbox"
-          value="enabled"
-        />
-      </div>,
-    );
+    const template = createCheckbox({
+      checked: args.checked,
+      description: args.description,
+      label: args.label,
+      name: "notifications",
+      required: args.required,
+      value: "enabled",
+    });
+    const root = template.root.cloneNode(true) as HTMLDivElement;
+    template.destroy();
     story.canvas.append(root);
     const controller = enhanceCheckbox(root, {
       description: args.description,
@@ -112,8 +110,13 @@ export const MarkupExistant: Story = {
       readOnly: args.readOnly,
     });
     trackController(story.root, controller);
-    story.setSource(`<div>
-  <input type="checkbox" name="notifications" value="enabled" aria-label="${args.label}">
+    story.setSource(`<div class="fui-field">
+  <label class="fui-field-label">${args.label}</label>
+  <div class="fui-checkbox">
+    <input class="fui-native-checkbox" type="checkbox" name="notifications" value="enabled">
+    <span class="fui-checkbox-control">…</span>
+  </div>
+  <p class="fui-field-description">${args.description}</p>
 </div>`);
     return story.root;
   },

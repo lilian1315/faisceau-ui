@@ -6,7 +6,7 @@ import {
   createClearIcon,
   type FuiItem,
 } from "../shared/index.js";
-import type { EnhanceSelectOptions, SelectOptions } from "./types.ts";
+import type { SelectOptions } from "./types.ts";
 
 export interface SelectMarkup {
   readonly root: HTMLElement;
@@ -17,15 +17,10 @@ export interface SelectMarkup {
 interface SelectViewOptions {
   readonly clearable?: boolean;
   readonly clearLabel?: string;
-  readonly description?: string;
-  readonly errorMessage?: string;
-  readonly label: string;
 }
 
 interface SelectView {
-  readonly label: HTMLLabelElement;
   readonly control: HTMLElement;
-  readonly messages: HTMLElement[];
   readonly positioner: HTMLElement;
 }
 
@@ -35,7 +30,6 @@ export function createSelectMarkup(
 ): SelectMarkup {
   const root = h("div", {
     class: "fui-select",
-    data: { fuiComponent: "select", fuiPart: "root" },
   });
   const nativeSelect = createNativeSelect(options, items);
   root.append(nativeSelect);
@@ -45,37 +39,13 @@ export function createSelectMarkup(
   return { root, nativeSelect, generated };
 }
 
-export function enhanceSelectMarkup(
-  root: HTMLElement,
-  nativeSelect: HTMLSelectElement,
-  options: EnhanceSelectOptions & { label: string },
-  items: readonly FuiItem[],
-): HTMLElement[] {
-  nativeSelect.classList.add("fui-native-select");
-  nativeSelect.dataset.fuiPart = "native-select";
-  return appendView(root, nativeSelect, createView(options, items));
-}
-
 function createView(options: SelectViewOptions, items: readonly FuiItem[]): SelectView {
-  const label = h(
-    "label",
-    { class: "fui-select-label", data: { fuiPart: "label" } },
-    options.label,
-  );
-  const value = h("span", {
-    class: "fui-select-value",
-    data: { fuiPart: "value" },
-  });
-  const indicator = h(
-    "span",
-    { class: "fui-select-indicator", data: { fuiPart: "indicator" } },
-    createChevronDownIcon(),
-  );
+  const value = h("span", { class: "fui-select-value" });
+  const indicator = h("span", { class: "fui-select-indicator" }, createChevronDownIcon());
   const trigger = h(
     "button",
     {
       class: "fui-select-trigger",
-      data: { fuiPart: "trigger" },
       type: "button",
     },
     value,
@@ -90,7 +60,6 @@ function createView(options: SelectViewOptions, items: readonly FuiItem[]): Sele
         {
           "aria-label": options.clearLabel ?? "Clear selection",
           class: "fui-select-clear-trigger",
-          data: { fuiPart: "clear-trigger" },
           type: "button",
         },
         createClearIcon(),
@@ -98,24 +67,12 @@ function createView(options: SelectViewOptions, items: readonly FuiItem[]): Sele
     );
   }
 
-  const control = h(
-    "div",
-    { class: "fui-select-control", data: { fuiPart: "control" } },
-    controlChildren,
-  );
-  const list = h(
-    "ul",
-    { class: "fui-select-list", data: { fuiPart: "list" } },
-    items.map(createSelectItem),
-  );
-  const content = h("div", { class: "fui-select-content", data: { fuiPart: "content" } }, list);
-  const positioner = h(
-    "div",
-    { class: "fui-select-positioner", data: { fuiPart: "positioner" } },
-    content,
-  );
+  const control = h("div", { class: "fui-select-control" }, controlChildren);
+  const list = h("ul", { class: "fui-select-list" }, items.map(createSelectItem));
+  const content = h("div", { class: "fui-select-content" }, list);
+  const positioner = h("div", { class: "fui-select-positioner" }, content);
 
-  return { label, control, messages: createFieldMessages(options), positioner };
+  return { control, positioner };
 }
 
 function appendView(
@@ -123,9 +80,9 @@ function appendView(
   nativeSelect: HTMLSelectElement,
   view: SelectView,
 ): HTMLElement[] {
-  const generated = [view.label, view.control, ...view.messages, view.positioner];
-  root.prepend(view.label, view.control);
-  nativeSelect.after(...view.messages, view.positioner);
+  const generated = [view.control, view.positioner];
+  root.prepend(view.control);
+  nativeSelect.after(view.positioner);
   return generated;
 }
 
@@ -135,7 +92,11 @@ function createNativeSelect(options: SelectOptions, items: readonly FuiItem[]): 
   const optionElements: HTMLOptionElement[] = [];
 
   if (!options.multiple) {
-    const placeholder = h("option", { value: "" }, options.placeholder ?? "Select an option");
+    const placeholder = h(
+      "option",
+      { data: { placeholder: "" }, value: "" },
+      options.placeholder ?? "Select an option",
+    );
     placeholder.hidden = true;
     placeholder.selected = selectedValues.size === 0;
     placeholder.defaultSelected = selectedValues.size === 0;
@@ -154,7 +115,6 @@ function createNativeSelect(options: SelectOptions, items: readonly FuiItem[]): 
     "select",
     {
       class: "fui-native-select",
-      data: { fuiPart: "native-select" },
       disabled: options.disabled,
       multiple: options.multiple,
       name: options.name,
@@ -169,11 +129,7 @@ function createNativeSelect(options: SelectOptions, items: readonly FuiItem[]): 
 }
 
 export function createSelectItem(item: FuiItem): HTMLLIElement {
-  const text = h(
-    "span",
-    { class: "fui-select-item-text", data: { fuiPart: "item-text" } },
-    item.label,
-  );
+  const text = h("span", { class: "fui-select-item-text" }, item.label);
   const children: Node[] = [text];
 
   if (item.description) {
@@ -182,7 +138,6 @@ export function createSelectItem(item: FuiItem): HTMLLIElement {
         "span",
         {
           class: "fui-select-item-description",
-          data: { fuiPart: "item-description" },
         },
         item.description,
       ),
@@ -194,7 +149,6 @@ export function createSelectItem(item: FuiItem): HTMLLIElement {
       "span",
       {
         class: "fui-select-item-indicator",
-        data: { fuiPart: "item-indicator" },
       },
       createCheckIcon(),
     ),
@@ -206,32 +160,9 @@ export function createSelectItem(item: FuiItem): HTMLLIElement {
       class: "fui-select-item",
       data: {
         disabled: item.disabled,
-        fuiPart: "item",
         value: item.value,
       },
     },
     children,
   );
-}
-
-function createFieldMessages(options: SelectViewOptions): HTMLElement[] {
-  const messages: HTMLElement[] = [];
-
-  if (options.description) {
-    messages.push(
-      h(
-        "p",
-        { class: "fui-field-description", data: { fuiPart: "description" } },
-        options.description,
-      ),
-    );
-  }
-
-  if (options.errorMessage) {
-    messages.push(
-      h("p", { class: "fui-field-error", data: { fuiPart: "error" } }, options.errorMessage),
-    );
-  }
-
-  return messages;
 }

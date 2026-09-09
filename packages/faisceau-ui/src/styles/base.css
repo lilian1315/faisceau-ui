@@ -1,7 +1,8 @@
 @layer fui-base {
   :where(
     .fui-select,
-    .fui-select-label,
+    .fui-field,
+    .fui-field-label,
     .fui-select-control,
     .fui-select-trigger,
     .fui-select-value,
@@ -16,7 +17,6 @@
     .fui-select-item-indicator,
     .fui-native-select,
     .fui-combobox,
-    .fui-combobox-label,
     .fui-combobox-control,
     .fui-combobox-field,
     .fui-combobox-input,
@@ -35,10 +35,8 @@
     .fui-combobox-item-description,
     .fui-combobox-item-indicator,
     .fui-checkbox,
-    .fui-checkbox-field,
     .fui-checkbox-control,
     .fui-checkbox-indicator,
-    .fui-checkbox-label,
     .fui-native-checkbox,
     .fui-tooltip-trigger,
     .fui-tooltip-trigger--generated,
@@ -54,7 +52,7 @@
     box-sizing: border-box;
   }
 
-  :where(.fui-select, .fui-combobox, .fui-checkbox) {
+  .fui-field {
     display: grid;
     inline-size: 100%;
     max-inline-size: min(var(--fui-control-max-inline-size), 100%);
@@ -66,7 +64,7 @@
     line-height: var(--fui-line-height-control);
   }
 
-  :where(.fui-select-label, .fui-combobox-label) {
+  .fui-field-label {
     display: inline-flex;
     align-items: center;
     min-inline-size: 0;
@@ -77,12 +75,12 @@
     overflow-wrap: anywhere;
   }
 
-  :where(.fui-select-label, .fui-combobox-label)[data-disabled] {
+  .fui-field-label[data-disabled] {
     cursor: not-allowed;
     opacity: 0.55;
   }
 
-  :where(.fui-select-label, .fui-combobox-label)[data-invalid] {
+  .fui-field-label[data-invalid] {
     color: var(--fui-color-destructive);
   }
 
@@ -157,13 +155,13 @@
   }
 
   @media (forced-colors: active) {
-    :where(.fui-select-label, .fui-combobox-label)[data-disabled],
+    .fui-field-label[data-disabled],
     :where(.fui-field-description) {
       color: GrayText;
       opacity: 1;
     }
 
-    :where(.fui-select-label, .fui-combobox-label)[data-invalid],
+    .fui-field-label[data-invalid],
     .fui-field-error {
       color: CanvasText;
     }
