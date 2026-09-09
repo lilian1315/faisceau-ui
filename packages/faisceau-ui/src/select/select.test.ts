@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vite-plus/test";
 
+import "../styles/index.css";
 import { createSelect, enhanceSelect } from "./select.ts";
 
 afterEach(() => {
@@ -320,6 +321,27 @@ describe("Select", () => {
     regular.destroy();
     aligned.destroy();
     multiple.destroy();
+  });
+
+  it("positions an item-aligned list on its first opening", async () => {
+    const host = document.createElement("div");
+    host.style.padding = "100px";
+    document.body.append(host);
+    const controller = createSelect({
+      defaultValue: ["Two"],
+      items: ["One", "Two", "Three"],
+      label: "Value",
+    }).mount(host);
+
+    requirePart<HTMLButtonElement>(controller.root, "trigger").click();
+    await flushPositioning();
+    await flushPositioning();
+
+    const rect = requirePart<HTMLElement>(controller.root, "positioner").getBoundingClientRect();
+    expect(rect.width).toBeGreaterThan(0);
+    expect(rect.left).toBeGreaterThan(0);
+    expect(rect.top).toBeGreaterThan(0);
+    controller.destroy();
   });
 
   it("uses Lucide icons and only authors fui-prefixed classes", () => {

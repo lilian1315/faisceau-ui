@@ -11,6 +11,34 @@ afterEach(() => {
 });
 
 describe("Zag framework adapter conformance", () => {
+  it("preserves imperative style changes when unrelated connected styles update", async () => {
+    const root = document.createElement("label");
+    const control = document.createElement("span");
+    const input = document.createElement("input");
+    root.append(control, input);
+    document.body.append(root);
+
+    const controller = createZagMachine(
+      checkbox.machine as checkbox.Machine,
+      { id: "styled-checkbox" },
+      checkbox.connect,
+    );
+    controller.bind(control, (api) => ({
+      ...api.getControlProps(),
+      style: `position:absolute;left:0px;transform:${api.checked ? "none" : "translateX(-100%)"};`,
+    }));
+    controller.bind(input, (api) => api.getHiddenInputProps());
+    controller.start();
+
+    control.style.left = "120px";
+    control.click();
+    await tick();
+
+    expect(control.style.left).toBe("120px");
+    expect(control.style.transform).toBe("none");
+    controller.destroy();
+  });
+
   it("keeps a controlled Checkbox synchronized with a Faisceau signal", async () => {
     const checked = signal<checkbox.CheckedState>(false);
     const root = document.createElement("label");
