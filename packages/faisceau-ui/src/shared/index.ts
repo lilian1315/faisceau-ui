@@ -36,7 +36,7 @@ export {
   type NativeSelectSource,
 } from "./native-select.js";
 
-/** Lucide icons rendered through @lilian1315/create-element/faisceau. */
+/** Lucide icons rendered through @lilian1315/create-element. */
 export {
   createCheckIcon,
   createChevronDownIcon,

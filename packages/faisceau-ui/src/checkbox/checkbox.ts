@@ -1,4 +1,4 @@
-import { h } from "@lilian1315/create-element/faisceau";
+import { h } from "@lilian1315/create-element";
 import { createZagMachine } from "@lilian1315/faisceau-zag";
 import * as checkbox from "@zag-js/checkbox";
 

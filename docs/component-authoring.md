@@ -23,7 +23,7 @@ Use `packages/faisceau-ui/src/<component>/` with:
 - `index.ts` for the public subpath;
 - `<component>.test.ts` for browser behavior.
 
-Build DOM with `h` from `@lilian1315/create-element/faisceau`. Give structural nodes one stable
+Build DOM with `h` from `@lilian1315/create-element`. Give structural nodes one stable
 `fui-*` class; these classes are both the public anatomy and the enhancement lookup contract. Reserve
 `data-*` attributes for Zag behavior/state or actual application data. Add icons to the shared Lucide
 helpers instead of embedding custom SVG.

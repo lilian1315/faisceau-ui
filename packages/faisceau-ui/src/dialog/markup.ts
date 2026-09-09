@@ -1,4 +1,4 @@
-import { h } from "@lilian1315/create-element/faisceau";
+import { h } from "@lilian1315/create-element";
 import { createXIcon } from "../shared/index.js";
 
 export type OverlayVariant = "dialog" | "drawer";

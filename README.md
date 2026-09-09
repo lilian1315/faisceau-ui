@@ -43,7 +43,7 @@ modernes ; le rendu serveur ne fait pas partie de son contrat.
 
 ## Créer un Select
 
-`createSelect` construit le markup avec `@lilian1315/create-element/faisceau`. Le contrôleur reste arrêté jusqu'à son montage :
+`createSelect` construit le markup avec `@lilian1315/create-element`. Le contrôleur reste arrêté jusqu'à son montage :
 
 ```ts
 import { createSelect } from "@lilian1315/faisceau-ui";

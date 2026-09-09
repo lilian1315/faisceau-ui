@@ -3,7 +3,7 @@ import Check from "@lucide/icons/icons/check";
 import ChevronDown from "@lucide/icons/icons/chevron-down";
 import Minus from "@lucide/icons/icons/minus";
 import X from "@lucide/icons/icons/x";
-import { h } from "@lilian1315/create-element/faisceau";
+import { h } from "@lilian1315/create-element";
 
 /** Creates the decorative downward chevron used by triggers. */
 export function createChevronDownIcon(): SVGSVGElement {

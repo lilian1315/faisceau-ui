@@ -1,7 +1,7 @@
 ## Faisceau UI project instructions
 
 Faisceau UI is a browser-only TypeScript component library. It combines Zag state machines,
-Faisceau reactivity, DOM created with `@lilian1315/create-element/faisceau`, and vanilla CSS.
+Faisceau reactivity, DOM created with `@lilian1315/create-element`, and vanilla CSS.
 
 ### Required conventions
 

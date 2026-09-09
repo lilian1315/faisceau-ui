@@ -1,4 +1,4 @@
-import { h } from "@lilian1315/create-element/faisceau";
+import { h } from "@lilian1315/create-element";
 
 export interface TooltipPopup {
   arrow: HTMLElement;

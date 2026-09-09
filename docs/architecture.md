@@ -46,7 +46,7 @@ Each public component has a root export and a package subpath. Styles ship separ
 
 ## Component lifecycle and DOM ownership
 
-`create*` builds a complete DOM tree with `@lilian1315/create-element/faisceau`. Its controller is
+`create*` builds a complete DOM tree with `@lilian1315/create-element`. Its controller is
 idle until the tree is inserted and `mount(target)` or `start()` is called. Destroying it stops Zag
 and removes the owned root.
 
