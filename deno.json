@@ -1,7 +1,7 @@
 {
   "workspace": ["packages/*"],
   "imports": {
-    "faisceau-zag": "jsr:@lilian1315/faisceau-zag@^0.0.3",
+    "faisceau-zag": "jsr:@lilian1315/faisceau-zag@^0.0.4",
     "@vitest/browser-playwright": "npm:@vitest/browser-playwright@4.1.11",
     "bumpp": "npm:bumpp@^12.3.0",
     "playwright": "npm:playwright@^1.62.1",
