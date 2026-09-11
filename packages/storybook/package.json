@@ -9,8 +9,8 @@
   },
   "dependencies": {
     "@lilian1315/create-element": "catalog:",
-    "@lilian1315/faisceau-ui": "workspace:*",
-    "faisceau": "catalog:"
+    "faisceau": "catalog:",
+    "faisceau-ui": "workspace:*"
   },
   "devDependencies": {
     "@storybook/addon-a11y": "10.6.0",

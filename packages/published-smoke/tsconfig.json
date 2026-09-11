@@ -6,8 +6,8 @@
     "moduleResolution": "Bundler",
     "noEmit": true,
     "strict": true,
-    "types": ["node"],
+    "types": ["vite/client", "node"],
     "verbatimModuleSyntax": true
   },
-  "include": ["published-smoke.test.ts", "published-smoke.test-d.ts", "verify-exports.ts"]
+  "include": ["published-smoke.test.ts", "published-smoke.test-d.ts"]
 }

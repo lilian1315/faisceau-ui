@@ -1,15 +1,16 @@
-import "@lilian1315/faisceau-ui/styles.css";
+import "faisceau-ui/styles/index.css";
 
 import { afterEach, describe, expect, it } from "vite-plus/test";
-import {
-  createCheckbox,
-  createSelect,
-  createTooltip,
-  enhanceCombobox,
-} from "@lilian1315/faisceau-ui";
-import { createCombobox as createComboboxFromSubpath } from "@lilian1315/faisceau-ui/combobox";
-import { enhanceSelect as enhanceSelectFromSubpath } from "@lilian1315/faisceau-ui/select";
-import { createZagMachine, normalizeProps } from "@lilian1315/faisceau-zag";
+import { createCheckbox, createSelect, createTooltip, enhanceCombobox } from "faisceau-ui";
+import { createCheckbox as createCheckboxFromSubpath } from "faisceau-ui/checkbox";
+import { createCombobox as createComboboxFromSubpath } from "faisceau-ui/combobox";
+import { createDialog as createDialogFromSubpath } from "faisceau-ui/dialog";
+import { createDrawer as createDrawerFromSubpath } from "faisceau-ui/drawer";
+import { createField as createFieldFromSubpath } from "faisceau-ui/field";
+import { enhanceSelect as enhanceSelectFromSubpath } from "faisceau-ui/select";
+import { createToaster as createToasterFromSubpath } from "faisceau-ui/toast";
+import { createTooltip as createTooltipFromSubpath } from "faisceau-ui/tooltip";
+import { createZagMachine, normalizeProps } from "faisceau-zag";
 
 const items = [
   { label: "France", value: "fr" },
@@ -27,6 +28,12 @@ describe("published package contract", () => {
     combobox.destroy();
     expect(typeof enhanceCombobox).toBe("function");
     expect(typeof enhanceSelectFromSubpath).toBe("function");
+    expect(typeof createCheckboxFromSubpath).toBe("function");
+    expect(typeof createDialogFromSubpath).toBe("function");
+    expect(typeof createDrawerFromSubpath).toBe("function");
+    expect(typeof createFieldFromSubpath).toBe("function");
+    expect(typeof createToasterFromSubpath).toBe("function");
+    expect(typeof createTooltipFromSubpath).toBe("function");
     expect(createCheckbox({ label: "Terms" }).root).toBeInstanceOf(HTMLElement);
     expect(createTooltip({ content: "Help", trigger: "Info" }).root).toBeInstanceOf(HTMLElement);
     expect(typeof createZagMachine).toBe("function");

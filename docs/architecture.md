@@ -15,7 +15,9 @@ until real application usage provides evidence for a smaller stable FUI API.
 
 ## Package boundaries
 
-### `@lilian1315/faisceau-zag`
+### `faisceau-zag`
+
+The adapter uses the package name `faisceau-zag` on npm and `@lilian1315/faisceau-zag` on JSR.
 
 The framework adapter owns the seam between Zag, Faisceau, and DOM props:
 
@@ -30,19 +32,24 @@ Machine, props, service, and connector share one schema type so incompatible Zag
 connectors fail during type checking. `api` is read-only. The underlying typed `service` is exposed
 for Zag parent/child compositions such as Toast, not as an alternative DOM-binding path.
 
-### `@lilian1315/faisceau-ui`
+### `faisceau-ui`
+
+The component library uses the package name `faisceau-ui` on npm and `@lilian1315/faisceau-ui` on
+JSR.
 
 The UI package owns component markup, enhancement, form behavior, CSS, icons, and accessible labels.
 It depends on the adapter and uses a dedicated Zag package for each component when available.
 
-Each public component has a root export and a package subpath. Styles ship separately through
-`@lilian1315/faisceau-ui/styles.css`; importing JavaScript does not implicitly inject CSS.
+Each public component has a root export and a package subpath in both registries. The npm package
+also ships styles separately through `faisceau-ui/styles/index.css`; importing JavaScript does not
+implicitly inject CSS. JSR exposes the TypeScript modules only because its package exports do not
+support CSS module targets.
 
 ### Private packages
 
 - `storybook` documents constructed and enhanced variants in TSX and runs the accessibility addon.
-- `published-smoke` validates files, subpath resolution, generated declarations, CSS inclusion, and
-  one real Chrome interaction through the public package surface.
+- `published-smoke` imports the built ESM and declaration surfaces, checks CSS inclusion, and runs
+  one real Chrome interaction through the public package exports.
 
 ## Component lifecycle and DOM ownership
 
@@ -114,5 +121,19 @@ Adapter conformance tests cover controlled props, delayed effects, cleanup, and 
 Type tests live in `*.test-d.ts` and are enabled in package configuration.
 
 Source tests do not prove the package is publishable. Any public entry change must also update and
-pass `published-smoke`, which checks the packed files and imports the generated ESM/declaration
-subpaths as a consumer would.
+pass `published-smoke`, which imports the generated ESM/declaration subpaths as a consumer would.
+Package builds separately run Publint against the npm manifest and compare its code exports with the
+JSR manifest.
+
+## Publication model
+
+Each public library has two manifests. `package.json` describes the built ESM package published to
+npm, while `jsr.json` exposes the TypeScript source published to JSR. CSS remains npm-only. The
+manifest versions move together.
+The root `deno.json` supplies JSR and npm dependency mappings for the Deno workspace and is generated
+from the package manifests plus `pnpm-workspace.yaml`.
+
+The GitHub Actions workflow publishes one package at a time. A tag named `faisceau-ui@<version>` or
+`faisceau-zag@<version>` selects the package; a manual run requires the same choice explicitly. The
+workflow rejects mismatched tag, npm-manifest, and JSR-manifest versions, runs the complete `ready`
+gate, then publishes to JSR and npm with OIDC.

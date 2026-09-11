@@ -1,18 +1,21 @@
 {
-  "name": "faisceau-ui",
   "version": "0.0.0",
   "private": true,
   "type": "module",
   "scripts": {
-    "ready": "vp check && vp run -r test && vp run -r build && vp run published-smoke#smoke",
-    "prepare": "vp config"
+    "ready": "vp check && vpr -r build && vpr -r test",
+    "prepare": "vp config",
+    "release:zag": "vp exec -F faisceau-zag bumpp --all -x 'node ../../scripts/generate-deno-config.ts' -c 'release faisceau-zag@' -t faisceau-zag@",
+    "release:ui": "vp exec -F faisceau-ui bumpp --all -x 'node ../../scripts/generate-deno-config.ts' -c 'release faisceau-ui@' -t faisceau-ui@"
   },
   "devDependencies": {
     "@vitest/browser-playwright": "catalog:",
+    "bumpp": "catalog:",
     "playwright": "catalog:",
     "vite": "catalog:",
     "vite-plus": "catalog:",
-    "vitest": "catalog:"
+    "vitest": "catalog:",
+    "yaml": "catalog:"
   },
   "devEngines": {
     "packageManager": {

@@ -1,5 +1,5 @@
 import { h } from "@lilian1315/create-element";
-import { createZagMachine } from "@lilian1315/faisceau-zag";
+import { createZagMachine } from "faisceau-zag";
 import * as tooltip from "@zag-js/tooltip";
 
 import { addFuiClasses, captureAttributes, createId, getLookupRoot } from "../shared/index.js";

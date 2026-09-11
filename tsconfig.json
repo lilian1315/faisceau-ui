@@ -2,12 +2,7 @@
   "compilerOptions": {
     "target": "ES2022",
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
-    "paths": {
-      "@lilian1315/faisceau-ui": ["./packages/faisceau-ui/src/index.ts"],
-      "@lilian1315/faisceau-ui/combobox": ["./packages/faisceau-ui/src/combobox/index.ts"],
-      "@lilian1315/faisceau-ui/select": ["./packages/faisceau-ui/src/select/index.ts"],
-      "@lilian1315/faisceau-zag": ["./packages/faisceau-zag/src/index.ts"]
-    },
+    "types": ["vite/client"],
     "noEmit": true,
     "module": "ESNext",
     "moduleResolution": "Bundler",

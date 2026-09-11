@@ -1,5 +1,5 @@
 import { h } from "@lilian1315/create-element";
-import { createZagMachine } from "@lilian1315/faisceau-zag";
+import { createZagMachine } from "faisceau-zag";
 import * as dialog from "@zag-js/dialog";
 
 import {

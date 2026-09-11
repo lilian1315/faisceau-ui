@@ -1,4 +1,4 @@
-import { createTooltip, enhanceTooltip } from "@lilian1315/faisceau-ui";
+import { createTooltip, enhanceTooltip } from "faisceau-ui";
 import type { Meta, StoryObj } from "@storybook/html-vite";
 
 import { asDom, createStoryShell, trackController } from "./story.tsx";

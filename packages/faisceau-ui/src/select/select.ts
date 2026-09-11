@@ -1,4 +1,4 @@
-import { createZagMachine } from "@lilian1315/faisceau-zag";
+import { createZagMachine } from "faisceau-zag";
 import * as select from "@zag-js/select";
 import { effect } from "faisceau";
 

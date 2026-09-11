@@ -1,0 +1,83 @@
+name: Publish package to npm and JSR
+
+on:
+  push:
+    tags:
+      - "faisceau-ui@*.*.*"
+      - "faisceau-zag@*.*.*"
+  workflow_dispatch:
+    inputs:
+      package:
+        description: Package to publish at the version declared in its manifests
+        required: true
+        type: choice
+        options:
+          - faisceau-ui
+          - faisceau-zag
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: publish
+    permissions:
+      contents: read
+      id-token: write # Required for OIDC
+    steps:
+      - uses: actions/checkout@v6
+      - uses: voidzero-dev/setup-vp@v1
+        with:
+          cache: true
+          run-install: true
+
+      - name: Resolve publish target
+        id: target
+        env:
+          DISPATCH_PACKAGE: ${{ inputs.package }}
+        run: |
+          set -euo pipefail
+
+          if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then
+            package="$DISPATCH_PACKAGE"
+          else
+            package="${GITHUB_REF_NAME%@*}"
+            tag_version="${GITHUB_REF_NAME##*@}"
+          fi
+
+          case "$package" in
+            faisceau-ui | faisceau-zag) directory="packages/$package" ;;
+            *) echo "error: unknown package '$package'" >&2; exit 1 ;;
+          esac
+
+          npm_version=$(node -p "require('./$directory/package.json').version")
+          jsr_version=$(node -p "require('./$directory/jsr.json').version")
+
+          if [ "$npm_version" != "$jsr_version" ]; then
+            echo "error: $directory/package.json and jsr.json declare different versions" >&2
+            exit 1
+          fi
+
+          if [ "$GITHUB_EVENT_NAME" != "workflow_dispatch" ] && [ "$tag_version" != "$npm_version" ]; then
+            echo "error: tag version $tag_version does not match $package version $npm_version" >&2
+            exit 1
+          fi
+
+          echo "directory=$directory" >> "$GITHUB_OUTPUT"
+          echo "package=$package" >> "$GITHUB_OUTPUT"
+          echo "version=$npm_version" >> "$GITHUB_OUTPUT"
+
+      - name: Install Chromium
+        run: vp exec playwright install --with-deps chromium
+
+      - name: Validate workspace
+        run: vp run ready
+
+      - name: Publish to JSR
+        working-directory: ${{ steps.target.outputs.directory }}
+        run: vpx jsr publish
+
+      - name: Publish to npm
+        run: >-
+          vp pm publish "${{ steps.target.outputs.directory }}"
+          --no-git-checks
+          --access public
+          --provenance

@@ -1,4 +1,4 @@
-import { createSelect, enhanceSelect } from "@lilian1315/faisceau-ui";
+import { createSelect, enhanceSelect } from "faisceau-ui";
 import type { Meta, StoryObj } from "@storybook/html-vite";
 
 import { asDom, createStoryShell, formatValues, trackController } from "./story.tsx";

@@ -1,4 +1,4 @@
-import { createCombobox, enhanceCombobox } from "@lilian1315/faisceau-ui";
+import { createCombobox, enhanceCombobox } from "faisceau-ui";
 import type { Meta, StoryObj } from "@storybook/html-vite";
 
 import { asDom, createStoryShell, formatValues, trackController } from "./story.tsx";

@@ -3,9 +3,12 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
+  "scripts": {
+    "test": "vp test"
+  },
   "dependencies": {
-    "@lilian1315/faisceau-ui": "workspace:*",
-    "@lilian1315/faisceau-zag": "workspace:*"
+    "faisceau-ui": "workspace:*",
+    "faisceau-zag": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "catalog:",

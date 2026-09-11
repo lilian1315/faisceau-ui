@@ -1,5 +1,5 @@
 {
-  "name": "@lilian1315/faisceau-zag",
+  "name": "faisceau-zag",
   "version": "0.0.0",
   "description": "Faisceau bindings for Zag.js machines and DOM props.",
   "license": "MIT",
@@ -9,10 +9,7 @@
   "type": "module",
   "sideEffects": false,
   "exports": {
-    ".": {
-      "types": "./dist/index.d.mts",
-      "import": "./dist/index.mjs"
-    },
+    ".": "./dist/index.mjs",
     "./package.json": "./package.json"
   },
   "publishConfig": {
@@ -33,7 +30,9 @@
     "@zag-js/tooltip": "catalog:",
     "@zag-js/vanilla": "catalog:",
     "faisceau": "catalog:",
+    "jsr-exports-lint": "catalog:",
     "playwright": "catalog:",
+    "publint": "catalog:",
     "vitest": "catalog:"
   },
   "peerDependencies": {

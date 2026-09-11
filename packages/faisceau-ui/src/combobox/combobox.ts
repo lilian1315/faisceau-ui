@@ -1,5 +1,5 @@
 import { h } from "@lilian1315/create-element";
-import { createZagMachine } from "@lilian1315/faisceau-zag";
+import { createZagMachine } from "faisceau-zag";
 import * as combobox from "@zag-js/combobox";
 import { effect } from "faisceau";
 

@@ -7,35 +7,48 @@ Toast. Chaque composant peut construire son propre DOM ou adopter un markup HTML
 
 ## Architecture
 
-Le monorepo contient deux bibliothèques publiables :
+Le monorepo contient deux bibliothèques destinées à être publiées sous un nom non scopé sur npm et
+sous le scope `@lilian1315` sur JSR :
 
-- `@lilian1315/faisceau-zag` : pont générique entre une machine Zag, les valeurs réactives Faisceau et des éléments DOM. Il gère le cycle de vie, les mises à jour et l'application réactive des props Zag.
-- `@lilian1315/faisceau-ui` : composants, markup et styles. Il utilise le pont précédent et une
-  machine Zag dédiée pour chaque composant lorsqu'elle existe.
+- `faisceau-zag` sur npm, `@lilian1315/faisceau-zag` sur JSR : pont générique entre une machine
+  Zag, les valeurs réactives Faisceau et des éléments DOM. Il gère le cycle de vie, les mises à
+  jour et l'application réactive des props Zag.
+- `faisceau-ui` sur npm, `@lilian1315/faisceau-ui` sur JSR : composants, markup et styles. Il
+  utilise le pont précédent et une machine Zag dédiée pour chaque composant lorsqu'elle existe.
 
-Le package privé `published-smoke` vérifie les artefacts et exports tels qu'ils seront consommés après publication.
+Le package privé `published-smoke` importe les sorties construites par leurs points d'entrée publics,
+vérifie leurs types et exécute une interaction réelle dans Chrome.
 
 ## Installation
 
 ```bash
-pnpm add @lilian1315/faisceau-ui
+pnpm add faisceau-ui
 ```
 
 Importer une fois la feuille de styles globale depuis le point d'entrée de l'application :
 
 ```ts
-import "@lilian1315/faisceau-ui/styles.css";
+import "faisceau-ui/styles/index.css";
 ```
 
 Chaque composant est également disponible depuis son sous-chemin, par exemple
-`@lilian1315/faisceau-ui/select`, `@lilian1315/faisceau-ui/dialog` ou
-`@lilian1315/faisceau-ui/toast`.
+`faisceau-ui/select`, `faisceau-ui/dialog` ou
+`faisceau-ui/toast`.
 
 Pour utiliser directement le pont de bas niveau :
 
 ```bash
-pnpm add @lilian1315/faisceau-zag @zag-js/vanilla faisceau
+pnpm add faisceau-zag @zag-js/vanilla faisceau
 ```
+
+Après publication, les mêmes bibliothèques pourront être ajoutées depuis JSR avec Deno :
+
+```bash
+deno add jsr:@lilian1315/faisceau-ui
+deno add jsr:@lilian1315/faisceau-zag
+```
+
+JSR distribue les modules TypeScript. La feuille de styles CSS est une entrée propre au package npm.
 
 Le pont suit l'adapter Vanilla officiel et déclare ses runtimes en peer dependencies. Cette
 version utilise Zag `2.0.0-next.2` et Faisceau 0.3.x. Le projet cible uniquement les navigateurs
@@ -46,8 +59,8 @@ modernes ; le rendu serveur ne fait pas partie de son contrat.
 `createSelect` construit le markup avec `@lilian1315/create-element`. Le contrôleur reste arrêté jusqu'à son montage :
 
 ```ts
-import { createSelect } from "@lilian1315/faisceau-ui";
-import "@lilian1315/faisceau-ui/styles.css";
+import { createSelect } from "faisceau-ui";
+import "faisceau-ui/styles/index.css";
 
 const select = createSelect({
   label: "Mode d'affichage",
@@ -77,7 +90,7 @@ Par défaut, le menu chevauche le contrôle à l'ouverture afin d'aligner le tex
 La Combobox filtre par défaut les libellés sans tenir compte de la casse. Une fonction `filter` permet de remplacer ce comportement.
 
 ```ts
-import { createCombobox } from "@lilian1315/faisceau-ui";
+import { createCombobox } from "faisceau-ui";
 
 const combobox = createCombobox({
   label: "Commande",
@@ -177,7 +190,7 @@ reset du formulaire.
 ```
 
 ```ts
-import { enhanceSelect } from "@lilian1315/faisceau-ui";
+import { enhanceSelect } from "faisceau-ui";
 
 const select = enhanceSelect(document.querySelector<HTMLElement>("#mode-select")!);
 ```
@@ -204,7 +217,7 @@ sélectionnable normal.
 ```
 
 ```ts
-import { enhanceCombobox } from "@lilian1315/faisceau-ui";
+import { enhanceCombobox } from "faisceau-ui";
 
 const combobox = enhanceCombobox(document.querySelector<HTMLElement>("#command-combobox")!, {
   emptyLabel: "Aucun résultat",
@@ -220,7 +233,7 @@ seule l'option vide portant `data-placeholder` est réservée au placeholder.
 `createCheckbox` construit un contrôle relié à un véritable `input[type="checkbox"]`, compatible avec `FormData`, `required` et le reset natif :
 
 ```ts
-import { createCheckbox } from "@lilian1315/faisceau-ui";
+import { createCheckbox } from "faisceau-ui";
 
 createCheckbox({
   label: "Accepter les conditions",
@@ -243,7 +256,7 @@ Pour l'enhancement, le `Field` et le contrôle visuel sont déjà présents :
 ```
 
 ```ts
-import { enhanceCheckbox } from "@lilian1315/faisceau-ui";
+import { enhanceCheckbox } from "faisceau-ui";
 
 enhanceCheckbox(document.querySelector<HTMLElement>("#newsletter")!);
 ```
@@ -253,7 +266,7 @@ enhanceCheckbox(document.querySelector<HTMLElement>("#newsletter")!);
 `createTooltip` génère un bouton et son infobulle accessible. `enhanceTooltip` peut utiliser le `title` d'un trigger existant ; l'attribut est temporairement retiré pour éviter la double infobulle puis restauré par `destroy()`.
 
 ```ts
-import { createTooltip, enhanceTooltip } from "@lilian1315/faisceau-ui";
+import { createTooltip, enhanceTooltip } from "faisceau-ui";
 
 createTooltip({ content: "Créer un document", trigger: "Créer" }).mount(document.body);
 enhanceTooltip(document.querySelector<HTMLElement>("[title]")!);
@@ -267,7 +280,7 @@ tandis que `enhance*` part d'un trigger et d'un contenu existants marqués avec
 il expose directement `swipeDirection`, les snap points, le grabber et une zone de swipe optionnelle.
 
 ```ts
-import { createDialog, createDrawer, createToaster } from "@lilian1315/faisceau-ui";
+import { createDialog, createDrawer, createToaster } from "faisceau-ui";
 
 createDialog({ trigger: "Ouvrir", title: "Profil", content: "Contenu" }).mount(document.body);
 createDrawer({
@@ -346,11 +359,15 @@ vp check
 vp run -r test
 vp run -r build
 
-# Exécuter toute la validation, y compris le contrat du package publié dans Chrome
+# Exécuter toute la validation, y compris les imports publics construits dans Chrome
 vp run ready
 
 # Lancer le site de démonstration
 vp run dev
 ```
 
-Les scripts `build` des bibliothèques utilisent `vp pack`, la commande Vite+ destinée aux packages publiables.
+Les scripts `build` des bibliothèques utilisent `vp pack`, la commande Vite+ destinée aux packages
+publiables. Chaque build vérifie le manifeste npm avec Publint et la correspondance entre les exports
+npm et JSR. Le workflow de publication accepte les tags `faisceau-ui@<version>` et
+`faisceau-zag@<version>` après avoir vérifié que `package.json`, `jsr.json` et le tag déclarent la
+même version.

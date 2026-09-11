@@ -1,0 +1,21 @@
+{
+  "$schema": "https://jsr.io/schema/config-file.v1.json",
+  "name": "@lilian1315/faisceau-ui",
+  "version": "0.0.0",
+  "license": "MIT",
+  "exports": {
+    ".": "./src/index.ts",
+    "./checkbox": "./src/checkbox/index.ts",
+    "./combobox": "./src/combobox/index.ts",
+    "./dialog": "./src/dialog/index.ts",
+    "./drawer": "./src/drawer/index.ts",
+    "./field": "./src/field/index.ts",
+    "./select": "./src/select/index.ts",
+    "./toast": "./src/toast/index.ts",
+    "./tooltip": "./src/tooltip/index.ts",
+    "./styles/index.css": "./src/styles/index.css"
+  },
+  "publish": {
+    "include": ["src/**/*.ts", "src/styles/**/*.css"]
+  }
+}
