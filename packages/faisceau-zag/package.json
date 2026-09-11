@@ -27,11 +27,14 @@
     "@zag-js/core": "catalog:"
   },
   "devDependencies": {
+    "@vitest/browser-playwright": "catalog:",
     "@zag-js/checkbox": "catalog:",
     "@zag-js/combobox": "catalog:",
     "@zag-js/tooltip": "catalog:",
     "@zag-js/vanilla": "catalog:",
-    "faisceau": "catalog:"
+    "faisceau": "catalog:",
+    "playwright": "catalog:",
+    "vitest": "catalog:"
   },
   "peerDependencies": {
     "@zag-js/vanilla": "2.0.0-next.2",

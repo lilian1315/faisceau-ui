@@ -74,5 +74,10 @@
     "@zag-js/toast": "catalog:",
     "@zag-js/tooltip": "catalog:",
     "faisceau": "catalog:"
+  },
+  "devDependencies": {
+    "@vitest/browser-playwright": "catalog:",
+    "playwright": "catalog:",
+    "vitest": "catalog:"
   }
 }

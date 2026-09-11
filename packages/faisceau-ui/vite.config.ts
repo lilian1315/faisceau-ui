@@ -6,6 +6,7 @@ const adapterSource = fileURLToPath(new URL("../faisceau-zag/src/index.ts", impo
 
 export default defineConfig({
   pack: {
+    deps: { resolveDepSubpath: true },
     dts: {
       tsconfig: "tsconfig.build.json",
     },
