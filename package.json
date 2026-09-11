@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "ready": "vp check && vpr -r build && vpr -r test",
+    "ready": "vpr -r build && vp check && vpr -r test",
     "prepare": "vp config",
     "release:zag": "vp exec -F faisceau-zag bumpp --all -x 'node ../../scripts/generate-deno-config.ts' -c 'release faisceau-zag@' -t faisceau-zag@",
     "release:ui": "vp exec -F faisceau-ui bumpp --all -x 'node ../../scripts/generate-deno-config.ts' -c 'release faisceau-ui@' -t faisceau-ui@"
