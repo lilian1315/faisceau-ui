@@ -12,6 +12,7 @@ const denoConfigPath = resolve(root, "deno.json");
 const workspacePath = resolve(root, "pnpm-workspace.yaml");
 
 const workspace = parse(readFileSync(workspacePath, "utf8"));
+const rootManifest = JSON.parse(readFileSync(resolve(root, "package.json"), "utf8"));
 
 const workspacePackages = readdirSync(resolve(root, "packages"), { withFileTypes: true })
   .filter((entry) => entry.isDirectory())
@@ -27,9 +28,16 @@ const workspacePackages = readdirSync(resolve(root, "packages"), { withFileTypes
       jsr: JSON.parse(readFileSync(resolve(directory, "jsr.json"), "utf8")),
     };
   });
-const dependencies = workspacePackages.flatMap(({ manifest }) =>
-  Object.entries({ ...manifest.dependencies, ...manifest.peerDependencies }),
-);
+const dependencies = [
+  ...Object.entries({ ...rootManifest.dependencies, ...rootManifest.devDependencies }),
+  ...workspacePackages.flatMap(({ manifest }) =>
+    Object.entries({
+      ...manifest.dependencies,
+      ...manifest.devDependencies,
+      ...manifest.peerDependencies,
+    }),
+  ),
+];
 const workspaceImports = Object.fromEntries(
   dependencies
     .filter(([, requirement]) => String(requirement).startsWith("workspace:"))
@@ -41,10 +49,12 @@ const workspaceImports = Object.fromEntries(
 );
 const npmImports = Object.fromEntries(
   dependencies
-    .filter(([, requirement]) => requirement === "catalog:")
-    .map(([name]) => {
-      const version = workspace.catalog[name];
-      if (typeof version !== "string") throw new Error(`Missing catalog version for ${name}`);
+    .filter(([, requirement]) => !String(requirement).startsWith("workspace:"))
+    .map(([name, requirement]) => {
+      const version = requirement === "catalog:" ? workspace.catalog[name] : requirement;
+      if (typeof version !== "string")
+        throw new Error(`Invalid dependency requirement for ${name}`);
+      if (version.startsWith("npm:") || version.startsWith("jsr:")) return [name, version];
       return [name, `npm:${name}@${version}`];
     }),
 );
