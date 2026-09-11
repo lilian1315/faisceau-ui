@@ -1,6 +1,6 @@
 {
   "name": "faisceau-zag",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Faisceau bindings for Zag.js machines and DOM props.",
   "license": "MIT",
   "repository": {
