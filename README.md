@@ -46,9 +46,17 @@ Après publication, les mêmes bibliothèques pourront être ajoutées depuis JS
 ```bash
 deno add jsr:@lilian1315/faisceau-ui
 deno add jsr:@lilian1315/faisceau-zag
+deno add npm:faisceau-ui
 ```
 
-JSR distribue les modules TypeScript. La feuille de styles CSS est une entrée propre au package npm.
+JSR distribue les modules TypeScript, mais n'accepte pas une feuille CSS comme point d'entrée. Dans
+une application Deno qui utilise un bundler prenant en charge le CSS, importez donc l'API depuis JSR
+et la feuille de styles depuis le package npm :
+
+```ts
+import { createSelect } from "@lilian1315/faisceau-ui";
+import "faisceau-ui/styles/index.css";
+```
 
 Le pont suit l'adapter Vanilla officiel et déclare ses runtimes en peer dependencies. Cette
 version utilise Zag `2.0.0-next.2` et Faisceau 0.3.x. Le projet cible uniquement les navigateurs
