@@ -15,7 +15,6 @@ storybook-static
 *.local
 architecture-review-*.html
 .pnpm-store
-.tmp-zag/
 
 # dotenv environment variable files
 .env
