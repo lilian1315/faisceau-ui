@@ -5,7 +5,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/lilian1315/faisceau-zag.git"
+    "url": "git+https://github.com/lilian1315/faisceau-ui.git"
   },
   "files": [
     "dist"
