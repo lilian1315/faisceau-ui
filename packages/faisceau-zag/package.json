@@ -3,6 +3,10 @@
   "version": "0.0.2",
   "description": "Faisceau bindings for Zag.js machines and DOM props.",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lilian1315/create-element.git"
+  },
   "files": [
     "dist"
   ],

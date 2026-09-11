@@ -3,6 +3,10 @@
   "version": "0.0.0",
   "description": "Accessible vanilla DOM components powered by Faisceau and Zag.js.",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lilian1315/create-element.git"
+  },
   "files": [
     "dist",
     "src/styles"
