@@ -55,8 +55,8 @@ const meta = {
 export default meta;
 type Story = StoryObj<TooltipStoryArgs>;
 
-export const CreeDeToutesPieces: Story = {
-  name: "Créé de toutes pièces",
+export const create: Story = {
+  name: "create()",
   render: (args) => {
     const story = createStoryShell({
       description: "Survolez le bouton ou donnez-lui le focus pour afficher le contenu positionné.",
@@ -84,8 +84,8 @@ export const CreeDeToutesPieces: Story = {
   },
 };
 
-export const TriggerExistant: Story = {
-  name: "Enhancement d’un trigger existant",
+export const enhance: Story = {
+  name: "enhance()",
   render: (args) => {
     const story = createStoryShell({
       description: "L’attribut title fournit le contenu puis est restauré au teardown.",
@@ -109,10 +109,4 @@ export const TriggerExistant: Story = {
     story.setSource(`<button type="button" title="${args.content}">${args.trigger}</button>`);
     return story.root;
   },
-};
-
-export const SansDelai: Story = {
-  name: "Sans délai",
-  args: { closeDelay: 0, openDelay: 0 },
-  render: (args) => CreeDeToutesPieces.render!(args, {} as never),
 };

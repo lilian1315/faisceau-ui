@@ -60,8 +60,8 @@ const meta = {
 export default meta;
 type Story = StoryObj<SelectStoryArgs>;
 
-export const CreeDeToutesPieces: Story = {
-  name: "Créé de toutes pièces",
+export const create: Story = {
+  name: "create()",
   render: (args) => {
     const story = createStoryShell({
       description:
@@ -94,8 +94,8 @@ export const CreeDeToutesPieces: Story = {
   },
 };
 
-export const MarkupExistant: Story = {
-  name: "Enhancement du markup existant",
+export const enhance: Story = {
+  name: "enhance()",
   args: { clearable: false, description: "Le script ne demande que le conteneur et son select." },
   render: (args) => {
     const story = createStoryShell({
@@ -143,69 +143,4 @@ export const MarkupExistant: Story = {
     story.output.textContent = `Valeur native initiale : ${nativeSelect.value}`;
     return story.root;
   },
-};
-
-export const SelectionMultiple: Story = {
-  name: "Sélection multiple",
-  args: { clearable: false, multiple: true },
-  render: (args) => CreeDeToutesPieces.render!(args, {} as never),
-};
-
-export const FormulaireNatif: Story = {
-  name: "Dans un formulaire natif",
-  args: { required: true },
-  render: (args) => {
-    const story = createStoryShell({
-      description:
-        "Soumission, required et reset passent par les API HTML standards du navigateur.",
-      eyebrow: "FormData · validity · reset",
-      title: "Contrat de formulaire natif",
-    });
-    const form = asDom<HTMLFormElement>(<form />);
-    const host = asDom<HTMLDivElement>(<div />);
-    const actions = asDom<HTMLDivElement>(
-      <div class="fui-story__actions">
-        <button class="fui-story__button" type="submit">
-          Envoyer
-        </button>
-        <button class="fui-story__button" type="reset">
-          Réinitialiser
-        </button>
-      </div>,
-    );
-    form.append(host, actions);
-    story.canvas.append(form);
-    const controller = createSelect({
-      ...args,
-      defaultValue: ["be"],
-      items: countries,
-      name: "country",
-    }).mount(host);
-    trackController(story.root, controller);
-    form.addEventListener("submit", (event) => {
-      event.preventDefault();
-      const values = [...new FormData(form).entries()];
-      story.output.textContent = `FormData : ${JSON.stringify(values)}`;
-    });
-    form.addEventListener("reset", () => {
-      queueMicrotask(() => {
-        story.output.textContent = `Après reset : ${formatValues(controller.api.peek().value)}`;
-      });
-    });
-    story.setSource(`<form>
-  <select name="country" required>…</select>
-  <button type="submit">Envoyer</button>
-  <button type="reset">Réinitialiser</button>
-</form>`);
-    return story.root;
-  },
-};
-
-export const EtatsEtValidation: Story = {
-  name: "États et validation",
-  args: {
-    description: "Une aide contextuelle est associée au trigger.",
-    required: true,
-  },
-  render: (args) => CreeDeToutesPieces.render!(args, {} as never),
 };

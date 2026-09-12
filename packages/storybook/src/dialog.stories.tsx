@@ -7,7 +7,7 @@ const meta = { title: "Dialog/Anatomie" } satisfies Meta;
 export default meta;
 type Story = StoryObj;
 
-export const CreeDeToutesPieces: Story = {
+export const create: Story = {
   render: () => {
     const story = createStoryShell({
       eyebrow: "createDialog",
@@ -29,7 +29,7 @@ export const CreeDeToutesPieces: Story = {
   },
 };
 
-export const MarkupExistant: Story = {
+export const enhance: Story = {
   render: () => {
     const story = createStoryShell({
       eyebrow: "enhanceDialog",

@@ -7,7 +7,8 @@ const meta = { title: "Toast/Anatomie" } satisfies Meta;
 export default meta;
 type Story = StoryObj;
 
-export const TypesEtAction: Story = {
+export const create: Story = {
+  name: "create()",
   render: () => {
     const story = createStoryShell({
       eyebrow: "createToaster",
@@ -52,7 +53,8 @@ export const TypesEtAction: Story = {
   },
 };
 
-export const RegionExistante: Story = {
+export const enhance: Story = {
+  name: "enhance()",
   render: () => {
     const story = createStoryShell({
       eyebrow: "enhanceToaster",

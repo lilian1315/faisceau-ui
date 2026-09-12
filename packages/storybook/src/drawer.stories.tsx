@@ -16,7 +16,7 @@ const meta = {
 export default meta;
 type Story = StoryObj<Args>;
 
-export const CreeDeToutesPieces: Story = {
+export const create: Story = {
   render: (args) => {
     const story = createStoryShell({
       eyebrow: "createDrawer",
@@ -45,7 +45,7 @@ export const CreeDeToutesPieces: Story = {
   },
 };
 
-export const MarkupExistant: Story = {
+export const enhance: Story = {
   render: (args) => {
     const story = createStoryShell({
       eyebrow: "enhanceDrawer",

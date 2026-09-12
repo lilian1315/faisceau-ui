@@ -64,8 +64,8 @@ const meta = {
 export default meta;
 type Story = StoryObj<ComboboxStoryArgs>;
 
-export const CreeDeToutesPieces: Story = {
-  name: "Créée de toutes pièces",
+export const create: Story = {
+  name: "create()",
   render: (args) => {
     const story = createStoryShell({
       description:
@@ -97,8 +97,8 @@ export const CreeDeToutesPieces: Story = {
   },
 };
 
-export const MarkupExistant: Story = {
-  name: "Enhancement du markup existant",
+export const enhance: Story = {
+  name: "enhance()",
   render: (args) => {
     const story = createStoryShell({
       description:
@@ -137,73 +137,6 @@ export const MarkupExistant: Story = {
     nativeSelect.addEventListener("change", () => {
       story.output.textContent = `Événement change · value = ${nativeSelect.value}`;
     });
-    return story.root;
-  },
-};
-
-export const SelectionMultiple: Story = {
-  name: "Sélection multiple et tags",
-  args: { multiple: true },
-  render: (args) => CreeDeToutesPieces.render!(args, {} as never),
-};
-
-export const EtatVide: Story = {
-  name: "Filtre sans résultat",
-  parameters: {
-    docs: {
-      description: {
-        story: "Ouvrez la liste puis saisissez une valeur absente pour observer l’état vide.",
-      },
-    },
-  },
-  render: (args) => CreeDeToutesPieces.render!(args, {} as never),
-};
-
-export const FormulaireNatif: Story = {
-  name: "Dans un formulaire natif",
-  args: { multiple: true, required: true },
-  render: (args) => {
-    const story = createStoryShell({
-      description: "En mode multiple, FormData reçoit une entrée par option sélectionnée.",
-      eyebrow: "FormData · multiple · reset",
-      title: "Contrat de formulaire natif",
-    });
-    const form = asDom<HTMLFormElement>(<form />);
-    const host = asDom<HTMLDivElement>(<div />);
-    const actions = asDom<HTMLDivElement>(
-      <div class="fui-story__actions">
-        <button class="fui-story__button" type="submit">
-          Envoyer
-        </button>
-        <button class="fui-story__button" type="reset">
-          Réinitialiser
-        </button>
-      </div>,
-    );
-    form.append(host, actions);
-    story.canvas.append(form);
-    const controller = createCombobox({
-      ...args,
-      defaultValue: ["paris", "lyon"],
-      getRemoveLabel: (item) => `Retirer ${item.label}`,
-      items: cities,
-      name: "cities",
-    }).mount(host);
-    trackController(story.root, controller);
-    form.addEventListener("submit", (event) => {
-      event.preventDefault();
-      story.output.textContent = `FormData : ${JSON.stringify([...new FormData(form).entries()])}`;
-    });
-    form.addEventListener("reset", () => {
-      queueMicrotask(() => {
-        story.output.textContent = `Après reset : ${formatValues(controller.api.peek().value)}`;
-      });
-    });
-    story.setSource(`<form>
-  <select name="cities" multiple required>…</select>
-  <button type="submit">Envoyer</button>
-  <button type="reset">Réinitialiser</button>
-</form>`);
     return story.root;
   },
 };

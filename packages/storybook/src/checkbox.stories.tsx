@@ -49,8 +49,8 @@ const meta = {
 export default meta;
 type Story = StoryObj<CheckboxStoryArgs>;
 
-export const CreeDeToutesPieces: Story = {
-  name: "Créée de toutes pièces",
+export const create: Story = {
+  name: "create()",
   render: (args) => {
     const story = createStoryShell({
       description:
@@ -83,8 +83,8 @@ export const CreeDeToutesPieces: Story = {
   },
 };
 
-export const MarkupExistant: Story = {
-  name: "Enhancement du markup existant",
+export const enhance: Story = {
+  name: "enhance()",
   render: (args) => {
     const story = createStoryShell({
       description:
@@ -118,58 +118,6 @@ export const MarkupExistant: Story = {
   </div>
   <p class="fui-field-description">${args.description}</p>
 </div>`);
-    return story.root;
-  },
-};
-
-export const FormulaireNatif: Story = {
-  name: "Dans un formulaire natif",
-  args: { checked: true, required: true },
-  render: (args) => {
-    const story = createStoryShell({
-      description:
-        "Soumettez puis réinitialisez le formulaire pour observer le contrat HTML natif.",
-      eyebrow: "FormData · validity · reset",
-      title: "Contrat de formulaire natif",
-    });
-    const form = asDom<HTMLFormElement>(
-      <form>
-        <div data-host />
-        <div class="fui-story__actions">
-          <button class="fui-story__button" type="submit">
-            Envoyer
-          </button>
-          <button class="fui-story__button" type="reset">
-            Réinitialiser
-          </button>
-        </div>
-      </form>,
-    );
-    story.canvas.append(form);
-    const host = form.querySelector<HTMLElement>("[data-host]")!;
-    const { checked, ...options } = args;
-    const controller = createCheckbox({
-      ...options,
-      defaultChecked: checked,
-      label: args.label,
-      name: "terms",
-      value: "accepted",
-    }).mount(host);
-    trackController(story.root, controller);
-    form.addEventListener("submit", (event) => {
-      event.preventDefault();
-      story.output.textContent = `FormData : ${JSON.stringify([...new FormData(form).entries()])}`;
-    });
-    form.addEventListener("reset", () => {
-      queueMicrotask(() => {
-        story.output.textContent = `Après reset : checked = ${controller.api.peek().checked}`;
-      });
-    });
-    story.setSource(`<form>
-  <input type="checkbox" name="terms" value="accepted" required>
-  <button type="submit">Envoyer</button>
-  <button type="reset">Réinitialiser</button>
-</form>`);
     return story.root;
   },
 };
