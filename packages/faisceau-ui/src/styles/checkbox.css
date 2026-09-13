@@ -1,24 +1,30 @@
 @layer fui-components {
   .fui-checkbox {
-    gap: var(--fui-space-1-5);
-  }
-
-  .fui-checkbox {
-    display: inline-flex;
+    display: grid;
+    grid-template-columns: auto 1fr;
     align-items: center;
     inline-size: fit-content;
     min-block-size: var(--fui-control-height-coarse);
     gap: var(--fui-space-2);
     cursor: pointer;
     user-select: none;
+    > * {
+      grid-column: 2;
+    }
+  }
+
+  .fui-checkbox-control,
+  .fui-checkbox-input {
+    grid-column: 1;
   }
 
   .fui-checkbox-control {
-    display: inline-grid;
+    display: grid;
+    line-height: 0;
     place-items: center;
     inline-size: 1rem;
     block-size: 1rem;
-    flex: none;
+    overflow: hidden;
     border: var(--fui-border-width) solid var(--fui-color-border);
     border-radius: var(--fui-radius-sm);
     background: var(--fui-color-surface);
@@ -42,13 +48,14 @@
   }
 
   .fui-checkbox-indicator .fui-icon {
+    display: none;
     inline-size: 0.75rem;
     block-size: 0.75rem;
   }
 
-  .fui-checkbox-indicator[data-state="checked"] .fui-icon--minus,
-  .fui-checkbox-indicator[data-state="indeterminate"] .fui-icon--check {
-    display: none;
+  .fui-checkbox-indicator[data-state="checked"] .fui-icon--check,
+  .fui-checkbox-indicator[data-state="indeterminate"] .fui-icon--minus {
+    display: block;
   }
 
   .fui-checkbox[data-disabled] {

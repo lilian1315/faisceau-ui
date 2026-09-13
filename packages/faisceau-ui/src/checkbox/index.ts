@@ -1,7 +1,2 @@
 export { createCheckbox, enhanceCheckbox } from "./checkbox.ts";
-export type {
-  CheckboxApi,
-  CheckboxController,
-  CheckboxOptions,
-  EnhanceCheckboxOptions,
-} from "./types.ts";
+export type { CheckboxApi, CheckboxController, CheckboxProps } from "./types.ts";
