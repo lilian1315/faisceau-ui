@@ -27,7 +27,7 @@ describe("Checkbox", () => {
     expect(controller.root.querySelector("input.fui-checkbox-input")).not.toBeNull();
     expect(controller.root.querySelector(".fui-checkbox-control")).not.toBeNull();
     expect(controller.root.querySelector(".fui-checkbox-indicator")).not.toBeNull();
-    expect(controller.root.querySelector("span.fui-label")?.textContent).toBe("Newsletter");
+    expect(controller.root.querySelector("span.fui-field-label")?.textContent).toBe("Newsletter");
     expect(controller.root.querySelector("p.fui-field-description")?.textContent).toBe(
       "Monthly updates",
     );
@@ -61,7 +61,7 @@ describe("Checkbox", () => {
   it("enhances caller markup, starts immediately, then restores it", async () => {
     const root = document.createElement("label");
     root.className = "fui-checkbox consumer-root";
-    root.innerHTML = `<input type="checkbox" class="fui-checkbox-input" name="newsletter" checked><span class="fui-label">Newsletter</span>`;
+    root.innerHTML = `<input type="checkbox" class="fui-checkbox-input" name="newsletter" checked><span class="fui-field-label">Newsletter</span>`;
     document.body.append(root);
     const input = root.querySelector<HTMLInputElement>("input")!;
 

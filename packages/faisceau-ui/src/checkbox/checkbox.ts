@@ -58,7 +58,7 @@ function factory(root?: HTMLLabelElement, options?: CheckboxProps) {
     if (typeof mOptions.required === "undefined") mOptions.required = input.required;
     if (typeof mOptions.readOnly === "undefined") mOptions.readOnly = input.readOnly;
 
-    label = root.querySelector<HTMLSpanElement>("span.fui-label");
+    label = root.querySelector<HTMLSpanElement>("span.fui-field-label");
     description = root.querySelector<HTMLParagraphElement>("p.fui-field-description");
 
     [root, input, label, description]
@@ -67,7 +67,7 @@ function factory(root?: HTMLLabelElement, options?: CheckboxProps) {
   } else {
     root = h("label", { class: "fui-checkbox" });
     input = h("input", { class: "fui-checkbox-input" });
-    label = typeof options.label === "string" ? h("span", { class: "fui-label" }) : null;
+    label = typeof options.label === "string" ? h("span", { class: "fui-field-label" }) : null;
     description =
       typeof options.description === "string" ? h("p", { class: "fui-field-description" }) : null;
 
