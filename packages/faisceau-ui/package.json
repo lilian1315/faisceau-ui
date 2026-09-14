@@ -1,6 +1,6 @@
 {
   "name": "faisceau-ui",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Accessible vanilla DOM components powered by Faisceau and Zag.js.",
   "license": "MIT",
   "repository": {

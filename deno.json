@@ -1,7 +1,7 @@
 {
   "workspace": ["packages/*"],
   "imports": {
-    "faisceau-zag": "jsr:@lilian1315/faisceau-zag@^0.0.5",
+    "faisceau-zag": "jsr:@lilian1315/faisceau-zag@^0.0.6",
     "@vitest/browser-playwright": "npm:@vitest/browser-playwright@4.1.11",
     "bumpp": "npm:bumpp@^12.3.0",
     "playwright": "npm:playwright@^1.62.1",
@@ -11,17 +11,18 @@
     "yaml": "npm:yaml@^2.9.0",
     "@lilian1315/create-element": "npm:@lilian1315/create-element@0.13.1",
     "@lucide/icons": "npm:@lucide/icons@1.41.0",
-    "@zag-js/checkbox": "npm:@zag-js/checkbox@2.0.0-next.2",
-    "@zag-js/combobox": "npm:@zag-js/combobox@2.0.0-next.2",
-    "@zag-js/dialog": "npm:@zag-js/dialog@2.0.0-next.2",
-    "@zag-js/drawer": "npm:@zag-js/drawer@2.0.0-next.2",
-    "@zag-js/select": "npm:@zag-js/select@2.0.0-next.2",
-    "@zag-js/toast": "npm:@zag-js/toast@2.0.0-next.2",
-    "@zag-js/tooltip": "npm:@zag-js/tooltip@2.0.0-next.2",
+    "@zag-js/checkbox": "npm:@zag-js/checkbox@2.0.0-next.3",
+    "@zag-js/combobox": "npm:@zag-js/combobox@2.0.0-next.3",
+    "@zag-js/dialog": "npm:@zag-js/dialog@2.0.0-next.3",
+    "@zag-js/drawer": "npm:@zag-js/drawer@2.0.0-next.3",
+    "@zag-js/select": "npm:@zag-js/select@2.0.0-next.3",
+    "@zag-js/toast": "npm:@zag-js/toast@2.0.0-next.3",
+    "@zag-js/tooltip": "npm:@zag-js/tooltip@2.0.0-next.3",
     "faisceau": "npm:faisceau@^0.3.2",
     "jsr-exports-lint": "npm:jsr-exports-lint@^0.4.2",
     "publint": "npm:publint@^0.3.24",
-    "@zag-js/core": "npm:@zag-js/core@2.0.0-next.2",
-    "@zag-js/vanilla": "npm:@zag-js/vanilla@2.0.0-next.2"
+    "@zag-js/core": "npm:@zag-js/core@2.0.0-next.3",
+    "@zag-js/vanilla": "npm:@zag-js/vanilla@2.0.0-next.3",
+    "typescript": "npm:typescript@^7.0.2"
   }
 }
