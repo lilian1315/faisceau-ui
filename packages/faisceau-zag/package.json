@@ -37,10 +37,11 @@
     "jsr-exports-lint": "catalog:",
     "playwright": "catalog:",
     "publint": "catalog:",
+    "typescript": "catalog:",
     "vitest": "catalog:"
   },
   "peerDependencies": {
-    "@zag-js/vanilla": "2.0.0-next.2",
+    "@zag-js/vanilla": "2.0.0-next.3",
     "faisceau": "^0.3.2"
   }
 }

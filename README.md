@@ -59,7 +59,7 @@ import "faisceau-ui/styles/index.css";
 ```
 
 Le pont suit l'adapter Vanilla officiel et déclare ses runtimes en peer dependencies. Cette
-version utilise Zag `2.0.0-next.2` et Faisceau 0.3.x. Le projet cible uniquement les navigateurs
+version utilise Zag `2.0.0-next.3` et Faisceau 0.3.x. Le projet cible uniquement les navigateurs
 modernes ; le rendu serveur ne fait pas partie de son contrat.
 
 ## Créer un Select
