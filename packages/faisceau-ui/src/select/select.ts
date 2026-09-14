@@ -21,15 +21,21 @@ import {
   buildPopup,
 } from "./markup.ts";
 
-export function createSelect(options: SelectProps) {
+export function createSelect(options: SelectProps): SelectController {
   return factory(undefined, options);
 }
 
-export function enhanceSelect(root: HTMLDivElement, options?: EnhanceSelectProps) {
+export function enhanceSelect(
+  root: HTMLDivElement,
+  options?: EnhanceSelectProps,
+): SelectController {
   return factory(root, options);
 }
 
-function factory(root?: HTMLDivElement, options?: SelectProps | EnhanceSelectProps) {
+function factory(
+  root?: HTMLDivElement,
+  options?: SelectProps | EnhanceSelectProps,
+): SelectController {
   if (root && !root.classList.contains("fui-select")) {
     throw new Error("[Faisceau UI] Select enhance mode need a root with the `fui-select` class");
   }

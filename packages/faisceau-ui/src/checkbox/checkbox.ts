@@ -5,15 +5,18 @@ import type { CheckboxController, CheckboxProps } from "./types";
 import { createCheckIcon, createId, createMinusIcon, getLookupRoot } from "../shared";
 import { captureAttributes, captureChildNodes, insertAfter } from "../shared/dom";
 
-export function createCheckbox(options?: CheckboxProps) {
+export function createCheckbox(options?: CheckboxProps): CheckboxController {
   return factory(undefined, options);
 }
 
-export function enhanceCheckbox(root: HTMLLabelElement, options: CheckboxProps) {
+export function enhanceCheckbox(
+  root: HTMLLabelElement,
+  options: CheckboxProps,
+): CheckboxController {
   return factory(root, options);
 }
 
-function factory(root?: HTMLLabelElement, options?: CheckboxProps) {
+function factory(root?: HTMLLabelElement, options?: CheckboxProps): CheckboxController {
   if (root && !root.classList.contains("fui-checkbox")) {
     throw new Error(
       "[Faisceau UI] checkbox enhance mode need a root with the `fui-checkbox` class",
