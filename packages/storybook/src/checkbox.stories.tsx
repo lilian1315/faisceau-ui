@@ -1,4 +1,4 @@
-import { createCheckbox2, enhanceCheckbox2, type CheckboxProps } from "faisceau-ui";
+import { createCheckbox, enhanceCheckbox, type CheckboxProps } from "faisceau-ui";
 import { asDom } from "@lilian1315/create-element/faisceau/jsx-runtime";
 import type { Meta, StoryObj } from "@storybook/html-vite";
 
@@ -28,7 +28,7 @@ const meta = {
       },
     },
   },
-  title: "Checkbox2/Anatomie",
+  title: "Checkbox/Anatomie",
 } satisfies Meta<CheckboxStoryArgs>;
 
 export default meta;
@@ -52,7 +52,7 @@ export const create: Story = {
     });
     const host = h("div");
     story.canvas.append(host);
-    const controller = createCheckbox2({
+    const controller = createCheckbox({
       ...args,
       onCheckedChange: ({ checked }) => {
         story.output.textContent = `checked = ${String(checked)}`;
@@ -90,12 +90,7 @@ export const enhance: Story = {
     const source = root.outerHTML;
 
     story.canvas.append(root);
-    const controller = enhanceCheckbox2(root, args);
-
-    const destroy = asDom<"button">(<button onclick={() => controller.destroy()}>destroy</button>);
-    story.canvas.appendChild(h("br"));
-    story.canvas.appendChild(h("br"));
-    story.canvas.appendChild(destroy);
+    const controller = enhanceCheckbox(root, args);
 
     trackController(story.root, controller);
     story.setSource(source);

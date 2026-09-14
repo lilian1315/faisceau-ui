@@ -34,11 +34,6 @@ export type {
 } from "./field/index.ts";
 export { createCheckbox, enhanceCheckbox } from "./checkbox/index.ts";
 export type { CheckboxApi, CheckboxController, CheckboxProps } from "./checkbox/index.ts";
-export {
-  createCheckbox as createCheckbox2,
-  enhanceCheckbox as enhanceCheckbox2,
-  type CheckboxProps as Checkbox2Props,
-} from "./checkbox2/index.ts";
 export { createDialog, enhanceDialog } from "./dialog/index.ts";
 export type {
   DialogApi,
