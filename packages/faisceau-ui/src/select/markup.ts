@@ -43,7 +43,7 @@ export function buildControl(options: { clearable?: boolean; clearLabel?: string
 }
 
 /** Builds the standalone clear button appended next to the trigger. */
-export function buildClearTrigger(clearLabel?: string): HTMLButtonElement {
+function buildClearTrigger(clearLabel?: string): HTMLButtonElement {
   return h(
     "button",
     {
@@ -73,7 +73,7 @@ export function buildPopup(items: readonly FuiItem[]): SelectPopup {
 }
 
 /** Builds one popup row for an item. */
-export function buildItem(item: FuiItem): HTMLLIElement {
+function buildItem(item: FuiItem): HTMLLIElement {
   const text = h(
     "span",
     { class: "fui-select-item-text", data: { fuiPart: "item-text" } },

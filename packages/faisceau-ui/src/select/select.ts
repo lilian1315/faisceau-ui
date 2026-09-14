@@ -12,14 +12,7 @@ import {
   type FuiItemInput,
 } from "../shared/index.js";
 import { captureAttributes, captureChildNodes, insertAfter } from "../shared/dom.ts";
-import {
-  buildClearTrigger,
-  buildControl,
-  buildItem,
-  buildNativeSelect,
-  buildOptions,
-  buildPopup,
-} from "./markup.ts";
+import { buildControl, buildNativeSelect, buildOptions, buildPopup } from "./markup.ts";
 
 export function createSelect(options: SelectProps): SelectController {
   return factory(undefined, options);
@@ -87,62 +80,34 @@ function factory(
     root.append(nativeSelect);
   }
 
-  const label = ensureLabel(root, options.label, enhanceMode, generated, restores);
-  ensureDescription(root, options.description, enhanceMode, generated, restores);
-  const control = ensurePart(
+  const label = ensureText<HTMLLabelElement>(
     root,
-    ".fui-select-control",
-    () => buildControl(options).control,
-    nativeSelect,
+    "label.fui-field-label",
+    () => h("label", { class: "fui-field-label" }) as HTMLLabelElement,
+    "prepend",
+    options.label,
+    enhanceMode,
     generated,
+    restores,
   );
-  const trigger = ensurePart(
-    control,
-    ".fui-select-trigger",
-    () => buildControl(options).trigger,
-    null,
-    generated,
-  );
-  const valueText = ensurePart(
-    trigger,
-    ".fui-select-value",
-    () => buildControl(options).value,
-    null,
-    generated,
-  );
-  ensurePart(
-    trigger,
-    ".fui-select-indicator",
-    () => buildControl(options).indicator,
-    valueText,
-    generated,
-  );
-  const clearTrigger = ensureClearTrigger(control, options, generated, restores);
-  const positioner = ensurePart(
+  ensureText<HTMLParagraphElement>(
     root,
-    ".fui-select-positioner",
-    () => buildPopup(items).positioner,
-    control,
+    "p.fui-field-description",
+    () => h("p", { class: "fui-field-description" }) as HTMLParagraphElement,
+    "append",
+    options.description,
+    enhanceMode,
     generated,
+    restores,
   );
-  const content = ensurePart(
-    positioner,
-    ".fui-select-content",
-    () => buildPopup(items).content,
-    null,
-    generated,
-  );
-  const list = ensurePart(
-    content,
-    "ul.fui-select-list",
-    () => buildPopup(items).list,
-    null,
-    generated,
-  );
-  // Caller-owned items are rebuilt from the resolved collection; snapshot them
-  // so teardown restores the original rows. Generated lists need no snapshot.
-  if (!generated.includes(list)) restores.push(captureChildNodes(list));
-  list.replaceChildren(...items.map(buildItem));
+
+  // Every other part is always generated fresh, in both modes.
+  const { control, trigger, value: valueText, clearTrigger } = buildControl(options);
+  insertAfter(root, control, nativeSelect);
+  generated.push(control);
+  const { positioner, content, list } = buildPopup(items);
+  insertAfter(root, positioner, control);
+  generated.push(positioner);
 
   const {
     items: _items,
@@ -193,22 +158,18 @@ function factory(
     if (indicator) zag.bind(indicator, (api) => api.getItemIndicatorProps({ item }));
   }
 
-  const stopValueText = effect(() => {
+  // One subscription drives the value text, the placeholder state, and the
+  // native repair. The native select is Zag's hidden select, which syncs
+  // options, emits one bubbling `change` per value change, and follows form
+  // reset. One gap remains: Zag also maps the value onto `select.value`, which
+  // only selects a single option, so re-renders wipe multiple selections.
+  // Repairing the options here never dispatches, so the cycle terminates.
+  const stopSync = effect(() => {
     const api = zag.api.get();
     const empty = api.value.length === 0;
     valueText.textContent = empty ? placeholder : api.valueAsString;
     valueText.toggleAttribute("data-placeholder-shown", empty);
-  });
-
-  // The native select is Zag's hidden select: `getHiddenSelectProps` wires the
-  // submitted control, while the machine syncs options, emits one bubbling
-  // `change` per value change, and follows form reset. One gap remains: Zag
-  // also maps the value onto `select.value`, which only selects a single
-  // option, so re-renders wipe multiple selections. Repair the options here.
-  // This never dispatches, so the cycle always terminates.
-  const stopNativeSync = effect(() => {
-    const value = zag.api.get().value;
-    if (!sameValues(readSelected(nativeSelect), value)) applyValue(nativeSelect, value);
+    if (!sameValues(readSelected(nativeSelect), api.value)) applyValue(nativeSelect, api.value);
   });
 
   let started = false;
@@ -237,8 +198,7 @@ function factory(
       if (destroyed) return;
       destroyed = true;
       const value = zag.api.get().value;
-      stopValueText();
-      stopNativeSync();
+      stopSync();
       zag.destroy();
 
       if (enhanceMode) {
@@ -293,90 +253,27 @@ function sameValues(left: readonly string[], right: readonly string[]): boolean 
   return left.every((value) => rightValues.has(value));
 }
 
-function ensureLabel(
+/** Adopts a label or description, generating it from a string option if missing. */
+function ensureText<T extends HTMLElement>(
   root: HTMLElement,
-  text: string | undefined,
-  enhanceMode: boolean,
-  generated: HTMLElement[],
-  restores: (() => void)[],
-): HTMLLabelElement | null {
-  let label = root.querySelector<HTMLLabelElement>("label.fui-field-label");
-  if (typeof text === "string" && !label) {
-    label = h("label", { class: "fui-field-label" }) as HTMLLabelElement;
-    root.prepend(label);
-    generated.push(label);
-  }
-  if (label && text !== undefined) {
-    if (enhanceMode && !generated.includes(label)) restores.push(captureChildNodes(label));
-    label.replaceChildren(new Text(text));
-  }
-  return label;
-}
-
-function ensureDescription(
-  root: HTMLElement,
-  text: string | undefined,
-  enhanceMode: boolean,
-  generated: HTMLElement[],
-  restores: (() => void)[],
-): HTMLParagraphElement | null {
-  let description = root.querySelector<HTMLParagraphElement>("p.fui-field-description");
-  if (typeof text === "string" && !description) {
-    description = h("p", { class: "fui-field-description" }) as HTMLParagraphElement;
-    root.append(description);
-    generated.push(description);
-  }
-  if (description && text !== undefined) {
-    if (enhanceMode && !generated.includes(description)) {
-      restores.push(captureChildNodes(description));
-    }
-    description.replaceChildren(new Text(text));
-  }
-  return description;
-}
-
-/** Adopts the clear button when `clearable`, removing a caller-owned one otherwise. */
-function ensureClearTrigger(
-  control: HTMLElement,
-  options: SelectProps | EnhanceSelectProps,
-  generated: HTMLElement[],
-  restores: (() => void)[],
-): HTMLButtonElement | null {
-  const existing = control.querySelector<HTMLButtonElement>(".fui-select-clear-trigger");
-  if (!options.clearable) {
-    if (existing) {
-      restores.push(captureChildNodes(control));
-      existing.remove();
-    }
-    return null;
-  }
-  if (existing) {
-    if (options.clearLabel) {
-      restores.push(captureAttributes(existing));
-      existing.setAttribute("aria-label", options.clearLabel);
-    }
-    return existing;
-  }
-  const clearTrigger = buildClearTrigger(options.clearLabel);
-  control.append(clearTrigger);
-  generated.push(clearTrigger);
-  return clearTrigger;
-}
-
-/** Adopts an existing direct child part or generates and inserts the missing one. */
-function ensurePart<T extends HTMLElement>(
-  parent: Element,
   selector: string,
   create: () => T,
-  after: Node | null,
+  where: "prepend" | "append",
+  text: string | undefined,
+  enhanceMode: boolean,
   generated: HTMLElement[],
-): T {
-  const existing = parent.querySelector<T>(`:scope > ${selector}`);
-  if (existing) return existing;
-  const node = create();
-  if (after) insertAfter(parent, node, after);
-  else parent.append(node);
-  generated.push(node);
+  restores: (() => void)[],
+): T | null {
+  let node = root.querySelector<T>(selector);
+  if (typeof text === "string" && !node) {
+    node = create();
+    root[where](node);
+    generated.push(node);
+  }
+  if (node && text !== undefined) {
+    if (enhanceMode && !generated.includes(node)) restores.push(captureChildNodes(node));
+    node.replaceChildren(new Text(text));
+  }
   return node;
 }
 
