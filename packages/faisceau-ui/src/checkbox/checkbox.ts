@@ -31,8 +31,8 @@ function factory(root?: HTMLLabelElement, options?: CheckboxProps) {
   };
 
   let input: HTMLInputElement;
-  let label: HTMLSpanElement | null;
-  let description: HTMLParagraphElement | null;
+  let label: HTMLSpanElement | null = null;
+  let description: HTMLParagraphElement | null = null;
   let indicator = h(
     "span",
     { class: "fui-checkbox-indicator" },
@@ -67,14 +67,17 @@ function factory(root?: HTMLLabelElement, options?: CheckboxProps) {
   } else {
     root = h("label", { class: "fui-checkbox" });
     input = h("input", { class: "fui-checkbox-input" });
-    label = typeof options.label === "string" ? h("span", { class: "fui-field-label" }) : null;
-    description =
-      typeof options.description === "string" ? h("p", { class: "fui-field-description" }) : null;
-
     root.append(input);
   }
 
   insertAfter(root, control, input);
+
+  label =
+    typeof options.label === "string" && !label ? h("span", { class: "fui-field-label" }) : label;
+  description =
+    typeof options.description === "string" && !description
+      ? h("p", { class: "fui-field-description" })
+      : description;
 
   if (description) {
     insertAfter(root, description, control);

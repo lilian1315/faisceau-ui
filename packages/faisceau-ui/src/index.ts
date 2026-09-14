@@ -8,10 +8,10 @@ export type {
 
 export { createSelect, enhanceSelect } from "./select/index.ts";
 export type {
-  EnhanceSelectOptions,
+  EnhanceSelectProps,
   SelectApi,
   SelectController,
-  SelectOptions,
+  SelectProps,
 } from "./select/index.ts";
 
 export { createTooltip, enhanceTooltip } from "./tooltip/index.ts";

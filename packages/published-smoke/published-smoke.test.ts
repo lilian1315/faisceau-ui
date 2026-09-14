@@ -50,7 +50,7 @@ describe("published package contract", () => {
     }).mount(form);
     const trigger = requirePart<HTMLButtonElement>(controller.root, "trigger");
 
-    expect(getComputedStyle(controller.root).display).toBe("grid");
+    expect(getComputedStyle(trigger).display).toBe("grid");
     expect(getComputedStyle(trigger).borderStyle).toBe("solid");
 
     trigger.click();

@@ -83,7 +83,6 @@ export const enhance: Story = {
       <label class="fui-checkbox">
         <input type="checkbox" class="fui-checkbox-input" checked />
         <span class="fui-field-label">Recevoir les nouveautés</span>
-        <p class="fui-field-description">Vous pourrez modifier ce choix plus tard.</p>
       </label>,
     );
 

@@ -1,19 +1,20 @@
 import type * as select from "@zag-js/select";
 
 import type { FuiItem, FuiItemInput } from "../shared/index.js";
-import type { FuiController, FuiFieldOptions } from "../types.js";
+import type { FuiController } from "../types.js";
 
-type SelectMachineOptions = Omit<
+export interface SelectProps extends Omit<
   select.Props<FuiItem>,
-  "collection" | "getRootNode" | "id" | "ids" | "multiple"
->;
-
-interface SelectViewOptions extends FuiFieldOptions {
-  /** Allows selecting more than one item without closing the popup. @default false */
-  multiple?: boolean;
-  /** Aligns the selected item's text with the trigger value. Always disabled in multiple mode. @default true */
-  alignItemWithTrigger?: boolean;
-  /** Text displayed while no item is selected. */
+  "collection" | "getRootNode" | "id" | "ids"
+> {
+  id?: string;
+  /** Available options. Strings become `{ value, label }` items. */
+  items: readonly FuiItemInput[];
+  /** Visible label rendered above the trigger. */
+  label?: string;
+  /** Supporting text rendered below the control. */
+  description?: string;
+  /** Text displayed while no item is selected. @default "Select an option" */
   placeholder?: string;
   /** Adds an explicit clear button next to the trigger. */
   clearable?: boolean;
@@ -21,22 +22,10 @@ interface SelectViewOptions extends FuiFieldOptions {
   clearLabel?: string;
 }
 
-/** Options for markup built entirely by Faisceau UI. */
-export type SelectOptions = SelectMachineOptions &
-  SelectViewOptions & {
-    items: readonly FuiItemInput[];
-    label: string;
-  };
-
-/** Options for enhancing a fully-authored Field with a direct Select child. */
-export type EnhanceSelectOptions = SelectMachineOptions &
-  SelectViewOptions & {
-    /** Optionally replaces the authored Field label while enhanced. */
-    label?: string;
-  };
+export type EnhanceSelectProps = Omit<SelectProps, "items"> & {
+  /** Replaces the options read from the native select when provided. */
+  items?: readonly FuiItemInput[];
+};
 
 export type SelectApi = select.Api;
-export interface SelectController extends FuiController<SelectApi> {
-  /** Replaces the available items while preserving retained item identity. */
-  setItems(items: readonly FuiItemInput[]): void;
-}
+export type SelectController = FuiController<SelectApi>;
