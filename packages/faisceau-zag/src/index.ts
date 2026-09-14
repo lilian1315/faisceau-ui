@@ -55,49 +55,6 @@ export interface ZagMachineController<
 
 let controllerId = 0;
 
-interface DeclaredStyle {
-  readonly priority: string;
-  readonly value: string;
-}
-
-function parseStyles(element: Element, cssText: unknown): Map<string, DeclaredStyle> {
-  const styles = new Map<string, DeclaredStyle>();
-  if (typeof cssText !== "string") return styles;
-
-  const declaration = element.ownerDocument.createElement("span").style;
-  declaration.cssText = cssText;
-  for (let index = 0; index < declaration.length; index++) {
-    const property = declaration.item(index);
-    styles.set(property, {
-      priority: declaration.getPropertyPriority(property),
-      value: declaration.getPropertyValue(property),
-    });
-  }
-  return styles;
-}
-
-function reconcileStyles(
-  element: Element,
-  cssText: unknown,
-  previous: ReadonlyMap<string, DeclaredStyle>,
-): Map<string, DeclaredStyle> {
-  if (!("style" in element)) return new Map();
-
-  const declaration = (element as HTMLElement | SVGElement).style;
-  const next = parseStyles(element, cssText);
-
-  for (const property of previous.keys()) {
-    if (!next.has(property)) declaration.removeProperty(property);
-  }
-  for (const [property, style] of next) {
-    const previousStyle = previous.get(property);
-    if (previousStyle?.value === style.value && previousStyle.priority === style.priority) continue;
-    declaration.setProperty(property, style.value, style.priority);
-  }
-
-  return next;
-}
-
 /**
  * Adapt a Zag machine to Faisceau signals and vanilla DOM elements.
  *
@@ -180,16 +137,13 @@ export function createZagMachine<TSchema extends MachineSchema, TApi>(
 
     const bindingScope = `${scope}-${++bindingId}`;
     let disposed = false;
-    let previousStyles = new Map<string, DeclaredStyle>();
 
     // Do not return spreadProps' cleanup from this effect. Its internal
     // previous-props snapshot must survive effect re-runs so that removed
     // keys and replaced listeners are reconciled correctly.
     const stopEffect = effect(() => {
       const props = getter(api.get()) ?? {};
-      const { style, ...attributes } = props;
-      previousStyles = reconcileStyles(element, style, previousStyles);
-      spreadProps(element, attributes, bindingScope);
+      spreadProps(element, props, bindingScope);
     });
 
     const dispose = (): void => {
@@ -200,7 +154,6 @@ export function createZagMachine<TSchema extends MachineSchema, TApi>(
 
       // Reconcile with an empty prop bag before releasing spreadProps' state.
       // This removes the final listeners and attributes owned by the binding.
-      previousStyles = reconcileStyles(element, undefined, previousStyles);
       spreadProps(element, {}, bindingScope)();
       bindings.delete(dispose);
     };

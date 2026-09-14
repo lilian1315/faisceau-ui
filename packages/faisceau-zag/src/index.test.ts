@@ -277,8 +277,7 @@ describe("createZagMachine", () => {
       value: "France",
       viewBox: "0 0 16 16",
     });
-    expect(normalized.style).toContain("--fui-accent:red;");
-    expect(normalized.style).toContain("margin-bottom:4px;");
+    expect(normalized.style).toMatchObject({ "--fui-accent": "red", marginBottom: "4px" });
     expect(normalizeProps.input({ onInput }).oninput).toBe(onInput);
     expect(normalizeProps.input({ onChange }).oninput).toBe(onChange);
   });
