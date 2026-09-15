@@ -24,8 +24,8 @@ describe("Tooltip", () => {
       openDelay: 0,
       trigger: "Create",
     }).mount(document.body);
-    const trigger = controller.root.querySelector<HTMLButtonElement>('[data-part="trigger"]')!;
-    const content = controller.root.querySelector<HTMLElement>('[data-part="content"]')!;
+    const trigger = controller.root.querySelector<HTMLButtonElement>('[data-fui-part="trigger"]')!;
+    const content = controller.root.querySelector<HTMLElement>('[data-fui-part="content"]')!;
 
     controller.api.get().setOpen(true);
     await flushMachine();
@@ -49,18 +49,18 @@ describe("Tooltip", () => {
 
     const controller = enhanceTooltip(trigger, { closeDelay: 0, openDelay: 0 });
     expect(trigger.hasAttribute("title")).toBe(false);
-    expect(trigger.classList).toContain("fui-tooltip");
+    expect(trigger.classList).toContain("fui-tooltip-trigger");
 
     controller.api.get().setOpen(true);
     await flushMachine();
-    expect(document.querySelector('[data-part="content"]')?.textContent).toContain(
+    expect(document.querySelector('[data-fui-part="content"]')?.textContent).toContain(
       "Archive this item",
     );
 
     controller.destroy();
     expect(trigger.className).toBe("consumer-trigger");
     expect(trigger.title).toBe("Archive this item");
-    expect(document.querySelector('[data-part="content"]')).toBeNull();
+    expect(document.querySelector('[data-fui-part="content"]')).toBeNull();
   });
 });
 

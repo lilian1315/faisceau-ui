@@ -19,11 +19,15 @@ export interface SelectPopup {
 
 /** Builds the visible trigger row: value text, chevron, and an optional clear button. */
 export function buildControl(options: { clearable?: boolean; clearLabel?: string }): SelectControl {
-  const value = h("span", { data: { part: "value-text" } });
-  const indicator = h("span", { data: { part: "indicator" } }, createChevronDownIcon());
+  const value = h("span", { class: "fui-select-value", data: { fuiPart: "value" } });
+  const indicator = h(
+    "span",
+    { class: "fui-select-indicator", data: { fuiPart: "indicator" } },
+    createChevronDownIcon(),
+  );
   const trigger = h(
     "button",
-    { data: { part: "trigger" }, type: "button" },
+    { class: "fui-select-trigger", data: { fuiPart: "trigger" }, type: "button" },
     value,
     indicator,
   ) as HTMLButtonElement;
@@ -32,7 +36,7 @@ export function buildControl(options: { clearable?: boolean; clearLabel?: string
 
   const control = h(
     "div",
-    { data: { part: "control" } },
+    { class: "fui-select-control", data: { fuiPart: "control" } },
     clearTrigger ? [trigger, clearTrigger] : [trigger],
   );
   return { control, trigger, value, indicator, clearTrigger };
@@ -44,7 +48,8 @@ function buildClearTrigger(clearLabel?: string): HTMLButtonElement {
     "button",
     {
       "aria-label": clearLabel ?? "Clear selection",
-      data: { part: "clear-trigger" },
+      class: "fui-select-clear-trigger",
+      data: { fuiPart: "clear-trigger" },
       type: "button",
     },
     createClearIcon(),
@@ -53,27 +58,52 @@ function buildClearTrigger(clearLabel?: string): HTMLButtonElement {
 
 /** Builds the popup shell; items are rendered separately with {@link buildItem}. */
 export function buildPopup(items: readonly FuiItem[]): SelectPopup {
-  const list = h("ul", { data: { part: "list" } }, items.map(buildItem));
-  const content = h("div", { data: { part: "content" } }, list);
-  const positioner = h("div", { data: { part: "positioner" } }, content);
+  const list = h(
+    "ul",
+    { class: "fui-select-list", data: { fuiPart: "list" } },
+    items.map(buildItem),
+  );
+  const content = h("div", { class: "fui-select-content", data: { fuiPart: "content" } }, list);
+  const positioner = h(
+    "div",
+    { class: "fui-select-positioner", data: { fuiPart: "positioner" } },
+    content,
+  );
   return { positioner, content, list };
 }
 
 /** Builds one popup row for an item. */
 function buildItem(item: FuiItem): HTMLLIElement {
-  const text = h("span", { data: { part: "item-text" } }, item.label);
+  const text = h(
+    "span",
+    { class: "fui-select-item-text", data: { fuiPart: "item-text" } },
+    item.label,
+  );
   const children: Node[] = [text];
 
   if (item.description) {
-    children.push(h("span", { data: { part: "item-description" } }, item.description));
+    children.push(
+      h(
+        "span",
+        { class: "fui-select-item-description", data: { fuiPart: "item-description" } },
+        item.description,
+      ),
+    );
   }
 
-  children.push(h("span", { data: { part: "item-indicator" } }, createCheckIcon()));
+  children.push(
+    h(
+      "span",
+      { class: "fui-select-item-indicator", data: { fuiPart: "item-indicator" } },
+      createCheckIcon(),
+    ),
+  );
 
   return h(
     "li",
     {
-      data: { disabled: item.disabled, part: "item", value: item.value },
+      class: "fui-select-item",
+      data: { disabled: item.disabled, fuiPart: "item", value: item.value },
     },
     children,
   );
@@ -85,7 +115,8 @@ export function buildNativeSelect(
   options: { multiple?: boolean; name?: string; placeholder?: string; value?: readonly string[] },
 ): HTMLSelectElement {
   const native = h("select", {
-    data: { part: "native-select" },
+    class: "fui-native-select",
+    data: { fuiPart: "native-select" },
     multiple: options.multiple,
     name: options.name,
   }) as HTMLSelectElement;

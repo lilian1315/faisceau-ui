@@ -57,11 +57,8 @@ function factory(
   let initialValue: string[];
 
   if (root) {
-    const found = root.querySelector<HTMLSelectElement>(
-      ':scope > select[data-part="native-select"]',
-    );
-    if (!found)
-      throw new Error('[Faisceau UI] missing Combobox `select[data-part="native-select"]`');
+    const found = root.querySelector<HTMLSelectElement>("select.fui-native-select");
+    if (!found) throw new Error("[Faisceau UI] missing Combobox `select.fui-native-select`");
     nativeSelect = found;
     restores.push(captureAttributes(root), captureAttributes(nativeSelect));
     if (typeof options.multiple === "undefined") multiple = nativeSelect.multiple;
@@ -106,11 +103,11 @@ function factory(
     root.append(nativeSelect);
   }
 
-  root.toggleAttribute("data-multiple", multiple);
+  root.toggleAttribute("data-fui-multiple", multiple);
 
   const label = ensureText(
     root,
-    { tag: "label", part: "label" },
+    { tag: "label", class: "fui-field-label" },
     (parent, node) => parent.prepend(node),
     options.label,
     enhanceMode,
@@ -118,7 +115,7 @@ function factory(
   );
   ensureText(
     root,
-    { tag: "p", part: "description" },
+    { tag: "p", class: "fui-field-description" },
     (parent, node) => parent.append(node),
     options.description,
     enhanceMode,
@@ -199,9 +196,9 @@ function factory(
   const itemDisposers = new Map<string, () => void>();
   const bindItem = (element: HTMLElement, item: FuiItem): void => {
     const disposers = [zag.bind(element, (api) => api.getItemProps({ item }))];
-    const text = element.querySelector<HTMLElement>('[data-part="item-text"]');
+    const text = element.querySelector<HTMLElement>(".fui-combobox-item-text");
     if (text) disposers.push(zag.bind(text, (api) => api.getItemTextProps({ item })));
-    const indicator = element.querySelector<HTMLElement>('[data-part="item-indicator"]');
+    const indicator = element.querySelector<HTMLElement>(".fui-combobox-item-indicator");
     if (indicator)
       disposers.push(zag.bind(indicator, (api) => api.getItemIndicatorProps({ item })));
     itemDisposers.set(item.value, () => disposers.forEach((dispose) => dispose()));
@@ -309,7 +306,7 @@ function factory(
       const nextValues = new Set(itemByValue.keys());
       const elements = new Map(
         Array.from(list.children)
-          .filter((element) => element.matches('[data-part="item"]'))
+          .filter((element) => element.classList.contains("fui-combobox-item"))
           .map((element) => [element.getAttribute("data-value")!, element as HTMLElement] as const),
       );
       const ordered = reconcileKeyedValues({
@@ -328,6 +325,7 @@ function factory(
           element.replaceChildren(...fresh.childNodes);
           element.dataset.value = item.value;
           element.toggleAttribute("data-disabled", item.disabled === true);
+          element.className = "fui-combobox-item";
           bindItem(element, item);
         },
       });
@@ -499,11 +497,12 @@ function renderSelectedTags(
   remove: (value: string) => void,
 ): void {
   const tags = items.map((item) => {
-    const label = h("span", null, item.label);
+    const label = h("span", { class: "fui-combobox-tag-label" }, item.label);
     const removeTrigger = h(
       "button",
       {
         "aria-label": getRemoveLabel(item),
+        class: "fui-combobox-tag-remove",
         data: { value: item.value },
         disabled,
         type: "button",
@@ -515,6 +514,7 @@ function renderSelectedTags(
     return h(
       "span",
       {
+        class: "fui-combobox-tag",
         data: { value: item.value },
       },
       label,
@@ -533,7 +533,7 @@ function updateFilteredMarkup(
 ): void {
   const visibleValues = new Set(filteredItems.map((item) => item.value));
   for (const element of list.children) {
-    if (element instanceof HTMLElement && element.matches('[data-part="item"]')) {
+    if (element instanceof HTMLElement && element.classList.contains("fui-combobox-item")) {
       element.hidden = !visibleValues.has(element.dataset.value ?? "");
     }
   }

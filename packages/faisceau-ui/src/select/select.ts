@@ -46,10 +46,8 @@ function factory(
   let initialValue: string[];
 
   if (root) {
-    const found = root.querySelector<HTMLSelectElement>(
-      ':scope > select[data-part="native-select"]',
-    );
-    if (!found) throw new Error('[Faisceau UI] missing Select `select[data-part="native-select"]`');
+    const found = root.querySelector<HTMLSelectElement>("select.fui-native-select");
+    if (!found) throw new Error("[Faisceau UI] missing Select `select.fui-native-select`");
     nativeSelect = found;
     restores.push(captureAttributes(root), captureAttributes(nativeSelect));
     if (typeof options.multiple === "undefined") multiple = nativeSelect.multiple;
@@ -85,7 +83,7 @@ function factory(
 
   const label = ensureText(
     root,
-    { tag: "label", part: "label" },
+    { tag: "label", class: "fui-field-label" },
     (parent, node) => parent.prepend(node),
     options.label,
     enhanceMode,
@@ -93,7 +91,7 @@ function factory(
   );
   ensureText(
     root,
-    { tag: "p", part: "description" },
+    { tag: "p", class: "fui-field-description" },
     (parent, node) => parent.append(node),
     options.description,
     enhanceMode,
@@ -151,9 +149,9 @@ function factory(
   for (const [index, item] of items.entries()) {
     const element = list.children[index] as HTMLElement;
     zag.bind(element, (api) => api.getItemProps({ item }));
-    const text = element.querySelector<HTMLElement>('[data-part="item-text"]');
+    const text = element.querySelector<HTMLElement>(".fui-select-item-text");
     if (text) zag.bind(text, (api) => api.getItemTextProps({ item }));
-    const indicator = element.querySelector<HTMLElement>('[data-part="item-indicator"]');
+    const indicator = element.querySelector<HTMLElement>(".fui-select-item-indicator");
     if (indicator) zag.bind(indicator, (api) => api.getItemIndicatorProps({ item }));
   }
 

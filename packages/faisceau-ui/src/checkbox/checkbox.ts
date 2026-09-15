@@ -34,12 +34,20 @@ function factory(root?: HTMLLabelElement, options?: CheckboxProps): CheckboxCont
   };
 
   let input: HTMLInputElement;
-  let indicator = h("span", { data: { part: "indicator" } }, createCheckIcon(), createMinusIcon());
-  let control = h("span", { data: { part: "control" } }, indicator);
+  let indicator = h(
+    "span",
+    { class: "fui-checkbox-indicator" },
+    createCheckIcon(),
+    createMinusIcon(),
+  );
+  let control = h("span", { class: "fui-checkbox-control" }, indicator);
 
   if (root) {
-    const _input = root.querySelector<HTMLInputElement>(':scope > input[type="checkbox"]');
-    if (!_input) throw new Error('[Faisceau UI] missing Checkbox `input[type="checkbox"]`');
+    const _input = root.querySelector<HTMLInputElement>(
+      "input[type='checkbox'].fui-checkbox-input",
+    );
+    if (!_input)
+      throw new Error("[Faisceau UI] missing Checkbox `input[type='checkbox'].fui-checkbox-input`");
     input = _input;
     if (typeof mOptions.name === "undefined") mOptions.name = input.name;
     if (typeof mOptions.value === "undefined") mOptions.value = input.value;
@@ -54,7 +62,7 @@ function factory(root?: HTMLLabelElement, options?: CheckboxProps): CheckboxCont
     [root, input].forEach((el) => restores.push(captureAttributes(el)));
   } else {
     root = h("label", { class: "fui-checkbox" });
-    input = h("input", { data: { part: "input" }, type: "checkbox" });
+    input = h("input", { class: "fui-checkbox-input" });
     root.append(input);
   }
 
@@ -63,7 +71,7 @@ function factory(root?: HTMLLabelElement, options?: CheckboxProps): CheckboxCont
 
   const label = ensureText(
     root,
-    { tag: "span", part: "label" },
+    { tag: "span", class: "fui-field-label" },
     (parent, node) => insertAfter(parent, node, control),
     options.label,
     enhanceMode,
@@ -71,7 +79,7 @@ function factory(root?: HTMLLabelElement, options?: CheckboxProps): CheckboxCont
   );
   ensureText(
     root,
-    { tag: "p", part: "description" },
+    { tag: "p", class: "fui-field-description" },
     (parent, node) => insertAfter(parent, node, label ?? control),
     options.description,
     enhanceMode,

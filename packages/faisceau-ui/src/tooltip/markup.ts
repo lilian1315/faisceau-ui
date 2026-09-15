@@ -9,10 +9,20 @@ export interface TooltipPopup {
 
 export function createTooltipPopup(text: string): TooltipPopup {
   const arrowTip = h("div", {
-    data: { part: "arrow-tip" },
+    class: "fui-tooltip-arrow-tip",
+    data: { fuiPart: "arrow-tip" },
   });
-  const arrow = h("div", { data: { part: "arrow" } }, arrowTip);
-  const content = h("div", { data: { part: "content" } }, arrow, text);
-  const positioner = h("div", { data: { part: "positioner" } }, content);
+  const arrow = h("div", { class: "fui-tooltip-arrow", data: { fuiPart: "arrow" } }, arrowTip);
+  const content = h(
+    "div",
+    { class: "fui-tooltip-content", data: { fuiPart: "content" } },
+    arrow,
+    text,
+  );
+  const positioner = h(
+    "div",
+    { class: "fui-tooltip-positioner", data: { fuiPart: "positioner" } },
+    content,
+  );
   return { arrow, arrowTip, content, positioner };
 }

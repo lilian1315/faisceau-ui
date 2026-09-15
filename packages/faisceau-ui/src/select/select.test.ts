@@ -27,13 +27,11 @@ describe("Select3", () => {
 
     expect(controller.root.tagName).toBe("DIV");
     expect(controller.root.classList.contains("fui-select")).toBe(true);
-    expect(controller.root.querySelector('select[data-part="native-select"]')).not.toBeNull();
-    expect(controller.root.querySelector('[data-part="trigger"]')).not.toBeNull();
-    expect(controller.root.querySelector('[data-part="value-text"]')?.textContent).toBe("Choose");
-    expect(controller.root.querySelector('label[data-part="label"]')?.textContent).toBe("Value");
-    expect(controller.root.querySelector('p[data-part="description"]')?.textContent).toBe(
-      "Pick one",
-    );
+    expect(controller.root.querySelector("select.fui-native-select")).not.toBeNull();
+    expect(controller.root.querySelector(".fui-select-trigger")).not.toBeNull();
+    expect(controller.root.querySelector(".fui-select-value")?.textContent).toBe("Choose");
+    expect(controller.root.querySelector("label.fui-field-label")?.textContent).toBe("Value");
+    expect(controller.root.querySelector("p.fui-field-description")?.textContent).toBe("Pick one");
     controller.destroy();
     expect(controller.root.isConnected).toBe(false);
   });
@@ -53,15 +51,15 @@ describe("Select3", () => {
       placeholder: "Choisir",
     }).mount(form);
     const nativeSelect = controller.root.querySelector<HTMLSelectElement>("select")!;
-    const trigger = controller.root.querySelector<HTMLButtonElement>('[data-part="trigger"]')!;
+    const trigger = controller.root.querySelector<HTMLButtonElement>(".fui-select-trigger")!;
 
     trigger.click();
     await flushMachine();
-    controller.root.querySelector<HTMLElement>('[data-part="item"][data-value="be"]')!.click();
+    controller.root.querySelector<HTMLElement>('.fui-select-item[data-value="be"]')!.click();
     await flushMachine();
 
     expect(controller.api.get().value).toEqual(["be"]);
-    expect(controller.root.querySelector('[data-part="value-text"]')?.textContent).toBe("Belgique");
+    expect(controller.root.querySelector(".fui-select-value")?.textContent).toBe("Belgique");
     expect(nativeSelect.value).toBe("be");
     expect(new FormData(form).get("country")).toBe("be");
     expect(onValueChange).toHaveBeenCalledOnce();
@@ -78,9 +76,9 @@ describe("Select3", () => {
     const nativeChange = vi.fn();
     nativeSelect.addEventListener("change", nativeChange);
 
-    controller.root.querySelector<HTMLButtonElement>('[data-part="trigger"]')!.click();
+    controller.root.querySelector<HTMLButtonElement>(".fui-select-trigger")!.click();
     await flushMachine();
-    controller.root.querySelector<HTMLElement>('[data-part="item"][data-value="Two"]')!.click();
+    controller.root.querySelector<HTMLElement>('.fui-select-item[data-value="Two"]')!.click();
     await flushMachine();
 
     // The machine syncs the hidden select and emits its own bubbling change.
@@ -105,16 +103,16 @@ describe("Select3", () => {
 
     expect(controller.root.querySelector("select")!.multiple).toBe(true);
 
-    controller.root.querySelector<HTMLButtonElement>('[data-part="trigger"]')!.click();
+    controller.root.querySelector<HTMLButtonElement>(".fui-select-trigger")!.click();
     await flushMachine();
-    controller.root.querySelector<HTMLElement>('[data-part="item"][data-value="be"]')!.click();
+    controller.root.querySelector<HTMLElement>('.fui-select-item[data-value="be"]')!.click();
     await flushMachine();
 
     expect(controller.api.get().open).toBe(true);
     expect(controller.api.get().value).toEqual(["fr", "be"]);
     expect(new FormData(form).getAll("countries")).toEqual(["fr", "be"]);
 
-    controller.root.querySelector<HTMLElement>('[data-part="item"][data-value="fr"]')!.click();
+    controller.root.querySelector<HTMLElement>('.fui-select-item[data-value="fr"]')!.click();
     await flushMachine();
     expect(controller.api.get().value).toEqual(["be"]);
     expect(new FormData(form).getAll("countries")).toEqual(["be"]);
@@ -141,7 +139,7 @@ describe("Select3", () => {
     form.reset();
     await flushMachine();
     expect(controller.api.get().value).toEqual(["fr"]);
-    expect(controller.root.querySelector('[data-part="value-text"]')?.textContent).toBe("France");
+    expect(controller.root.querySelector(".fui-select-value")?.textContent).toBe("France");
     expect(new FormData(form).get("country")).toBe("fr");
     controller.destroy();
   });
@@ -149,27 +147,27 @@ describe("Select3", () => {
   it("enhances caller markup, starts immediately, then restores it", async () => {
     const root = document.createElement("div");
     root.className = "fui-select consumer-root";
-    root.innerHTML = `<label data-part="label">Pays</label><select data-part="native-select" name="country"><option value="" data-placeholder="" hidden>Choisir</option><option value="fr" selected>France</option><option value="be">Belgique</option></select>`;
+    root.innerHTML = `<label class="fui-field-label">Pays</label><select class="fui-native-select" name="country"><option value="" data-placeholder="" hidden>Choisir</option><option value="fr" selected>France</option><option value="be">Belgique</option></select>`;
     document.body.append(root);
     const nativeSelect = root.querySelector<HTMLSelectElement>("select")!;
 
     const controller = enhanceSelect(root, {});
     expect(controller.started).toBe(true);
     expect(controller.api.get().value).toEqual(["fr"]);
-    expect(root.querySelector('[data-part="trigger"]')).not.toBeNull();
-    expect(root.querySelector('[data-part="value-text"]')?.textContent).toBe("France");
+    expect(root.querySelector(".fui-select-trigger")).not.toBeNull();
+    expect(root.querySelector(".fui-select-value")?.textContent).toBe("France");
 
-    controller.root.querySelector<HTMLButtonElement>('[data-part="trigger"]')!.click();
+    controller.root.querySelector<HTMLButtonElement>(".fui-select-trigger")!.click();
     await flushMachine();
-    controller.root.querySelector<HTMLElement>('[data-part="item"][data-value="be"]')!.click();
+    controller.root.querySelector<HTMLElement>('.fui-select-item[data-value="be"]')!.click();
     await flushMachine();
     expect(controller.api.get().value).toEqual(["be"]);
 
     controller.destroy();
-    expect(root.querySelector('[data-part="trigger"]')).toBeNull();
-    expect(root.querySelector('[data-part="positioner"]')).toBeNull();
+    expect(root.querySelector(".fui-select-trigger")).toBeNull();
+    expect(root.querySelector(".fui-select-positioner")).toBeNull();
     expect(root.className).toBe("fui-select consumer-root");
-    expect(root.querySelector('label[data-part="label"]')?.textContent).toBe("Pays");
+    expect(root.querySelector("label.fui-field-label")?.textContent).toBe("Pays");
     expect(nativeSelect.name).toBe("country");
     expect(nativeSelect.value).toBe("be");
   });
@@ -184,10 +182,10 @@ describe("Select3", () => {
       label: "Value",
     }).mount(document.body);
 
-    controller.root.querySelector<HTMLButtonElement>('[data-part="trigger"]')!.click();
+    controller.root.querySelector<HTMLButtonElement>(".fui-select-trigger")!.click();
     await flushMachine();
 
-    const list = controller.root.querySelector<HTMLElement>('[data-part="list"]')!;
+    const list = controller.root.querySelector<HTMLElement>(".fui-select-list")!;
     list.dispatchEvent(
       new KeyboardEvent("keydown", { bubbles: true, cancelable: true, key: "ArrowDown" }),
     );
@@ -201,16 +199,17 @@ describe("Select3", () => {
     controller.destroy();
   });
 
-  it("uses Lucide icons and only keeps a fui-* class on its root", () => {
+  it("uses Lucide icons and only authors fui-prefixed classes", () => {
     const controller = createSelect({ items: ["One", "Two"], label: "Value" });
     expect(controller.root.querySelector('svg[data-fui-icon="chevron-down"]')).not.toBeNull();
     expect(controller.root.querySelector('svg[data-fui-icon="check"]')).not.toBeNull();
-    const descendantClasses = Array.from(controller.root.querySelectorAll("[class]"), (element) => [
+    const classes = Array.from(controller.root.querySelectorAll("[class]"), (element) => [
       ...element.classList,
     ]).flat();
 
-    expect(controller.root.classList.contains("fui-select")).toBe(true);
-    expect(descendantClasses.filter((name) => name.startsWith("fui-"))).toEqual([]);
+    expect(
+      [...controller.root.classList, ...classes].every((name) => name.startsWith("fui-")),
+    ).toBe(true);
     controller.destroy();
   });
 });

@@ -3,43 +3,36 @@
 @use "./base";
 @use "./mixins" as *;
 
-.fui-dialog [data-part="backdrop"] {
+.fui-dialog-backdrop {
   @include fui-overlay-backdrop;
 }
 
-.fui-dialog [data-part="positioner"] {
+.fui-dialog-positioner {
   @include fui-overlay-positioner;
   place-items: center;
   padding: var(--fui-space-4);
 }
 
-.fui-dialog [data-part="content"] {
+.fui-dialog-content {
   @include fui-overlay-content;
 }
 
-.fui-dialog [data-part="title"] {
+.fui-dialog-title {
   margin: 0;
   padding-inline-end: 2.5rem;
   font-size: 1.125rem;
 }
 
-.fui-dialog [data-part="description"] {
+.fui-dialog-description {
   margin: var(--fui-space-2) 0 var(--fui-space-4);
   color: var(--fui-color-muted-foreground);
   line-height: var(--fui-line-height-copy);
 }
 
-.fui-dialog [data-part="body"] {
+.fui-dialog-body {
   line-height: var(--fui-line-height-copy);
 }
 
-.fui-dialog [data-part="close-trigger"] {
+.fui-dialog-close {
   @include fui-close-button;
-
-  svg {
-    display: block;
-    inline-size: var(--fui-icon-size);
-    block-size: var(--fui-icon-size);
-    pointer-events: none;
-  }
 }

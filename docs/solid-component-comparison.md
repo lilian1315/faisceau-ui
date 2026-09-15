@@ -35,7 +35,7 @@ API compatibility oracle for this workspace's newer Zag Next packages.
 | Public shape     | Opinionated `create*` / `enhance*` controller with complete markup                          | Headless compound parts, `Root`, `RootProvider`, context, and `use*` hook              |
 | Ownership        | Explicit create/adopt/restore semantics                                                     | Solid renderer owns the declared nodes and cleanup                                     |
 | Reactivity       | Reactive DOM bindings and connected API, but component options are fixed after construction | Props, collections, presence, and rendered items naturally follow Solid accessors      |
-| Composition      | Stable `data-part` hooks and enhancement of authored markup                                 | Per-part props, arbitrary nesting where valid, and `asChild` polymorphism              |
+| Composition      | Stable `data-fui-part` hooks and enhancement of authored markup                             | Per-part props, arbitrary nesting where valid, and `asChild` polymorphism              |
 | Presence         | Popup/overlay trees stay mounted and Zag/CSS hide them                                      | Dedicated presence/render-strategy integration supports lazy mount and unmount-on-exit |
 | Portal           | No built-in portal; overlay parts remain beside the root/trigger                            | Separate `Portal` utility is used in overlay examples, so portalling is opt-in         |
 | Forms            | Native controls are mandatory and have explicit reset/event/validation bridges              | Hidden control is a declarative part; Field composes descriptions/errors               |

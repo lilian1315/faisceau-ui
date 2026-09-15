@@ -1,6 +1,6 @@
 # Faisceau UI
 
-Faisceau UI est une bibliothèque de composants DOM accessibles pour navigateurs modernes. Elle associe les machines d'état de [Zag.js](https://zagjs.com/) à [`@lilian1315/create-element`](https://github.com/lilian1315/create-element) et [`faisceau`](https://github.com/lilian1315/faisceau), sans dépendre d'un framework. Son apparence s'inspire de shadcn/ui, avec des styles Sass compilés en CSS, les icônes open source de [Lucide](https://lucide.dev/) et une classe racine préfixée par `fui-` par composant.
+Faisceau UI est une bibliothèque de composants DOM accessibles pour navigateurs modernes. Elle associe les machines d'état de [Zag.js](https://zagjs.com/) à [`@lilian1315/create-element`](https://github.com/lilian1315/create-element) et [`faisceau`](https://github.com/lilian1315/faisceau), sans dépendre d'un framework. Son apparence s'inspire de shadcn/ui, avec des styles Sass compilés en CSS, les icônes open source de [Lucide](https://lucide.dev/) et des classes internes préfixées par `fui-`.
 
 La bibliothèque fournit actuellement Select, Combobox, Checkbox, Tooltip, Dialog, Drawer et
 Toast. Chaque composant peut construire son propre DOM ou adopter un markup HTML déjà présent.
@@ -185,9 +185,8 @@ form.addEventListener("submit", (event) => {
 ## Améliorer un markup existant
 
 Les fonctions `enhanceSelect`, `enhanceCombobox` et `enhanceCheckbox` adoptent un markup
-existant minimal. Seule la racine porte une classe `fui-*` ; les parts sont identifiées par
-leurs attributs `data-part` et doivent être présentes avant l'appel. Le contrôle natif reste
-dans le document et conserve la soumission, la validation et
+existant minimal. Les classes `fui-*` constituent le contrat d'anatomie et doivent être présentes
+avant l'appel. Le contrôle natif reste dans le document et conserve la soumission, la validation et
 le reset du formulaire.
 
 ### Select existant
@@ -195,8 +194,8 @@ le reset du formulaire.
 ```html
 <form id="settings">
   <div class="fui-select" id="mode-select">
-    <label data-part="label">Mode d'affichage</label>
-    <select data-part="native-select" name="display-mode" required>
+    <label class="fui-field-label">Mode d'affichage</label>
+    <select class="fui-native-select" name="display-mode" required>
       <option value="" data-placeholder>Choisir un mode</option>
       <option value="simple" selected>Simple</option>
       <option value="expert">Expert</option>
@@ -219,8 +218,8 @@ sélectionnable normal.
 
 ```html
 <div class="fui-combobox" id="command-combobox">
-  <label data-part="label">Commande</label>
-  <select data-part="native-select" name="command">
+  <label class="fui-field-label">Commande</label>
+  <select class="fui-native-select" name="command">
     <option value="" data-placeholder>Rechercher une commande</option>
     <option value="build">Build</option>
     <option value="test">Test</option>
@@ -260,8 +259,8 @@ Pour l'enhancement, le label, l'input natif et le contrôle visuel suffisent :
 
 ```html
 <label class="fui-checkbox" id="newsletter">
-  <input data-part="input" type="checkbox" name="newsletter" />
-  <span data-part="label">Recevoir la newsletter</span>
+  <input class="fui-checkbox-input" type="checkbox" name="newsletter" />
+  <span class="fui-field-label">Recevoir la newsletter</span>
 </label>
 ```
 
@@ -285,7 +284,7 @@ enhanceTooltip(document.querySelector<HTMLElement>("[title]")!);
 ## Dialog, Drawer et Toast
 
 Dialog et Drawer acceptent le même modèle : la variante `create*` construit le panneau,
-tandis que `enhance*` part d'un contenu existant marqué avec `data-part="content"`.
+tandis que `enhance*` part d'un contenu existant marqué avec `data-fui-part="content"`.
 Les triggers ne sont jamais possédés : chaque composant accepte un `triggerSelector`
 dont tous les éléments correspondants ouvrent le panneau. Drawer utilise sa machine Zag dédiée :
 il expose directement `swipeDirection`, les snap points, le grabber et une zone de swipe optionnelle.
@@ -328,10 +327,7 @@ Les couleurs, rayons, dimensions et durées sont exposés sous forme de variable
 }
 ```
 
-Seule la racine de chaque composant porte une classe `fui-*`. Les parts se sélectionnent
-via leurs attributs `data-part`, suivant la logique de style Zag
-(`[data-part="trigger"]`, `[data-part="content"]`, …), combinés aux attributs d'état
-(`[data-state]`, `[data-disabled]`, …) pour les variantes.
+Toutes les classes appartenant à la bibliothèque commencent par `fui-`. Les attributs d'état et d'accessibilité ajoutés par Zag restent disponibles pour des ajustements ciblés.
 
 ## Cycle de vie
 

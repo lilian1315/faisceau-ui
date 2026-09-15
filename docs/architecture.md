@@ -70,12 +70,9 @@ back to `ownerDocument` for this Storybook and test case.
 
 ## Markup and styling contract
 
-- Only component roots carry a `fui-*` class. Descendant parts are identified by
-  their `data-part` attribute (Zag styling logic: `[data-part="trigger"]`,
-  `[data-part="content"]`, …) combined with Zag-owned `data-*` state attributes.
-  Stylesheets scope part selectors under the root class. Zag-owned `data-*`
-  attributes describe behavior and state rather than duplicating anatomy.
-- The owned root class is a single `fui-*` token; enhancement validates it before mutation.
+- Structural `fui-*` classes are the stable anatomy used by setup code, enhancement, and consumer
+  styling. Zag-owned `data-*` attributes describe behavior and state rather than duplicating anatomy.
+- Library-owned classes are single `fui-*` tokens; enhancement validates them before mutation.
 - Consumer classes are additive and are restored by enhanced controllers.
 - CSS is authored in Sass without `@layer` or `:where`, so selectors carry their natural
   specificity and cascade in `@use` order. `src/styles/` holds one public stylesheet per

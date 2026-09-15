@@ -6,7 +6,7 @@ export {
   type KeyedReconciler,
 } from "./keyed-reconciler.ts";
 
-/** DOM part discovery helpers. Only component roots carry an owned `fui-*` class. */
+/** DOM part discovery helpers. All owned class names are validated as `fui-*`. */
 export {
   addFuiClasses,
   partSelector,

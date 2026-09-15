@@ -19,27 +19,41 @@ export function createOverlayView(options: {
   title: string;
   variant: OverlayVariant;
 }): OverlayView {
-  const title = h("h2", { data: { part: "title" } }, options.title);
+  const title = h(
+    "h2",
+    { class: `fui-${options.variant}-title`, data: { fuiPart: "title" } },
+    options.title,
+  );
   const description = options.description
-    ? h("p", { data: { part: "description" } }, options.description)
+    ? h(
+        "p",
+        { class: `fui-${options.variant}-description`, data: { fuiPart: "description" } },
+        options.description,
+      )
     : null;
   const close = h("button", {
     ariaLabel: options.closeLabel ?? "Fermer",
-    data: { part: "close-trigger" },
+    class: `fui-${options.variant}-close`,
+    data: { fuiPart: "close-trigger" },
     type: "button",
   });
   close.append(createXIcon());
   const content = h(
     "div",
-    { data: { part: "content" } },
+    { class: `fui-${options.variant}-content`, data: { fuiPart: "content" } },
     title,
     description,
-    h("div", { data: { part: "body" } }, options.content),
+    h("div", { class: `fui-${options.variant}-body`, data: { fuiPart: "body" } }, options.content),
     close,
   );
-  const positioner = h("div", { data: { part: "positioner" } }, content);
+  const positioner = h(
+    "div",
+    { class: `fui-${options.variant}-positioner`, data: { fuiPart: "positioner" } },
+    content,
+  );
   const backdrop = h("div", {
-    data: { part: "backdrop" },
+    class: `fui-${options.variant}-backdrop`,
+    data: { fuiPart: "backdrop" },
   });
   return { backdrop, close, content, description, positioner, title };
 }
