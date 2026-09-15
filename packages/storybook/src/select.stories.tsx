@@ -16,6 +16,10 @@ const countries = [
 
 const meta = {
   argTypes: {
+    alignItemWithTrigger: {
+      control: "boolean",
+      description: "Centre le positionneur sur l’option sélectionnée. Désactivé en mode multiple.",
+    },
     label: { control: "text", description: "Libellé visible et accessible." },
     description: { control: "text", description: "Aide associée au champ." },
     multiple: { control: "boolean", description: "Autorise plusieurs valeurs." },

@@ -11,7 +11,7 @@ import {
   type FuiItem,
   type FuiItemInput,
 } from "../shared/index.js";
-import { captureAttributes, captureChildNodes, insertAfter } from "../shared/dom.ts";
+import { captureAttributes, captureChildNodes, ensureText, insertAfter } from "../shared/dom.ts";
 import { buildControl, buildNativeSelect, buildOptions, buildPopup } from "./markup.ts";
 
 export function createSelect(options: SelectProps): SelectController {
@@ -35,10 +35,10 @@ function factory(
 
   const enhanceMode = !!root;
   const restores: (() => void)[] = [];
-  const generated: HTMLElement[] = [];
   options ??= { items: [] };
+  if (typeof options.alignItemWithTrigger === "undefined") options.alignItemWithTrigger = true;
 
-  const multiple = options.multiple ?? root?.querySelector("select")?.multiple ?? false;
+  let multiple: boolean = options.multiple ?? false;
   const placeholder = options.placeholder ?? "Select an option";
 
   let nativeSelect: HTMLSelectElement;
@@ -50,6 +50,7 @@ function factory(
     if (!found) throw new Error("[Faisceau UI] missing Select `select.fui-native-select`");
     nativeSelect = found;
     restores.push(captureAttributes(root), captureAttributes(nativeSelect));
+    if (typeof options.multiple === "undefined") multiple = nativeSelect.multiple;
 
     initialValue = [...(options.value ?? options.defaultValue ?? readSelected(nativeSelect))];
     if (options.items) {
@@ -80,34 +81,30 @@ function factory(
     root.append(nativeSelect);
   }
 
-  const label = ensureText<HTMLLabelElement>(
+  const label = ensureText(
     root,
-    "label.fui-field-label",
-    () => h("label", { class: "fui-field-label" }) as HTMLLabelElement,
-    "prepend",
+    { tag: "label", class: "fui-field-label" },
+    (parent, node) => parent.prepend(node),
     options.label,
     enhanceMode,
-    generated,
     restores,
   );
-  ensureText<HTMLParagraphElement>(
+  ensureText(
     root,
-    "p.fui-field-description",
-    () => h("p", { class: "fui-field-description" }) as HTMLParagraphElement,
-    "append",
+    { tag: "p", class: "fui-field-description" },
+    (parent, node) => parent.append(node),
     options.description,
     enhanceMode,
-    generated,
     restores,
   );
 
   // Every other part is always generated fresh, in both modes.
   const { control, trigger, value: valueText, clearTrigger } = buildControl(options);
   insertAfter(root, control, nativeSelect);
-  generated.push(control);
+  restores.push(() => control.remove());
   const { positioner, content, list } = buildPopup(items);
   insertAfter(root, positioner, control);
-  generated.push(positioner);
+  restores.push(() => positioner.remove());
 
   const {
     items: _items,
@@ -202,7 +199,6 @@ function factory(
       zag.destroy();
 
       if (enhanceMode) {
-        for (const node of generated) node.remove();
         restores.forEach((restore) => restore());
         applyValue(nativeSelect, value);
         return;
@@ -251,30 +247,6 @@ function sameValues(left: readonly string[], right: readonly string[]): boolean 
   if (left.length !== right.length) return false;
   const rightValues = new Set(right);
   return left.every((value) => rightValues.has(value));
-}
-
-/** Adopts a label or description, generating it from a string option if missing. */
-function ensureText<T extends HTMLElement>(
-  root: HTMLElement,
-  selector: string,
-  create: () => T,
-  where: "prepend" | "append",
-  text: string | undefined,
-  enhanceMode: boolean,
-  generated: HTMLElement[],
-  restores: (() => void)[],
-): T | null {
-  let node = root.querySelector<T>(selector);
-  if (typeof text === "string" && !node) {
-    node = create();
-    root[where](node);
-    generated.push(node);
-  }
-  if (node && text !== undefined) {
-    if (enhanceMode && !generated.includes(node)) restores.push(captureChildNodes(node));
-    node.replaceChildren(new Text(text));
-  }
-  return node;
 }
 
 function throwDestroyed(): never {
