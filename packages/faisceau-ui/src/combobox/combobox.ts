@@ -1,219 +1,272 @@
 import { h } from "@lilian1315/create-element";
-import { createZagMachine } from "faisceau-zag";
 import * as combobox from "@zag-js/combobox";
 import { effect } from "faisceau";
+import { createZagMachine } from "faisceau-zag";
 
-import { createField, enhanceField } from "../field/index.ts";
-import type { FieldControlContext, FieldControlFactory } from "../field/index.ts";
+import type { ComboboxController, ComboboxProps, EnhanceComboboxProps } from "./types.ts";
 import {
-  captureAttributes,
   createClearIcon,
   createId,
-  createNativeSelectField,
-  getNativeSelectValue,
   getLookupRoot,
   normalizeItems,
-  reconcileNativeSelectOptions,
   reconcileKeyedValues,
-  readNativeSelect,
-  requireNativeSelect,
-  setNativeSelectValue,
   type FuiItem,
   type FuiItemInput,
-  type NativeSelectFieldController,
-  type NativeSelectSource,
 } from "../shared/index.js";
-import { createComboboxItem, createComboboxMarkup } from "./markup.ts";
-import type { ComboboxController, ComboboxOptions, EnhanceComboboxOptions } from "./types.ts";
+import { captureAttributes, captureChildNodes, ensureText, insertAfter } from "../shared/dom.ts";
+import {
+  buildControl,
+  buildItem,
+  buildNativeSelect,
+  buildOptions,
+  buildPopup,
+  hideNativeSelect,
+  reconcileNativeSelectOptions,
+} from "./markup.ts";
 
-interface ComboboxParts {
-  label: HTMLLabelElement;
-  control: HTMLElement;
-  input: HTMLInputElement;
-  selection: HTMLElement;
-  trigger: HTMLButtonElement;
-  clearTrigger: HTMLButtonElement | null;
-  positioner: HTMLElement;
-  content: HTMLElement;
-  list: HTMLElement;
-  empty: HTMLElement;
-  nativeSelect: HTMLSelectElement;
-  itemElements: HTMLElement[];
+export function createCombobox(options: ComboboxProps): ComboboxController {
+  return factory(undefined, options);
 }
 
-type ComboboxSetupOptions = EnhanceComboboxOptions & { items?: readonly FuiItemInput[] };
-
-/** Builds a Combobox tree. Call `.mount(target)` to insert it and start Zag. */
-export function createCombobox(options: ComboboxOptions): ComboboxController {
-  return createField({
-    ...fieldOptions(options),
-    control: comboboxField(options),
-    label: options.label,
-  });
-}
-
-/** Enhances a fully-authored Field containing a direct `.fui-combobox` child. */
 export function enhanceCombobox(
-  root: HTMLElement,
-  options: EnhanceComboboxOptions = {},
+  root: HTMLDivElement,
+  options?: EnhanceComboboxProps,
 ): ComboboxController {
-  return enhanceField(root, {
-    ...fieldOptions(options),
-    control: comboboxField(options),
-  });
+  return factory(root, options);
 }
 
-function comboboxField(options: ComboboxSetupOptions): FieldControlFactory<ComboboxController> {
-  return {
-    rootClass: "fui-combobox",
-    create(context) {
-      if (!("items" in options) || options.items === undefined) {
-        throw new Error("[Faisceau UI] Combobox creation requires options.items.");
-      }
-      const items = normalizeItems(options.items);
-      const markup = createComboboxMarkup(options as ComboboxOptions, items);
-      return setupCombobox(markup.root, options, context, {
-        items,
-        nativeSelect: markup.nativeSelect,
-        ownsRoot: true,
-        start: false,
-      });
-    },
-    enhance(controlRoot, context) {
-      const nativeSelect = requireNativeSelect(controlRoot, "Combobox");
-      requireRootClass(controlRoot, "fui-combobox", "Combobox");
-      requireRootClass(nativeSelect, "fui-native-select", "Combobox");
-      const source = readNativeSelect(nativeSelect);
-      const resolvedOptions = resolveEnhancedOptions(
-        { ...options, label: options.label ?? context.label.textContent?.trim() },
-        nativeSelect,
-        source,
+function factory(
+  root?: HTMLDivElement,
+  options?: ComboboxProps | EnhanceComboboxProps,
+): ComboboxController {
+  if (root && !root.classList.contains("fui-combobox")) {
+    throw new Error(
+      "[Faisceau UI] Combobox enhance mode need a root with the `fui-combobox` class",
+    );
+  }
+
+  const enhanceMode = !!root;
+  const restores: (() => void)[] = [];
+  options ??= { items: [] };
+
+  let multiple: boolean = options.multiple ?? false;
+  let placeholder: string | undefined = options.placeholder;
+
+  let nativeSelect: HTMLSelectElement;
+  let items: FuiItem[];
+  let initialValue: string[];
+
+  if (root) {
+    const found = root.querySelector<HTMLSelectElement>("select.fui-native-select");
+    if (!found) throw new Error("[Faisceau UI] missing Combobox `select.fui-native-select`");
+    nativeSelect = found;
+    restores.push(captureAttributes(root), captureAttributes(nativeSelect));
+    if (typeof options.multiple === "undefined") multiple = nativeSelect.multiple;
+
+    initialValue = [...(options.value ?? options.defaultValue ?? readSelected(nativeSelect))];
+    if (options.items) {
+      items = normalizeItems(options.items);
+      const known = new Set(items.map((item) => item.value));
+      initialValue = initialValue.filter((value) => known.has(value));
+      restores.push(captureChildNodes(nativeSelect));
+      nativeSelect.replaceChildren(
+        ...buildOptions(items, options.placeholder, multiple, initialValue),
       );
-      const restoreRoot = captureAttributes(controlRoot);
-      const restoreSelect = captureAttributes(nativeSelect);
-      const originalOptions = Array.from(nativeSelect.childNodes, (node) => node.cloneNode(true));
-      return setupCombobox(controlRoot, resolvedOptions, context, {
-        cleanup() {
-          const value = getNativeSelectValue(nativeSelect);
-          nativeSelect.replaceChildren(...originalOptions);
-          setNativeSelectValue(nativeSelect, value);
-          restoreRoot();
-        },
-        items: source.items,
-        nativeSelect,
-        ownsRoot: false,
-        restoreNativeSelect: restoreSelect,
-        start: true,
-      });
-    },
-  };
-}
+    } else {
+      items = normalizeItems(readItems(nativeSelect));
+    }
+    // Like Checkbox, unspecified form props are read from the adopted element.
+    options = {
+      ...options,
+      name: options.name ?? (nativeSelect.name || undefined),
+      disabled: options.disabled ?? nativeSelect.disabled,
+      required: options.required ?? nativeSelect.required,
+      form: options.form ?? nativeSelect.getAttribute("form") ?? undefined,
+    };
+    placeholder ??= readPlaceholder(nativeSelect);
+    // The adopted select becomes the submitted control; Zag must not see it.
+    nativeSelect.setAttribute("aria-hidden", "true");
+    nativeSelect.tabIndex = -1;
+    hideNativeSelect(nativeSelect);
+    if (options.name !== undefined) nativeSelect.name = options.name;
+    if (options.form !== undefined) nativeSelect.setAttribute("form", options.form);
+    if (options.multiple !== undefined) nativeSelect.multiple = multiple;
+    if (options.disabled !== undefined) nativeSelect.disabled = options.disabled;
+    if (options.required !== undefined) nativeSelect.required = options.required;
+  } else {
+    if (options.items === undefined)
+      throw new Error("[Faisceau UI] Combobox creation requires options.items.");
+    items = normalizeItems(options.items);
+    initialValue = [...(options.value ?? options.defaultValue ?? [])];
+    root = h("div", { class: "fui-combobox" }) as HTMLDivElement;
+    nativeSelect = buildNativeSelect(items, { ...options, multiple, value: initialValue });
+    root.append(nativeSelect);
+  }
 
-function setupCombobox(
-  root: HTMLElement,
-  options: ComboboxSetupOptions,
-  fieldContext: FieldControlContext,
-  setup: {
-    cleanup?: () => void;
-    items: FuiItem[];
-    nativeSelect: HTMLSelectElement;
-    ownsRoot: boolean;
-    restoreNativeSelect?: () => void;
-    start: boolean;
-  },
-): ComboboxController {
+  root.toggleAttribute("data-fui-multiple", multiple);
+
+  const label = ensureText(
+    root,
+    { tag: "label", class: "fui-field-label" },
+    (parent, node) => parent.prepend(node),
+    options.label,
+    enhanceMode,
+    restores,
+  );
+  ensureText(
+    root,
+    { tag: "p", class: "fui-field-description" },
+    (parent, node) => parent.append(node),
+    options.description,
+    enhanceMode,
+    restores,
+  );
+
+  // Every other part is always generated fresh, in both modes.
+  const { control, selection, input, clearTrigger, trigger } = buildControl({
+    clearLabel: options.clearLabel,
+    placeholder,
+  });
+  insertAfter(root, control, nativeSelect);
+  restores.push(() => control.remove());
+  const { positioner, content, list, empty } = buildPopup(items, options.emptyLabel);
+  insertAfter(root, positioner, control);
+  restores.push(() => positioner.remove());
+
   const {
-    className: _className,
-    clearLabel,
-    emptyLabel,
+    items: _items,
+    label: _label,
+    description: _description,
+    placeholder: _placeholder,
+    clearLabel: _clearLabel,
+    emptyLabel: _emptyLabel,
     filter = defaultFilter,
     getRemoveLabel = defaultRemoveLabel,
     id: requestedId,
-    items: _items,
-    label: _label,
+    value,
+    defaultValue: _defaultValue,
     onInputValueChange,
-    onValueChange,
     ...behavior
   } = options;
-  const parts = resolveParts(root, setup.nativeSelect, setup.items, fieldContext.label, emptyLabel);
-  const machineId = requestedId ?? fieldContext.id ?? createId("combobox");
 
-  root.dataset.fuiComponent = "combobox";
-  root.toggleAttribute("data-fui-multiple", behavior.multiple === true);
-  if (!parts.label.textContent?.trim()) {
-    throw new Error("[Faisceau UI] Combobox requires a visible, non-empty label.");
-  }
-
-  if (emptyLabel !== undefined) parts.empty.textContent = emptyLabel;
-  const itemRecords = mapItems(parts.itemElements, setup.items, machineId);
-  let currentItems = [...setup.items];
+  let currentItems = [...items];
   let itemByValue = new Map(currentItems.map((item) => [item.value, item]));
-  const ids = createPartIds(machineId, root, parts, itemRecords);
-  const resetValue = [
-    ...(behavior.value ?? behavior.defaultValue ?? getNativeSelectValue(parts.nativeSelect)),
-  ];
   const initialInput = behavior.inputValue ?? behavior.defaultInputValue ?? "";
-  const initialItems = getFilteredItems(setup.items, initialInput, filter);
-  updateFilteredMarkup(itemRecords, initialItems, parts.empty);
+  const initialItems = getFilteredItems(currentItems, initialInput, filter);
+  updateFilteredMarkup(list, empty, initialItems);
 
   let updateCollection = (_inputValue: string): void => {};
-  let nativeField: NativeSelectFieldController | undefined;
-  const machineProps: combobox.Props<FuiItem> = {
-    ...behavior,
-    collection: createCollection(initialItems),
-    getRootNode: () => getLookupRoot(root),
-    id: machineId,
-    ids,
-    inputBehavior: behavior.inputBehavior ?? "autohighlight",
-    invalid: behavior.invalid ?? fieldContext.invalid,
-    name: undefined,
-    onInputValueChange(details) {
-      updateCollection(details.inputValue);
-      onInputValueChange?.(details);
-    },
-    onValueChange(details) {
-      nativeField?.syncFromMachine(details.value);
-      onValueChange?.(details);
-    },
-    openOnClick: behavior.openOnClick ?? true,
-    positioning: {
-      gutter: 6,
-      placement: "bottom-start",
-      sameWidth: true,
-      ...behavior.positioning,
-    },
-    translations: {
-      ...behavior.translations,
-      clearTriggerLabel:
-        clearLabel ?? behavior.translations?.clearTriggerLabel ?? "Clear selection",
-    },
-  };
   const zag = createZagMachine(
     combobox.machine as combobox.Machine<FuiItem>,
-    machineProps,
+    {
+      ...behavior,
+      multiple,
+      collection: createCollection(initialItems),
+      getRootNode: () => getLookupRoot(root),
+      id: requestedId ?? createId("combobox"),
+      inputBehavior: behavior.inputBehavior ?? "autohighlight",
+      // The native select owns submission; the filter input must stay nameless.
+      name: undefined,
+      onInputValueChange(details) {
+        updateCollection(details.inputValue);
+        onInputValueChange?.(details);
+      },
+      openOnClick: behavior.openOnClick ?? true,
+      positioning: {
+        gutter: 6,
+        placement: "bottom-start",
+        sameWidth: true,
+        ...behavior.positioning,
+      },
+      ...(value !== undefined ? { value } : { defaultValue: initialValue }),
+    },
     combobox.connect,
   );
-  nativeField = createNativeSelectField({
-    focusTarget: parts.input,
-    getValue: () => zag.api.get().value,
-    props: {
-      disabled: behavior.disabled ?? fieldContext.disabled,
-      form: behavior.form,
-      multiple: behavior.multiple,
-      name: behavior.name,
-      required: behavior.required,
-    },
-    resetValue,
-    restore: setup.restoreNativeSelect,
-    select: parts.nativeSelect,
-    setValue: (value) => zag.api.get().setValue(value),
+
+  zag.bind(root, (api) => api.getRootProps());
+  if (label) zag.bind(label, (api) => api.getLabelProps());
+  zag.bind(control, (api) => api.getControlProps());
+  zag.bind(input, (api) => api.getInputProps());
+  zag.bind(trigger, (api) => api.getTriggerProps());
+  zag.bind(clearTrigger, (api) => api.getClearTriggerProps());
+  zag.bind(positioner, (api) => api.getPositionerProps());
+  zag.bind(content, (api) => api.getContentProps());
+  zag.bind(list, (api) => api.getListProps());
+
+  const itemDisposers = new Map<string, () => void>();
+  const bindItem = (element: HTMLElement, item: FuiItem): void => {
+    const disposers = [zag.bind(element, (api) => api.getItemProps({ item }))];
+    const text = element.querySelector<HTMLElement>(".fui-combobox-item-text");
+    if (text) disposers.push(zag.bind(text, (api) => api.getItemTextProps({ item })));
+    const indicator = element.querySelector<HTMLElement>(".fui-combobox-item-indicator");
+    if (indicator)
+      disposers.push(zag.bind(indicator, (api) => api.getItemIndicatorProps({ item })));
+    itemDisposers.set(item.value, () => disposers.forEach((dispose) => dispose()));
+  };
+  for (const [index, item] of currentItems.entries()) {
+    bindItem(list.children[index] as HTMLElement, item);
+  }
+
+  // Unlike Select, Zag's Combobox owns no hidden select, so the native select is
+  // synced here with the exact hidden-select protocol from `@zag-js/select`:
+  // options mirror the machine value (`syncSelectElement`), every machine change
+  // emits one bubbling `change` tagged as internal (`dispatchChangeEvent`), and
+  // native `input`/`change` events flow back into the machine unless internal.
+  const syncNativeValue = (next: readonly string[]): void => {
+    syncSelectElement(nativeSelect, next, multiple);
+    queueMicrotask(() => {
+      if (destroyed) return;
+      nativeSelect.dispatchEvent(
+        markAsInternalChangeEvent(new Event("change", { bubbles: true, composed: true })),
+      );
+    });
+  };
+  const handleNativeChange = (event: Event): void => {
+    if (isInternalChangeEvent(event)) return;
+    zag.api.get().setValue(readSelected(nativeSelect));
+  };
+  const focusInput = (event: Event): void => {
+    event.preventDefault();
+    input.focus({ preventScroll: true });
+  };
+  nativeSelect.addEventListener("input", handleNativeChange);
+  nativeSelect.addEventListener("change", handleNativeChange);
+  // Like Zag's hidden select, a focused native control hands focus to the visible
+  // one. Browser extensions and failed native validation can land focus here.
+  nativeSelect.addEventListener("focus", focusInput);
+
+  const stopSync = effect(() => {
+    const api = zag.api.get();
+    if (!sameValues(readSelected(nativeSelect), api.value)) syncNativeValue(api.value);
+  });
+  const stopClearVisibility = effect(() => {
+    const api = zag.api.get();
+    clearTrigger.hidden = api.inputValue.length === 0 && !api.hasSelectedItems;
+  });
+  const stopSelectedTags = effect(() => {
+    const api = zag.api.get();
+    const selectedItems = api.value.flatMap((entry) => {
+      const item = itemByValue.get(entry);
+      return item === undefined ? [] : [item];
+    });
+    renderSelectedTags(
+      selection,
+      multiple ? selectedItems : [],
+      api.disabled || behavior.readOnly === true,
+      getRemoveLabel,
+      (entry) => {
+        api.clearValue(entry);
+        api.focus();
+      },
+    );
   });
 
   let filterRevision = 0;
+  let started = false;
   let destroyed = false;
   updateCollection = (inputValue): void => {
     const filteredItems = getFilteredItems(currentItems, inputValue, filter);
-    updateFilteredMarkup(itemRecords, filteredItems, parts.empty);
+    updateFilteredMarkup(list, empty, filteredItems);
     const revision = ++filterRevision;
 
     queueMicrotask(() => {
@@ -222,65 +275,24 @@ function setupCombobox(
     });
   };
 
-  zag.bind(root, (api) => api.getRootProps());
-  zag.bind(parts.label, (api) => api.getLabelProps());
-  zag.bind(parts.control, (api) => api.getControlProps());
-  zag.bind(parts.input, (api) => api.getInputProps());
-  zag.bind(parts.trigger, (api) => api.getTriggerProps());
-  zag.bind(parts.positioner, (api) => api.getPositionerProps());
-  zag.bind(parts.content, (api) => api.getContentProps());
-  zag.bind(parts.list, (api) => api.getListProps());
-
-  if (parts.clearTrigger) {
-    zag.bind(parts.clearTrigger, (api) => api.getClearTriggerProps());
-  }
-
-  const itemDisposers = new Map<string, () => void>();
-  const bindItem = (element: HTMLElement, item: FuiItem): void => {
-    const disposers = [zag.bind(element, (api) => api.getItemProps({ item }))];
-
-    const text = queryClass<HTMLElement>(element, "fui-combobox-item-text");
-    if (text) {
-      disposers.push(zag.bind(text, (api) => api.getItemTextProps({ item })));
-    }
-
-    const indicator = queryClass<HTMLElement>(element, "fui-combobox-item-indicator");
-    if (indicator) {
-      disposers.push(zag.bind(indicator, (api) => api.getItemIndicatorProps({ item })));
-    }
-    itemDisposers.set(item.value, () => disposers.forEach((dispose) => dispose()));
+  let form: HTMLFormElement | null = null;
+  let fieldsetObserver: MutationObserver | null = null;
+  const baseDisabled = behavior.disabled ?? false;
+  const handleFormReset = (event: Event): void => {
+    if (event.defaultPrevented) return;
+    // Mirrors Zag's `trackFormControl`: reset restores the machine's initial value
+    // and the sync effect rewrites the native options from there.
+    const next = [...initialValue];
+    if (!sameValues(next, zag.api.get().value)) zag.api.get().setValue(next);
   };
-  for (const { element, item } of itemRecords) {
-    bindItem(element, item);
-  }
+  const applyFieldsetDisabled = (fieldsetDisabled: boolean): void => {
+    // Mirrors Zag's fieldset tracking: the observable disabled state combines the
+    // machine prop with the closest fieldset. The native select needs no manual
+    // update; a disabled fieldset disables its form controls by itself.
+    const next = baseDisabled || fieldsetDisabled;
+    if (next !== zag.api.get().disabled) zag.updateProps({ disabled: next });
+  };
 
-  const stopClearVisibility = effect(() => {
-    if (!parts.clearTrigger) return;
-    const api = zag.api.get();
-    parts.clearTrigger.hidden = api.inputValue.length === 0 && !api.hasSelectedItems;
-  });
-  const stopSelectedTags = effect(() => {
-    const api = zag.api.get();
-    const selectedItems = api.value.flatMap((value) => {
-      const item = itemByValue.get(value);
-      return item === undefined ? [] : [item];
-    });
-    renderSelectedTags(
-      parts.selection,
-      behavior.multiple === true ? selectedItems : [],
-      api.disabled || behavior.readOnly === true,
-      getRemoveLabel,
-      (value) => {
-        api.clearValue(value);
-        api.focus();
-      },
-    );
-  });
-  if (fieldContext.describedBy) {
-    parts.input.setAttribute("aria-describedby", fieldContext.describedBy);
-  }
-
-  let started = false;
   const controller: ComboboxController = {
     api: zag.api,
     root,
@@ -288,55 +300,64 @@ function setupCombobox(
       return started;
     },
     setItems(inputs) {
-      if (destroyed) throwDestroyed("Combobox");
+      if (destroyed) return throwDestroyed();
       currentItems = normalizeItems(inputs);
       itemByValue = new Map(currentItems.map((item) => [item.value, item]));
       const nextValues = new Set(itemByValue.keys());
       const elements = new Map(
-        queryClasses<HTMLElement>(parts.list, "fui-combobox-item").map((element) => [
-          element.dataset.value!,
-          element,
-        ]),
+        Array.from(list.children)
+          .filter((element) => element.classList.contains("fui-combobox-item"))
+          .map((element) => [element.getAttribute("data-value")!, element as HTMLElement] as const),
       );
       const ordered = reconcileKeyedValues({
-        create: (item) => createComboboxItem(item),
+        create: (item) => buildItem(item),
         current: elements,
-        destroy: (element, value) => {
-          itemDisposers.get(value)?.();
-          itemDisposers.delete(value);
+        destroy: (element, entry) => {
+          itemDisposers.get(entry)?.();
+          itemDisposers.delete(entry);
           element.remove();
         },
         getKey: (item) => item.value,
         inputs: currentItems,
         update: (element, item) => {
           itemDisposers.get(item.value)?.();
-          const fresh = createComboboxItem(item);
+          const fresh = buildItem(item);
           element.replaceChildren(...fresh.childNodes);
           element.dataset.value = item.value;
           element.toggleAttribute("data-disabled", item.disabled === true);
           element.className = "fui-combobox-item";
-          element.id ||= `${machineId}:item:${item.value}`;
           bindItem(element, item);
         },
       });
-      parts.list.append(...ordered);
-      const value = zag.api.get().value.filter((entry) => nextValues.has(entry));
-      const valueChanged = value.length !== zag.api.get().value.length;
-      if (valueChanged) nativeField.syncFromMachine(value);
-      reconcileNativeSelectOptions(parts.nativeSelect, currentItems, behavior.placeholder ?? "");
-      if (valueChanged) zag.api.get().setValue(value);
-      updateCollection(zag.api.get().inputValue);
+      list.append(...ordered);
+      const api = zag.api.get();
+      const next = api.value.filter((entry) => nextValues.has(entry));
+      if (next.length !== api.value.length) syncNativeValue(next);
+      reconcileNativeSelectOptions(nativeSelect, currentItems, placeholder ?? "");
+      if (next.length !== api.value.length) api.setValue(next);
+      updateCollection(api.inputValue);
     },
-    mount(target) {
-      if (destroyed) throwDestroyed("Combobox");
+    mount(target: ParentNode) {
+      if (destroyed) return throwDestroyed();
       target.append(root);
       return this.start();
     },
     start() {
-      if (destroyed) throwDestroyed("Combobox");
+      if (destroyed) return throwDestroyed();
       if (!started) {
         zag.start();
-        nativeField.start();
+        // Mirrors the select machine entry: the native selection is rewritten from
+        // the machine value, and the label takes ownership of the native control.
+        syncSelectElement(nativeSelect, zag.api.get().value, multiple);
+        if (label?.id) nativeSelect.setAttribute("aria-labelledby", label.id);
+        form = nativeSelect.form;
+        form?.addEventListener("reset", handleFormReset, { passive: true });
+        const fieldset = nativeSelect.closest("fieldset");
+        if (fieldset) {
+          applyFieldsetDisabled(fieldset.disabled);
+          fieldsetObserver = new MutationObserver(() => applyFieldsetDisabled(fieldset.disabled));
+          fieldsetObserver.observe(fieldset, { attributes: true, attributeFilter: ["disabled"] });
+        }
         started = true;
       }
       return this;
@@ -344,150 +365,102 @@ function setupCombobox(
     destroy() {
       if (destroyed) return;
       destroyed = true;
+      const value = zag.api.get().value;
       filterRevision += 1;
+      stopSync();
       stopClearVisibility();
       stopSelectedTags();
       for (const dispose of itemDisposers.values()) dispose();
       itemDisposers.clear();
-      nativeField.destroy();
+      nativeSelect.removeEventListener("input", handleNativeChange);
+      nativeSelect.removeEventListener("change", handleNativeChange);
+      nativeSelect.removeEventListener("focus", focusInput);
+      form?.removeEventListener("reset", handleFormReset);
+      fieldsetObserver?.disconnect();
+      fieldsetObserver = null;
       zag.destroy();
-      if (setup.ownsRoot) root.remove();
-      else setup.cleanup?.();
+
+      if (enhanceMode) {
+        restores.forEach((restore) => restore());
+        syncSelectElement(nativeSelect, value, multiple);
+        return;
+      }
+
+      root?.remove();
     },
   };
 
-  if (setup.start) controller.start();
+  if (enhanceMode) controller.start();
+
   return controller;
 }
 
-function resolveParts(
-  root: HTMLElement,
-  nativeSelect: HTMLSelectElement,
-  items: readonly FuiItem[],
-  label: HTMLLabelElement,
-  emptyLabel?: string,
-): ComboboxParts {
-  const control = requireClass<HTMLElement>(root, "fui-combobox-control", "Combobox");
-  const input = requireClass<HTMLInputElement>(root, "fui-combobox-input", "Combobox");
-  const selection = requireClass<HTMLElement>(root, "fui-combobox-selection", "Combobox");
-  const trigger = requireClass<HTMLButtonElement>(root, "fui-combobox-trigger", "Combobox");
-  const positioner = requireClass<HTMLElement>(root, "fui-combobox-positioner", "Combobox");
-  const content = requireClass<HTMLElement>(root, "fui-combobox-content", "Combobox");
-  const list = requireClass<HTMLElement>(root, "fui-combobox-list", "Combobox");
-  const empty = requireClass<HTMLElement>(root, "fui-combobox-empty", "Combobox");
-  if (emptyLabel !== undefined) empty.textContent = emptyLabel;
-  const clearTrigger = queryClass<HTMLButtonElement>(root, "fui-combobox-clear-trigger");
-  const itemElements = queryClasses<HTMLElement>(root, "fui-combobox-item");
-  if (items.length > 0 && itemElements.length === 0) {
-    throw new Error("[Faisceau UI] Combobox items require `.fui-combobox-item` markup.");
-  }
-
-  return {
-    label,
-    control,
-    input,
-    selection,
-    trigger,
-    clearTrigger,
-    positioner,
-    content,
-    list,
-    empty,
-    nativeSelect,
-    itemElements,
-  };
+/** Reads items from native options, skipping the explicitly-marked placeholder. */
+function readItems(native: HTMLSelectElement): FuiItemInput[] {
+  return Array.from(native.options)
+    .filter((option) => !option.hasAttribute("data-placeholder"))
+    .map((option) => {
+      const group = option.parentElement;
+      const description = option.dataset.description?.trim();
+      const disabled = option.disabled || (group instanceof HTMLOptGroupElement && group.disabled);
+      return {
+        value: option.value,
+        label: option.label || option.text,
+        ...(disabled ? { disabled: true as const } : {}),
+        ...(description ? { description } : {}),
+      };
+    });
 }
 
-function resolveEnhancedOptions(
-  options: EnhanceComboboxOptions,
-  nativeSelect: HTMLSelectElement,
-  source: NativeSelectSource,
-): EnhanceComboboxOptions & { label: string } {
-  const label = options.label ?? nativeSelect.getAttribute("aria-label")?.trim();
-  if (!label) {
-    throw new Error(
-      "[Faisceau UI] Combobox enhancement requires options.label or aria-label on the native select.",
-    );
-  }
-
-  const hasExplicitValue = options.value !== undefined || options.defaultValue !== undefined;
-  return {
-    ...options,
-    disabled: options.disabled ?? nativeSelect.disabled,
-    form: options.form ?? nativeSelect.getAttribute("form") ?? undefined,
-    label,
-    multiple: options.multiple ?? nativeSelect.multiple,
-    name: (options.name ?? nativeSelect.name) || undefined,
-    placeholder: options.placeholder ?? source.placeholder,
-    required: options.required ?? nativeSelect.required,
-    ...(!hasExplicitValue ? { defaultValue: source.value } : {}),
-  };
+/** Reads the selected values with the exact `getSelectedValues` logic from `@zag-js/select`. */
+function readSelected(native: HTMLSelectElement): string[] {
+  return native.multiple
+    ? Array.from(native.selectedOptions, (option) => option.value)
+    : native.value
+      ? [native.value]
+      : [];
 }
 
-function mapItems(
-  elements: readonly HTMLElement[],
-  items: readonly FuiItem[],
-  machineId: string,
-): Array<{ element: HTMLElement; item: FuiItem }> {
-  const itemByValue = new Map(items.map((item) => [item.value, item]));
-  const seen = new Set<string>();
-  const records = elements.map((element, index) => {
-    const value = element.getAttribute("data-value");
-    if (value === null) {
-      throw new Error(`[Faisceau UI] Combobox item at index ${index} requires data-value.`);
-    }
-    if (seen.has(value)) {
-      throw new Error(`[Faisceau UI] Combobox markup contains duplicate data-value "${value}".`);
-    }
-    seen.add(value);
-
-    const item = itemByValue.get(value);
-    if (!item) {
-      throw new Error(
-        `[Faisceau UI] Combobox markup item "${value}" is absent from options.items.`,
-      );
-    }
-
-    element.id ||= `${machineId}:item:${index}`;
-    return { element, item };
-  });
-
-  for (const item of items) {
-    if (!seen.has(item.value)) {
-      throw new Error(`[Faisceau UI] Combobox item "${item.value}" has no matching markup node.`);
-    }
-  }
-
-  return records;
+/** Reads the placeholder text from the explicitly-marked option, if any. */
+function readPlaceholder(native: HTMLSelectElement): string | undefined {
+  return (
+    native.querySelector<HTMLOptionElement>("option[data-placeholder]")?.label.trim() || undefined
+  );
 }
 
-function createPartIds(
-  id: string,
-  root: HTMLElement,
-  parts: ComboboxParts,
-  items: ReadonlyArray<{ element: HTMLElement; item: FuiItem }>,
-): combobox.ElementIds {
-  root.id ||= `${id}:root`;
-  parts.label.id ||= `${id}:label`;
-  parts.control.id ||= `${id}:control`;
-  parts.input.id ||= `${id}:input`;
-  parts.trigger.id ||= `${id}:trigger`;
-  parts.positioner.id ||= `${id}:positioner`;
-  parts.content.id ||= `${id}:content`;
-  if (parts.clearTrigger) parts.clearTrigger.id ||= `${id}:clear-trigger`;
+/** Writes the machine value onto the native options (`syncSelectElement` in `@zag-js/select`). */
+function syncSelectElement(
+  native: HTMLSelectElement,
+  value: readonly string[],
+  multiple: boolean,
+): void {
+  if (value.length === 0 && !multiple) {
+    native.selectedIndex = -1;
+    return;
+  }
+  for (const option of native.options) {
+    option.selected = value.includes(option.value);
+  }
+}
 
-  const itemIds = new Map(items.map(({ element, item }) => [item.value, element.id]));
-  return {
-    root: root.id,
-    label: parts.label.id,
-    control: parts.control.id,
-    input: parts.input.id,
-    trigger: parts.trigger.id,
-    positioner: parts.positioner.id,
-    content: parts.content.id,
-    clearTrigger: parts.clearTrigger?.id,
-    item: (value) => itemIds.get(value) ?? `${id}:item:${value}`,
-  };
+/** Tags machine-originated changes so the native handler ignores them (`@zag-js/dom-query`). */
+const INTERNAL_CHANGE_EVENT = Symbol.for("zag.changeEvent");
+
+function isInternalChangeEvent(event: Event): boolean {
+  return Object.prototype.hasOwnProperty.call(event, INTERNAL_CHANGE_EVENT);
+}
+
+function markAsInternalChangeEvent<T extends Event>(event: T): T {
+  if (isInternalChangeEvent(event)) return event;
+  Object.defineProperty(event, INTERNAL_CHANGE_EVENT, { value: true });
+  return event;
+}
+
+/** Order-insensitive value comparison (native order follows the document). */
+function sameValues(left: readonly string[], right: readonly string[]): boolean {
+  if (left.length !== right.length) return false;
+  const rightValues = new Set(right);
+  return left.every((value) => rightValues.has(value));
 }
 
 function createCollection(items: readonly FuiItem[]) {
@@ -554,55 +527,19 @@ function renderSelectedTags(
 }
 
 function updateFilteredMarkup(
-  records: ReadonlyArray<{ element: HTMLElement; item: FuiItem }>,
-  filteredItems: readonly FuiItem[],
+  list: HTMLElement,
   empty: HTMLElement,
+  filteredItems: readonly FuiItem[],
 ): void {
   const visibleValues = new Set(filteredItems.map((item) => item.value));
-  for (const { element, item } of records) element.hidden = !visibleValues.has(item.value);
+  for (const element of list.children) {
+    if (element instanceof HTMLElement && element.classList.contains("fui-combobox-item")) {
+      element.hidden = !visibleValues.has(element.dataset.value ?? "");
+    }
+  }
   empty.hidden = filteredItems.length > 0;
 }
 
-function fieldOptions(options: ComboboxSetupOptions) {
-  return {
-    className: options.className,
-    description: options.description,
-    disabled: options.disabled,
-    errorMessage: options.errorMessage,
-    id: options.id,
-    invalid: options.invalid,
-    label: options.label,
-  };
-}
-
-function queryClass<T extends Element>(root: ParentNode, className: string): T | null {
-  return root.querySelector<T>(`.${className}`);
-}
-
-function queryClasses<T extends Element>(root: ParentNode, className: string): T[] {
-  return Array.from(root.querySelectorAll<T>(`.${className}`));
-}
-
-function requireClass<T extends Element>(
-  root: ParentNode,
-  className: string,
-  component: string,
-): T {
-  const elements = queryClasses<T>(root, className);
-  if (elements.length !== 1) {
-    throw new Error(
-      `[Faisceau UI] ${component} enhancement requires exactly one \`.${className}\` element; found ${elements.length}.`,
-    );
-  }
-  return elements[0]!;
-}
-
-function requireRootClass(root: Element, className: string, component: string): void {
-  if (!root.classList.contains(className)) {
-    throw new Error(`[Faisceau UI] ${component} enhancement requires \`.${className}\`.`);
-  }
-}
-
-function throwDestroyed(name: string): never {
-  throw new Error(`[Faisceau UI] Cannot start or mount a destroyed ${name}.`);
+function throwDestroyed(): never {
+  throw new Error("[Faisceau UI] Cannot start or mount a destroyed Combobox.");
 }

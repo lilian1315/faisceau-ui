@@ -1,18 +1,11 @@
-import { createCombobox, enhanceCombobox } from "faisceau-ui";
+import { createCombobox, enhanceCombobox, type ComboboxProps } from "faisceau-ui";
+import { asDom } from "@lilian1315/create-element/faisceau/jsx-runtime";
 import type { Meta, StoryObj } from "@storybook/html-vite";
 
-import { asDom, createStoryShell, formatValues, trackController } from "./story.tsx";
+import { createStoryShell, trackController } from "./story.tsx";
+import { h } from "@lilian1315/create-element/faisceau";
 
-interface ComboboxStoryArgs {
-  clearLabel: string;
-  description: string;
-  disabled: boolean;
-  emptyLabel: string;
-  label: string;
-  multiple: boolean;
-  placeholder: string;
-  required: boolean;
-}
+type ComboboxStoryArgs = ComboboxProps;
 
 const cities = [
   { value: "paris", label: "Paris", description: "Île-de-France" },
@@ -24,37 +17,30 @@ const cities = [
 ] as const;
 
 const meta = {
-  args: {
-    clearLabel: "Effacer la recherche",
-    description: "Saisissez quelques lettres pour filtrer les suggestions.",
-    disabled: false,
-    emptyLabel: "Aucune ville trouvée",
-    label: "Ville",
-    multiple: false,
-    placeholder: "Rechercher une ville…",
-    required: false,
-  },
   argTypes: {
-    clearLabel: { control: "text", description: "Nom accessible de l’action d’effacement." },
-    description: { control: "text", description: "Texte d’aide relié à la saisie." },
-    disabled: { control: "boolean", description: "Désactive la saisie et les actions." },
-    emptyLabel: {
-      control: "text",
-      description: "Message affiché quand le filtre ne retourne rien.",
-    },
     label: { control: "text", description: "Libellé visible et accessible." },
+    description: { control: "text", description: "Aide associée au champ." },
     multiple: {
       control: "boolean",
       description: "Affiche les valeurs choisies sous forme de tags.",
     },
     placeholder: { control: "text", description: "Indication affichée dans la saisie vide." },
-    required: { control: "boolean", description: "Active la validation HTML native." },
+    emptyLabel: {
+      control: "text",
+      description: "Message affiché quand le filtre ne retourne rien.",
+    },
+    clearLabel: {
+      control: "text",
+      description: "Nom accessible de l’action d’effacement.",
+    },
+    disabled: { control: "boolean", description: "Empêche toute interaction." },
+    required: { control: "boolean", description: "Active la validation native required." },
   },
   parameters: {
     docs: {
       description: {
         component:
-          "Combobox filtrable pilotée par Zag.js. La collection visuelle se synchronise avec un `<select>` natif utilisable par FormData et la validation du navigateur.",
+          "Combobox Zag reliée à un véritable select natif. La saisie filtre la liste, FormData, required et reset conservent la sémantique du navigateur.",
       },
     },
   },
@@ -65,15 +51,22 @@ export default meta;
 type Story = StoryObj<ComboboxStoryArgs>;
 
 export const create: Story = {
+  args: {
+    label: "Ville",
+    description: "Saisissez quelques lettres pour filtrer les suggestions.",
+    placeholder: "Rechercher une ville…",
+    emptyLabel: "Aucune ville trouvée",
+  },
+
   name: "create()",
+
   render: (args) => {
     const story = createStoryShell({
-      description:
-        "La factory assemble la saisie, la liste filtrable, l’état vide et le select natif.",
+      description: "La factory génère le select natif, la saisie, le popup et les options.",
       eyebrow: "createCombobox",
       title: "Construction programmatique",
     });
-    const host = asDom<HTMLDivElement>(<div />);
+    const host = h("div");
     story.canvas.append(host);
     const controller = createCombobox({
       ...args,
@@ -82,61 +75,54 @@ export const create: Story = {
       items: cities,
       name: args.multiple ? "cities" : "city",
       onValueChange: ({ value }) => {
-        story.output.textContent = `Valeur native : ${formatValues(value)}`;
+        story.output.textContent = `value = ${value.join(", ") || "(vide)"}`;
       },
     }).mount(host);
     trackController(story.root, controller);
     story.setSource(`createCombobox({
-  label: "${args.label}",
-  name: "${args.multiple ? "cities" : "city"}",
-  items: cities,
-  multiple: ${args.multiple},
-  emptyLabel: "${args.emptyLabel}"
-}).mount(target)`);
+      label: "${args.label}",
+      name: "${args.multiple ? "cities" : "city"}",
+      items: cities,
+      multiple: ${args.multiple},
+      emptyLabel: "${args.emptyLabel}"
+    }).mount(target)`);
     return story.root;
   },
 };
 
 export const enhance: Story = {
   name: "enhance()",
+
   render: (args) => {
     const story = createStoryShell({
       description:
-        "Les options du select deviennent la collection filtrable ; aucun markup Zag n’est requis.",
+        "Le conteneur et son select suffisent ; le script génère toutes les parts visuelles.",
       eyebrow: "enhanceCombobox",
       title: "Progressive enhancement",
     });
-    const template = createCombobox({
-      description: args.description,
-      items: ["Rechercher", "Créer un document", "Partager", "Archiver"],
-      label: args.label,
-      name: "command",
-      required: args.required,
-    });
-    const root = template.root.cloneNode(true) as HTMLDivElement;
-    template.destroy();
-    story.setSource(`<div class="fui-field">
-  <label class="fui-field-label">${args.label}</label>
-  <div class="fui-combobox">
-    <select class="fui-native-select" name="command">…</select>
-    <div class="fui-combobox-control">…</div>
-    <div class="fui-combobox-positioner">…</div>
-  </div>
-  <p class="fui-field-description">${args.description}</p>
-</div>`);
+    const root = asDom<"div">(
+      <div class="fui-combobox">
+        <label class="fui-field-label">Ville</label>
+        <select class="fui-native-select" name="city">
+          <option value="" data-placeholder="" hidden>
+            Rechercher une ville…
+          </option>
+          <option value="paris" selected>
+            Paris
+          </option>
+          <option value="lyon">Lyon</option>
+          <option value="bordeaux">Bordeaux</option>
+        </select>
+      </div>,
+    );
+
+    const source = root.outerHTML;
+
     story.canvas.append(root);
-    const controller = enhanceCombobox(root, {
-      clearLabel: args.clearLabel,
-      description: args.description,
-      disabled: args.disabled,
-      emptyLabel: args.emptyLabel,
-      placeholder: args.placeholder,
-    });
+    const controller = enhanceCombobox(root, args);
+
     trackController(story.root, controller);
-    const nativeSelect = root.querySelector("select")!;
-    nativeSelect.addEventListener("change", () => {
-      story.output.textContent = `Événement change · value = ${nativeSelect.value}`;
-    });
+    story.setSource(source);
     return story.root;
   },
 };

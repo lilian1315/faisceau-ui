@@ -3,7 +3,9 @@ export type {
   ComboboxApi,
   ComboboxController,
   ComboboxOptions,
+  ComboboxProps,
   EnhanceComboboxOptions,
+  EnhanceComboboxProps,
 } from "./combobox/index.ts";
 
 export { createSelect, enhanceSelect } from "./select/index.ts";
@@ -23,15 +25,7 @@ export type {
 } from "./tooltip/index.ts";
 
 export type { FuiItem, FuiItemInput } from "./shared/index.ts";
-export type { FuiController, FuiFieldOptions, FuiReactive } from "./types.ts";
-export { createField, enhanceField } from "./field/index.ts";
-export type {
-  EnhanceFieldOptions,
-  FieldControlContext,
-  FieldControlFactory,
-  FieldController,
-  FieldOptions,
-} from "./field/index.ts";
+export type { FuiController, FuiReactive } from "./types.ts";
 export { createCheckbox, enhanceCheckbox } from "./checkbox/index.ts";
 export type { CheckboxApi, CheckboxController, CheckboxProps } from "./checkbox/index.ts";
 export { createDialog, enhanceDialog } from "./dialog/index.ts";

@@ -184,26 +184,22 @@ form.addEventListener("submit", (event) => {
 
 ## Améliorer un markup existant
 
-Les fonctions `enhanceSelect`, `enhanceCombobox` et `enhanceCheckbox` adoptent un `Field` entièrement
-structuré. Les classes `fui-*` constituent le contrat d'anatomie et doivent être présentes avant
-l'appel. Le contrôle natif reste dans le document et conserve la soumission, la validation et le
-reset du formulaire.
+Les fonctions `enhanceSelect`, `enhanceCombobox` et `enhanceCheckbox` adoptent un markup
+existant minimal. Les classes `fui-*` constituent le contrat d'anatomie et doivent être présentes
+avant l'appel. Le contrôle natif reste dans le document et conserve la soumission, la validation et
+le reset du formulaire.
 
 ### Select existant
 
 ```html
 <form id="settings">
-  <div class="fui-field" id="mode-select">
+  <div class="fui-select" id="mode-select">
     <label class="fui-field-label">Mode d'affichage</label>
-    <div class="fui-select">
-      <select class="fui-native-select" name="display-mode" required>
-        <option value="" data-placeholder>Choisir un mode</option>
-        <option value="simple" selected>Simple</option>
-        <option value="expert" data-description="Affiche tous les réglages">Expert</option>
-      </select>
-      <div class="fui-select-control">…</div>
-      <div class="fui-select-positioner">…</div>
-    </div>
+    <select class="fui-native-select" name="display-mode" required>
+      <option value="" data-placeholder>Choisir un mode</option>
+      <option value="simple" selected>Simple</option>
+      <option value="expert">Expert</option>
+    </select>
   </div>
 </form>
 ```
@@ -211,7 +207,7 @@ reset du formulaire.
 ```ts
 import { enhanceSelect } from "faisceau-ui";
 
-const select = enhanceSelect(document.querySelector<HTMLElement>("#mode-select")!);
+const select = enhanceSelect(document.querySelector<HTMLDivElement>("#mode-select")!);
 ```
 
 La valeur initiale vient de l'option `selected`. Le placeholder vient de l'unique option
@@ -221,31 +217,28 @@ sélectionnable normal.
 ### Combobox existante
 
 ```html
-<div class="fui-field" id="command-combobox">
+<div class="fui-combobox" id="command-combobox">
   <label class="fui-field-label">Commande</label>
-  <div class="fui-combobox">
-    <select class="fui-native-select" name="command">
-      <option value="" data-placeholder>Rechercher une commande</option>
-      <option value="build">Build</option>
-      <option value="test">Test</option>
-    </select>
-    <div class="fui-combobox-control">…</div>
-    <div class="fui-combobox-positioner">…</div>
-  </div>
+  <select class="fui-native-select" name="command">
+    <option value="" data-placeholder>Rechercher une commande</option>
+    <option value="build">Build</option>
+    <option value="test">Test</option>
+  </select>
 </div>
 ```
 
 ```ts
 import { enhanceCombobox } from "faisceau-ui";
 
-const combobox = enhanceCombobox(document.querySelector<HTMLElement>("#command-combobox")!, {
+const combobox = enhanceCombobox(document.querySelector<HTMLDivElement>("#command-combobox")!, {
   emptyLabel: "Aucun résultat",
 });
 ```
 
-Les valeurs des options représentant des items doivent être uniques. Les items visuels doivent porter les mêmes `data-value`
-que les options natives. Les options `disabled` et les `<optgroup disabled>` sont reconnues ; la
-seule l'option vide portant `data-placeholder` est réservée au placeholder.
+La saisie, le trigger, la liste filtrable et l'état vide sont générés ; seuls le conteneur
+`.fui-combobox` et son `<select>` natif sont requis. Les valeurs des options doivent être uniques.
+Les options `disabled` et les `<optgroup disabled>` sont reconnues ; la seule l'option vide
+portant `data-placeholder` est réservée au placeholder.
 
 ## Checkbox
 
@@ -262,22 +255,19 @@ createCheckbox({
 }).mount(document.querySelector("#terms")!);
 ```
 
-Pour l'enhancement, le `Field` et le contrôle visuel sont déjà présents :
+Pour l'enhancement, le label, l'input natif et le contrôle visuel suffisent :
 
 ```html
-<div class="fui-field" id="newsletter">
-  <label class="fui-field-label">Recevoir la newsletter</label>
-  <div class="fui-checkbox">
-    <input class="fui-native-checkbox" type="checkbox" name="newsletter" />
-    <span class="fui-checkbox-control"><span class="fui-checkbox-indicator"></span></span>
-  </div>
-</div>
+<label class="fui-checkbox" id="newsletter">
+  <input class="fui-checkbox-input" type="checkbox" name="newsletter" />
+  <span class="fui-field-label">Recevoir la newsletter</span>
+</label>
 ```
 
 ```ts
 import { enhanceCheckbox } from "faisceau-ui";
 
-enhanceCheckbox(document.querySelector<HTMLElement>("#newsletter")!);
+enhanceCheckbox(document.querySelector<HTMLLabelElement>("#newsletter")!, {});
 ```
 
 ## Tooltip

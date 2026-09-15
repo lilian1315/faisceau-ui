@@ -17,7 +17,6 @@ export default defineConfig({
     },
     entry: [
       "src/index.ts",
-      "src/field/index.ts",
       "src/checkbox/index.ts",
       "src/combobox/index.ts",
       "src/select/index.ts",

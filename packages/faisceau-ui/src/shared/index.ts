@@ -19,22 +19,8 @@ export {
 /** Unique DOM id generation. */
 export { createId } from "./id.ts";
 
-/** DOM lookup helpers shared by Zag-powered components. */
-export { getLookupRoot } from "./dom.ts";
-
-/** Native select helpers shared by form-compatible collection components. */
-export {
-  captureAttributes,
-  createNativeSelectField,
-  getNativeSelectValue,
-  reconcileNativeSelectOptions,
-  readNativeSelect,
-  requireNativeSelect,
-  setNativeSelectValue,
-  type NativeSelectFieldController,
-  type NativeSelectFieldProps,
-  type NativeSelectSource,
-} from "./native-select.js";
+/** DOM lookup and snapshot helpers shared by Zag-powered components. */
+export { captureAttributes, getLookupRoot } from "./dom.ts";
 
 /** Lucide icons rendered through @lilian1315/create-element. */
 export {

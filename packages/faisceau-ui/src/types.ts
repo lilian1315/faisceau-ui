@@ -19,14 +19,3 @@ export interface FuiController<Api> {
   /** Stops effects/listeners. Markup created by the controller is also removed. */
   destroy(): void;
 }
-
-export interface FuiFieldOptions {
-  /** Stable machine id. A `fui-*` id is generated when omitted. */
-  id?: string;
-  /** Extra caller-owned class added without replacing FUI classes. */
-  className?: string;
-  /** Optional supporting text rendered below the control. */
-  description?: string;
-  /** Optional validation message rendered below the control. */
-  errorMessage?: string;
-}

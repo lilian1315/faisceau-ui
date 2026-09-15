@@ -22,7 +22,6 @@
     "./combobox": "./dist/combobox/index.mjs",
     "./dialog": "./dist/dialog/index.mjs",
     "./drawer": "./dist/drawer/index.mjs",
-    "./field": "./dist/field/index.mjs",
     "./select": "./dist/select/index.mjs",
     "./toast": "./dist/toast/index.mjs",
     "./tooltip": "./dist/tooltip/index.mjs",
@@ -52,11 +51,6 @@
       "default": "./dist/styles/drawer.css"
     },
     "./styles/drawer.scss": "./src/styles/drawer.scss",
-    "./styles/field.css": {
-      "types": "./dist/styles/field.css.d.ts",
-      "default": "./dist/styles/field.css"
-    },
-    "./styles/field.scss": "./src/styles/field.scss",
     "./styles/select.css": {
       "types": "./dist/styles/select.css.d.ts",
       "default": "./dist/styles/select.css"

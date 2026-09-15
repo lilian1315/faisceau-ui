@@ -1,26 +1,21 @@
 import type * as combobox from "@zag-js/combobox";
 
 import type { FuiItem, FuiItemInput } from "../shared/index.js";
-import type { FuiController, FuiFieldOptions } from "../types.js";
+import type { FuiController } from "../types.js";
 
-type ComboboxMachineOptions = Omit<
+export interface ComboboxProps extends Omit<
   combobox.Props<FuiItem>,
-  | "allowCustomValue"
-  | "collection"
-  | "getRootNode"
-  | "id"
-  | "ids"
-  | "multiple"
-  | "onInputValueChange"
->;
-
-interface ComboboxViewOptions extends FuiFieldOptions {
-  /** Items shown in the suggestion list. */
+  "allowCustomValue" | "collection" | "getRootNode" | "id" | "ids" | "onInputValueChange"
+> {
+  id?: string;
+  /** Available options. Strings become `{ value, label }` items. */
   items: readonly FuiItemInput[];
-  /** Visible label associated with the input. */
-  label: string;
-  /** Allows selecting more than one item and renders the choices as removable tags. @default false */
-  multiple?: boolean;
+  /** Visible label rendered above the control. */
+  label?: string;
+  /** Supporting text rendered below the control. */
+  description?: string;
+  /** Text displayed in the empty input. @default "Select an option" */
+  placeholder?: string;
   /** Accessible label for the clear button. */
   clearLabel?: string;
   /** Message displayed when filtering returns no items. */
@@ -33,15 +28,15 @@ interface ComboboxViewOptions extends FuiFieldOptions {
   onInputValueChange?: combobox.Props<FuiItem>["onInputValueChange"];
 }
 
-/** Options for markup built entirely by Faisceau UI. */
-export type ComboboxOptions = ComboboxMachineOptions & ComboboxViewOptions;
+export type EnhanceComboboxProps = Omit<ComboboxProps, "items"> & {
+  /** Replaces the options read from the native select when provided. */
+  items?: readonly FuiItemInput[];
+};
 
-/** Options for enhancing a fully-authored Field with a direct Combobox child. */
-export type EnhanceComboboxOptions = ComboboxMachineOptions &
-  Omit<ComboboxViewOptions, "items" | "label"> & {
-    /** Optionally replaces the authored Field label while enhanced. */
-    label?: string;
-  };
+/** @deprecated Use {@link ComboboxProps} instead. */
+export type ComboboxOptions = ComboboxProps;
+/** @deprecated Use {@link EnhanceComboboxProps} instead. */
+export type EnhanceComboboxOptions = EnhanceComboboxProps;
 
 export type ComboboxApi = combobox.Api;
 export interface ComboboxController extends FuiController<ComboboxApi> {

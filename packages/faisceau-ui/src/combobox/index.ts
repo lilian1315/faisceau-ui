@@ -3,5 +3,7 @@ export type {
   ComboboxApi,
   ComboboxController,
   ComboboxOptions,
+  ComboboxProps,
   EnhanceComboboxOptions,
+  EnhanceComboboxProps,
 } from "./types.ts";

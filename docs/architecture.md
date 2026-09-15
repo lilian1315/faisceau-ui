@@ -96,15 +96,18 @@ Select and Combobox retain one real `<select>` as the submitted control. Checkbo
 `input[type="checkbox"]`. The native element owns `name`, `form`, `required`, `disabled`, submitted
 values, and browser validation.
 
-`Field` owns the visible label, description, error, accessible relationships, and the lifecycle of
-one direct control child. Control factories keep Field independent from the catalog of form controls.
-`createNativeSelectField()` centralizes the collection-field protocol:
+Each form control renders its own visible label and description directly inside its root.
+Select delegates its native `<select>` to Zag through `getHiddenSelectProps()`:
 
-- machine changes update native selected options and emit bubbling `input`, then `change`;
-- native changes update the Zag machine without event echo;
-- `form.reset()` restores the initial selection;
-- invalid or native focus is redirected to the visible control;
+- machine changes rewrite the selected options and emit one internal bubbling `change`;
+- native `input`/`change` update the machine unless tagged internal, so there is no event echo;
+- `form.reset()` restores the machine's initial value, which is then written back to the options;
+- the closest fieldset drives the observable disabled state;
+- native focus is forwarded to the visible trigger;
 - teardown restores enhanced attributes while preserving the current value.
+
+Combobox mirrors that exact protocol around its own native `<select>` because Zag's combobox machine
+owns no hidden select; the filter input stays nameless and submits nothing.
 
 Future form controls should use a native element whenever the platform supplies an appropriate
 submission primitive. Form behavior belongs in a shared deep module once two components share the

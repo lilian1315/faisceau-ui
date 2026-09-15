@@ -6,7 +6,6 @@ import { createCheckbox as createCheckboxFromSubpath } from "faisceau-ui/checkbo
 import { createCombobox as createComboboxFromSubpath } from "faisceau-ui/combobox";
 import { createDialog as createDialogFromSubpath } from "faisceau-ui/dialog";
 import { createDrawer as createDrawerFromSubpath } from "faisceau-ui/drawer";
-import { createField as createFieldFromSubpath } from "faisceau-ui/field";
 import { enhanceSelect as enhanceSelectFromSubpath } from "faisceau-ui/select";
 import { createToaster as createToasterFromSubpath } from "faisceau-ui/toast";
 import { createTooltip as createTooltipFromSubpath } from "faisceau-ui/tooltip";
@@ -31,7 +30,6 @@ describe("published package contract", () => {
     expect(typeof createCheckboxFromSubpath).toBe("function");
     expect(typeof createDialogFromSubpath).toBe("function");
     expect(typeof createDrawerFromSubpath).toBe("function");
-    expect(typeof createFieldFromSubpath).toBe("function");
     expect(typeof createToasterFromSubpath).toBe("function");
     expect(typeof createTooltipFromSubpath).toBe("function");
     expect(createCheckbox({ label: "Terms" }).root).toBeInstanceOf(HTMLElement);
