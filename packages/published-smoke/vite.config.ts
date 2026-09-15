@@ -9,7 +9,7 @@ export default defineConfig({
       instances: [{ browser: "chromium", name: "chrome" }],
       provider: playwright({ launchOptions: { channel: "chromium" } }),
     },
-    include: ["published-smoke.test.ts"],
+    include: ["published-smoke.test.ts", "published-smoke-styles.test.ts"],
     typecheck: {
       enabled: true,
     },

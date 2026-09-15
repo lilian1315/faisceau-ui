@@ -13,7 +13,8 @@
   ],
   "type": "module",
   "sideEffects": [
-    "**/*.css"
+    "**/*.css",
+    "**/*.scss"
   ],
   "exports": {
     ".": "./dist/index.mjs",
@@ -26,13 +27,63 @@
     "./toast": "./dist/toast/index.mjs",
     "./tooltip": "./dist/tooltip/index.mjs",
     "./package.json": "./package.json",
-    "./styles/index.css": "./src/styles/index.css"
+    "./styles/index.css": {
+      "types": "./dist/styles/index.css.d.ts",
+      "default": "./dist/styles/index.css"
+    },
+    "./styles/index.scss": "./src/styles/index.scss",
+    "./styles/checkbox.css": {
+      "types": "./dist/styles/checkbox.css.d.ts",
+      "default": "./dist/styles/checkbox.css"
+    },
+    "./styles/checkbox.scss": "./src/styles/checkbox.scss",
+    "./styles/combobox.css": {
+      "types": "./dist/styles/combobox.css.d.ts",
+      "default": "./dist/styles/combobox.css"
+    },
+    "./styles/combobox.scss": "./src/styles/combobox.scss",
+    "./styles/dialog.css": {
+      "types": "./dist/styles/dialog.css.d.ts",
+      "default": "./dist/styles/dialog.css"
+    },
+    "./styles/dialog.scss": "./src/styles/dialog.scss",
+    "./styles/drawer.css": {
+      "types": "./dist/styles/drawer.css.d.ts",
+      "default": "./dist/styles/drawer.css"
+    },
+    "./styles/drawer.scss": "./src/styles/drawer.scss",
+    "./styles/field.css": {
+      "types": "./dist/styles/field.css.d.ts",
+      "default": "./dist/styles/field.css"
+    },
+    "./styles/field.scss": "./src/styles/field.scss",
+    "./styles/select.css": {
+      "types": "./dist/styles/select.css.d.ts",
+      "default": "./dist/styles/select.css"
+    },
+    "./styles/select.scss": "./src/styles/select.scss",
+    "./styles/toast.css": {
+      "types": "./dist/styles/toast.css.d.ts",
+      "default": "./dist/styles/toast.css"
+    },
+    "./styles/toast.scss": "./src/styles/toast.scss",
+    "./styles/tokens.css": {
+      "types": "./dist/styles/tokens.css.d.ts",
+      "default": "./dist/styles/tokens.css"
+    },
+    "./styles/tokens.scss": "./src/styles/tokens.scss",
+    "./styles/tooltip.css": {
+      "types": "./dist/styles/tooltip.css.d.ts",
+      "default": "./dist/styles/tooltip.css"
+    },
+    "./styles/tooltip.scss": "./src/styles/tooltip.scss"
   },
   "publishConfig": {
     "access": "public"
   },
   "scripts": {
-    "build": "vp pack",
+    "build:styles": "sass src/styles:dist/styles --no-source-map --style=expanded && node scripts/build-css-dts.mjs",
+    "build": "vpr build:styles && vp pack",
     "dev": "vp pack --watch",
     "test": "vp test"
   },
@@ -54,6 +105,7 @@
     "jsr-exports-lint": "catalog:",
     "playwright": "catalog:",
     "publint": "catalog:",
+    "sass": "catalog:",
     "vitest": "catalog:"
   }
 }

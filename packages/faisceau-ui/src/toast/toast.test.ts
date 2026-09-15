@@ -13,8 +13,11 @@ describe("Toast", () => {
     expect(notification.textContent).toContain("Enregistré");
     expect(notification.getAttribute("role")).toBeTruthy();
     toaster.dismiss(id);
-    await new Promise((resolve) => setTimeout(resolve, 250));
-    expect(toaster.root.querySelector('[data-fui-part="root"]')).toBeNull();
+    // Removal follows Zag's `removeDelay` (200 ms by default); poll instead of
+    // relying on a fixed sleep so the assertion survives parallel-run load.
+    await vi.waitFor(() => {
+      expect(toaster.root.querySelector('[data-fui-part="root"]')).toBeNull();
+    });
   });
 
   it("runs an action and enhances an existing region", async () => {

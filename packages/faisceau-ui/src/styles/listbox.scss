@@ -1,0 +1,258 @@
+// Shared listbox anatomy for select and combobox, with tokens and base.
+@use "./tokens";
+@use "./base";
+@use "./mixins" as *;
+
+.fui-select-positioner,
+.fui-combobox-positioner {
+  --z-index: var(--fui-z-index-popover);
+
+  max-inline-size: min(var(--fui-control-max-inline-size), calc(100vw - (2 * var(--fui-space-2))));
+}
+
+.fui-select-content,
+.fui-combobox-content {
+  inline-size: 100%;
+  min-inline-size: min(8rem, calc(100vw - (2 * var(--fui-space-2))));
+  max-inline-size: 100%;
+  overflow: hidden;
+  color: var(--fui-color-foreground);
+  background: var(--fui-color-surface-popover);
+  border: var(--fui-border-width) solid var(--fui-color-border);
+  border-radius: var(--fui-radius-md);
+  box-shadow:
+    0 1px 2px var(--fui-color-control-shadow),
+    0 8px 24px var(--fui-color-popover-shadow);
+  font-family: inherit;
+  font-size: var(--fui-font-size-control);
+  line-height: var(--fui-line-height-control);
+  transform-origin: var(--transform-origin, center);
+  overscroll-behavior: contain;
+
+  &[data-state="closed"] {
+    pointer-events: none;
+  }
+
+  &:focus-visible {
+    @include fui-focus-ring;
+  }
+
+  &[data-side="bottom"] {
+    --fui-listbox-enter-y: -0.125rem;
+  }
+
+  &[data-side="top"] {
+    --fui-listbox-enter-y: 0.125rem;
+  }
+
+  &[data-side="left"] {
+    --fui-listbox-enter-x: 0.125rem;
+  }
+
+  &[data-side="right"] {
+    --fui-listbox-enter-x: -0.125rem;
+  }
+}
+
+.fui-select-list,
+.fui-combobox-list {
+  display: grid;
+  max-block-size: min(
+    var(--fui-listbox-max-block-size),
+    var(--available-height, calc(100dvh - (2 * var(--fui-space-2))))
+  );
+  margin: 0;
+  padding: var(--fui-space-1);
+  overflow-x: hidden;
+  overflow-y: auto;
+  gap: var(--fui-space-0-5);
+  list-style: none;
+  scrollbar-width: thin;
+  scrollbar-color: var(--fui-color-border) transparent;
+  overscroll-behavior: contain;
+}
+
+.fui-select-item,
+.fui-combobox-item {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: center;
+  min-block-size: var(--fui-listbox-item-min-height);
+  min-inline-size: 0;
+  padding-block: var(--fui-space-1);
+  padding-inline: calc(var(--fui-space-2) + var(--fui-icon-size) + var(--fui-space-1-5))
+    var(--fui-space-2);
+  color: var(--fui-color-foreground);
+  border-radius: var(--fui-radius-sm);
+  cursor: default;
+  outline: none;
+  row-gap: var(--fui-space-0-5);
+  touch-action: manipulation;
+
+  &::before {
+    position: absolute;
+    inset-block: var(--fui-space-1-5);
+    inset-inline-start: var(--fui-space-0-5);
+    inline-size: 2px;
+    border-radius: 999px;
+    background: currentColor;
+    content: "";
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  &[data-highlighted] {
+    color: var(--fui-color-accent-foreground);
+    background: var(--fui-color-accent);
+
+    &::before {
+      opacity: 1;
+    }
+  }
+
+  &[data-state="checked"] {
+    font-weight: var(--fui-font-weight-medium);
+  }
+
+  &[data-disabled] {
+    cursor: not-allowed;
+    opacity: 0.5;
+    pointer-events: none;
+  }
+
+  &:focus-visible {
+    outline: var(--fui-focus-ring-width) solid var(--fui-color-ring);
+    outline-offset: calc(-1 * var(--fui-focus-ring-width));
+  }
+}
+
+.fui-select-item-text,
+.fui-combobox-item-text {
+  grid-column: 1;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  overflow-wrap: anywhere;
+  text-align: start;
+}
+
+.fui-select-item-description,
+.fui-combobox-item-description {
+  grid-column: 1;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  color: var(--fui-color-muted-foreground);
+  font-size: var(--fui-font-size-caption);
+  font-weight: var(--fui-font-weight-normal);
+  line-height: var(--fui-line-height-copy);
+  overflow-wrap: anywhere;
+  text-align: start;
+  text-wrap: pretty;
+}
+
+.fui-select-item-indicator,
+.fui-combobox-item-indicator {
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-start: var(--fui-space-2);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: var(--fui-icon-size);
+  block-size: var(--fui-icon-size);
+  color: currentColor;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-50%);
+
+  &[data-state="checked"] {
+    opacity: 1;
+  }
+
+  &[data-state="unchecked"] {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .fui-select-content[data-state="open"],
+  .fui-combobox-content[data-state="open"] {
+    animation: fui-listbox-in var(--fui-duration-fast) var(--fui-easing-standard);
+  }
+
+  .fui-select-item,
+  .fui-combobox-item {
+    transition-property: color, background-color;
+    transition-duration: var(--fui-duration-fast);
+    transition-timing-function: var(--fui-easing-standard);
+  }
+
+  .fui-select-item-indicator,
+  .fui-combobox-item-indicator {
+    transition-property: opacity;
+    transition-duration: var(--fui-duration-fast);
+    transition-timing-function: var(--fui-easing-standard);
+  }
+}
+
+@media (any-pointer: coarse) {
+  .fui-select-item,
+  .fui-combobox-item {
+    min-block-size: var(--fui-control-height-coarse);
+  }
+}
+
+@media (forced-colors: active) {
+  .fui-select-content,
+  .fui-combobox-content {
+    color: CanvasText;
+    background: Canvas;
+    border-color: CanvasText;
+    box-shadow: none;
+
+    &:focus-visible {
+      outline-color: Highlight;
+    }
+  }
+
+  .fui-select-item,
+  .fui-combobox-item {
+    &:focus-visible {
+      outline-color: Highlight;
+    }
+
+    &[data-highlighted] {
+      color: HighlightText;
+      background: Highlight;
+      forced-color-adjust: none;
+
+      .fui-select-item-description,
+      .fui-combobox-item-description {
+        color: HighlightText;
+      }
+    }
+
+    &[data-disabled] {
+      color: GrayText;
+      opacity: 1;
+
+      .fui-select-item-description,
+      .fui-combobox-item-description {
+        color: GrayText;
+      }
+    }
+  }
+}
+
+@keyframes fui-listbox-in {
+  from {
+    opacity: 0;
+    transform: translate3d(var(--fui-listbox-enter-x, 0), var(--fui-listbox-enter-y, 0), 0)
+      scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}

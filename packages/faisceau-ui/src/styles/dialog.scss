@@ -1,0 +1,42 @@
+// Self-contained Dialog styles: tokens, shared base, and dialog rules.
+@use "./tokens";
+@use "./base";
+@use "./mixins" as *;
+
+.fui-dialog-trigger {
+  @include fui-trigger-button;
+}
+
+.fui-dialog-backdrop {
+  @include fui-overlay-backdrop;
+}
+
+.fui-dialog-positioner {
+  @include fui-overlay-positioner;
+  place-items: center;
+  padding: var(--fui-space-4);
+}
+
+.fui-dialog-content {
+  @include fui-overlay-content;
+}
+
+.fui-dialog-title {
+  margin: 0;
+  padding-inline-end: 2.5rem;
+  font-size: 1.125rem;
+}
+
+.fui-dialog-description {
+  margin: var(--fui-space-2) 0 var(--fui-space-4);
+  color: var(--fui-color-muted-foreground);
+  line-height: var(--fui-line-height-copy);
+}
+
+.fui-dialog-body {
+  line-height: var(--fui-line-height-copy);
+}
+
+.fui-dialog-close {
+  @include fui-close-button;
+}

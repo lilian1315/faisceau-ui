@@ -65,7 +65,12 @@ behaviors.
 
 ## 5. Add appearance and stories
 
-- Add a component stylesheet under `src/styles/` and import it from `styles/index.css`.
+- Add a self-contained component stylesheet under `src/styles/` (for example
+  `dialog.scss`): `@use` tokens, base, then the component's shared dependencies in index
+  order, followed by the component rules. Forward it from `styles/index.scss` in cascade
+  order, expose both the `.css` and `.scss` files in `package.json` exports, and rebuild so
+  `dist/styles/` picks it up. Shared multi-component blocks belong in `_mixins.scss` so
+  per-component files stay scoped.
 - Use semantic `--fui-*` tokens, structural borders, visible focus states, and minimum 40–44 px hit
   areas.
 - Specify transitioned properties explicitly; routine interactions stay at or below 150 ms.

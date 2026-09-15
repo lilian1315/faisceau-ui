@@ -1,0 +1,79 @@
+// Self-contained Checkbox styles: tokens, shared base, and checkbox rules.
+@use "./tokens";
+@use "./base";
+@use "./mixins" as *;
+
+.fui-checkbox {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  inline-size: fit-content;
+  min-block-size: var(--fui-control-height-coarse);
+  gap: var(--fui-space-2);
+  cursor: pointer;
+  user-select: none;
+
+  > * {
+    grid-column: 2;
+  }
+
+  &[data-disabled] {
+    cursor: not-allowed;
+    opacity: 0.55;
+  }
+
+  &[data-invalid] .fui-checkbox-control {
+    border-color: var(--fui-color-destructive);
+  }
+}
+
+.fui-checkbox-control,
+.fui-checkbox-input {
+  grid-column: 1;
+}
+
+.fui-checkbox-control {
+  display: grid;
+  line-height: 0;
+  place-items: center;
+  inline-size: 1rem;
+  block-size: 1rem;
+  overflow: hidden;
+  border: var(--fui-border-width) solid var(--fui-color-border);
+  border-radius: var(--fui-radius-sm);
+  background: var(--fui-color-surface);
+  color: var(--fui-color-background);
+  box-shadow: 0 1px 2px var(--fui-color-control-shadow);
+  transition:
+    background-color var(--fui-duration-fast) var(--fui-easing-standard),
+    border-color var(--fui-duration-fast) var(--fui-easing-standard),
+    box-shadow var(--fui-duration-fast) var(--fui-easing-standard);
+
+  &[data-state="checked"],
+  &[data-state="indeterminate"] {
+    border-color: var(--fui-color-foreground);
+    background: var(--fui-color-foreground);
+  }
+
+  &[data-focus-visible] {
+    @include fui-focus-ring;
+  }
+}
+
+.fui-checkbox-indicator .fui-icon {
+  display: none;
+  inline-size: 0.75rem;
+  block-size: 0.75rem;
+}
+
+.fui-checkbox-indicator[data-state="checked"] .fui-icon--check,
+.fui-checkbox-indicator[data-state="indeterminate"] .fui-icon--minus {
+  display: block;
+}
+
+@media (forced-colors: active) {
+  .fui-checkbox-control[data-state="checked"] {
+    background: Highlight;
+    color: HighlightText;
+  }
+}

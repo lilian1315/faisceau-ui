@@ -27,6 +27,7 @@ catalog:
   publint: ^0.3.24
   yaml: ^2.9.0
   bumpp: ^12.3.0
+  sass: ^1.104.1
 overrides:
   vite@*: "catalog:"
   vitest@*: "catalog:"

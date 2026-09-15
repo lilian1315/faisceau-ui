@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vite-plus/test";
 
-import "../styles/index.css";
+import "../styles/index.scss";
 import { createSelect, enhanceSelect } from "./select.ts";
 
 afterEach(() => {

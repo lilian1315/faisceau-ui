@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "vp test"
+    "test": "vp test && tsc -p tsconfig.css.json"
   },
   "dependencies": {
     "faisceau-ui": "workspace:*",

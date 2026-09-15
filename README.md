@@ -1,6 +1,6 @@
 # Faisceau UI
 
-Faisceau UI est une bibliothèque de composants DOM accessibles pour navigateurs modernes. Elle associe les machines d'état de [Zag.js](https://zagjs.com/) à [`@lilian1315/create-element`](https://github.com/lilian1315/create-element) et [`faisceau`](https://github.com/lilian1315/faisceau), sans dépendre d'un framework. Son apparence s'inspire de shadcn/ui, avec du CSS vanilla, les icônes open source de [Lucide](https://lucide.dev/) et des classes internes préfixées par `fui-`.
+Faisceau UI est une bibliothèque de composants DOM accessibles pour navigateurs modernes. Elle associe les machines d'état de [Zag.js](https://zagjs.com/) à [`@lilian1315/create-element`](https://github.com/lilian1315/create-element) et [`faisceau`](https://github.com/lilian1315/faisceau), sans dépendre d'un framework. Son apparence s'inspire de shadcn/ui, avec des styles Sass compilés en CSS, les icônes open source de [Lucide](https://lucide.dev/) et des classes internes préfixées par `fui-`.
 
 La bibliothèque fournit actuellement Select, Combobox, Checkbox, Tooltip, Dialog, Drawer et
 Toast. Chaque composant peut construire son propre DOM ou adopter un markup HTML déjà présent.
@@ -30,6 +30,17 @@ Importer une fois la feuille de styles globale depuis le point d'entrée de l'ap
 ```ts
 import "faisceau-ui/styles/index.css";
 ```
+
+Les sources Sass vivent dans `src/styles/` et sont compilées vers `dist/styles/`
+pendant le build. Les consommateurs équipés de Sass peuvent importer directement
+`faisceau-ui/styles/index.scss`.
+
+Chaque composant peut aussi importer sa propre feuille de styles, autonome
+(jetons, base partagée et règles du composant), par exemple
+`faisceau-ui/styles/select.css`. Avec plusieurs composants, préférez le paquet
+global `faisceau-ui/styles/index.css` pour éviter les doublons. Chaque entrée CSS
+est accompagnée de sa déclaration de types, inutile donc de déclarer un module
+`*.css` pour les importer depuis TypeScript.
 
 Chaque composant est également disponible depuis son sous-chemin, par exemple
 `faisceau-ui/select`, `faisceau-ui/dialog` ou

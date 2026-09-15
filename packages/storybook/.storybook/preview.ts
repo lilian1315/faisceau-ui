@@ -1,6 +1,6 @@
 import type { Preview } from "@storybook/html-vite";
 
-import "faisceau-ui/styles/index.css";
+import "faisceau-ui/styles/index.scss";
 import "../src/storybook.css";
 
 const preview: Preview = {

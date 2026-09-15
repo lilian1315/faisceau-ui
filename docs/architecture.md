@@ -7,7 +7,7 @@ repository configuration remains the source of truth for versions, scripts, and 
 
 Faisceau UI targets modern browsers. Server rendering and framework-specific renderers are outside
 the current contract. The visual language is inspired by shadcn/ui, but implementation and public
-behavior use vanilla CSS, native DOM, Faisceau, and Zag.
+behavior use Sass compiled to vanilla CSS, native DOM, Faisceau, and Zag.
 
 The library is not published yet. Component options intentionally expose much of the corresponding
 Zag props and controllers expose the connected Zag API. Compatibility is not a design constraint
@@ -74,8 +74,18 @@ back to `ownerDocument` for this Storybook and test case.
   styling. Zag-owned `data-*` attributes describe behavior and state rather than duplicating anatomy.
 - Library-owned classes are single `fui-*` tokens; enhancement validates them before mutation.
 - Consumer classes are additive and are restored by enhanced controllers.
-- CSS is vanilla and layered. `tokens.css` defines semantic `--fui-*` variables; component sheets
-  consume those variables.
+- CSS is authored in Sass without `@layer` or `:where`, so selectors carry their natural
+  specificity and cascade in `@use` order. `src/styles/` holds one public stylesheet per
+  component plus the `index.scss` bundle; the directory compiles to `dist/styles/*.css` during
+  the package build. `faisceau-ui/styles/index.css` resolves to the compiled bundle while
+  `faisceau-ui/styles/<component>.css` (and the matching `.scss` sources) expose the same
+  styles per component. `tokens.scss` defines semantic `--fui-*` variables; component sheets
+  `@use` it together with the shared `base.scss`. Each component stylesheet is self-contained;
+  shared multi-selector blocks live as mixins in the internal `_mixins.scss` partial so
+  per-component files stay scoped. Import the `index` bundle when styling several components
+  to avoid duplicating the token/base prelude. Every CSS subpath carries a `types` condition
+  pointing at a generated sibling `<name>.css.d.ts`, so the imports typecheck without an
+  ambient `*.css` declaration.
 - Controls favor 44 px touch targets, explicit focus-visible rings, restrained property-specific
   transitions, and `scale: 0.96` press feedback.
 - Icons come from Lucide and are created through shared helpers with `currentColor`.

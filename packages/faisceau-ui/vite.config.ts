@@ -8,6 +8,9 @@ const jsrManifest = new URL("./jsr.json", import.meta.url);
 
 export default defineConfig({
   pack: {
+    // Disabled so the Sass-compiled `dist/styles/*.css` stylesheets (built before
+    // `vp pack` runs) survive the bundle step and publint check.
+    clean: false,
     deps: { resolveDepSubpath: true },
     dts: {
       tsconfig: "tsconfig.build.json",

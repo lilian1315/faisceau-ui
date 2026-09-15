@@ -15,6 +15,6 @@
     "./tooltip": "./src/tooltip/index.ts"
   },
   "publish": {
-    "include": ["src/**/*.ts", "src/styles/**/*.css"]
+    "include": ["src/**/*.ts", "src/styles/**/*.scss"]
   }
 }

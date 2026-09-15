@@ -1,0 +1,59 @@
+// Self-contained Toast styles: tokens, shared base, and toast rules.
+@use "./tokens";
+@use "./base";
+@use "./mixins" as *;
+
+.fui-toast-action {
+  @include fui-trigger-button;
+}
+
+.fui-toast-group {
+  position: fixed;
+  z-index: 70;
+  display: flex;
+  inline-size: min(24rem, calc(100vw - 2rem));
+  flex-direction: column;
+  gap: var(--fui-space-3);
+  pointer-events: none;
+}
+
+.fui-toast {
+  position: relative;
+  display: flex;
+  min-block-size: 4.5rem;
+  align-items: center;
+  gap: var(--fui-space-3);
+  padding: var(--fui-space-3) 3.5rem var(--fui-space-3) var(--fui-space-4);
+  border: var(--fui-border-width) solid var(--fui-color-border);
+  border-radius: var(--fui-radius-md);
+  background: var(--fui-color-surface-popover);
+  color: var(--fui-color-foreground);
+  box-shadow: 0 12px 32px var(--fui-color-popover-shadow);
+  pointer-events: auto;
+
+  &[data-type="error"] {
+    border-color: var(--fui-color-destructive);
+  }
+}
+
+.fui-toast-copy {
+  min-inline-size: 0;
+  flex: 1;
+}
+
+.fui-toast-title {
+  font-weight: var(--fui-font-weight-medium);
+}
+
+.fui-toast-description {
+  margin-block-start: var(--fui-space-1);
+  color: var(--fui-color-muted-foreground);
+  font-size: var(--fui-font-size-caption);
+  line-height: var(--fui-line-height-copy);
+}
+
+.fui-toast-close {
+  @include fui-close-button;
+  inset-block-start: 50%;
+  transform: translateY(-50%);
+}

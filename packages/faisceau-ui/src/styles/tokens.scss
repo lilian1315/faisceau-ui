@@ -1,0 +1,67 @@
+:root,
+[data-fui-theme="light"] {
+  --fui-color-background: oklch(1 0 0);
+  --fui-color-foreground: oklch(0.145 0 0);
+  --fui-color-surface: oklch(1 0 0);
+  --fui-color-surface-popover: oklch(1 0 0);
+  --fui-color-muted: oklch(0.97 0 0);
+  --fui-color-muted-foreground: oklch(0.46 0 0);
+  --fui-color-accent: oklch(0.95 0 0);
+  --fui-color-accent-foreground: oklch(0.205 0 0);
+  --fui-color-border: oklch(0.62 0 0);
+  --fui-color-ring: oklch(0.42 0 0);
+  --fui-color-destructive: oklch(0.5 0.2 27);
+  --fui-color-destructive-foreground: oklch(0.985 0 0);
+  --fui-color-control-shadow: oklch(0 0 0 / 0.06);
+  --fui-color-popover-shadow: oklch(0 0 0 / 0.14);
+
+  --fui-radius-sm: 0.375rem;
+  --fui-radius-md: 0.5rem;
+  --fui-border-width: 1px;
+  --fui-focus-ring-width: 2px;
+  --fui-focus-ring-offset: 2px;
+
+  --fui-space-0-5: 0.125rem;
+  --fui-space-1: 0.25rem;
+  --fui-space-1-5: 0.375rem;
+  --fui-space-2: 0.5rem;
+  --fui-space-3: 0.75rem;
+  --fui-space-4: 1rem;
+  --fui-space-6: 1.5rem;
+
+  --fui-font-size-caption: 0.8125rem;
+  --fui-font-size-control: 0.875rem;
+  --fui-font-size-input-mobile: 1rem;
+  --fui-font-weight-normal: 400;
+  --fui-font-weight-medium: 500;
+  --fui-line-height-control: 1.4;
+  --fui-line-height-copy: 1.5;
+
+  --fui-control-height: 2.25rem;
+  --fui-control-height-coarse: 2.75rem;
+  --fui-control-max-inline-size: 15rem;
+  --fui-listbox-item-min-height: 2rem;
+  --fui-listbox-max-block-size: 20rem;
+  --fui-icon-size: 1rem;
+  --fui-z-index-popover: 50;
+
+  --fui-duration-fast: 100ms;
+  --fui-easing-standard: cubic-bezier(0.2, 0, 0, 1);
+}
+
+[data-fui-theme="dark"] {
+  --fui-color-background: oklch(0.145 0 0);
+  --fui-color-foreground: oklch(0.985 0 0);
+  --fui-color-surface: oklch(0.19 0 0);
+  --fui-color-surface-popover: oklch(0.205 0 0);
+  --fui-color-muted: oklch(0.269 0 0);
+  --fui-color-muted-foreground: oklch(0.75 0 0);
+  --fui-color-accent: oklch(0.31 0 0);
+  --fui-color-accent-foreground: oklch(0.985 0 0);
+  --fui-color-border: oklch(0.58 0 0);
+  --fui-color-ring: oklch(0.78 0 0);
+  --fui-color-destructive: oklch(0.72 0.19 22);
+  --fui-color-destructive-foreground: oklch(0.145 0 0);
+  --fui-color-control-shadow: oklch(0 0 0 / 0.22);
+  --fui-color-popover-shadow: oklch(0 0 0 / 0.42);
+}
