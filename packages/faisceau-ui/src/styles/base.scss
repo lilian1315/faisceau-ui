@@ -1,70 +1,24 @@
-// Shared foundation: design tokens plus field, icon, and utility rules.
+// Shared foundation: design tokens plus field and utility rules.
+//
+// Only component roots carry an `fui-*` class. Every descendant part is
+// identified by its Zag-style `data-part` attribute, scoped under its root.
+
 @use "./tokens";
 
 .fui-select,
-.fui-field,
-.fui-field-label,
-.fui-select-control,
-.fui-select-trigger,
-.fui-select-value,
-.fui-select-indicator,
-.fui-select-clear-trigger,
-.fui-select-positioner,
-.fui-select-content,
-.fui-select-list,
-.fui-select-item,
-.fui-select-item-text,
-.fui-select-item-description,
-.fui-select-item-indicator,
-.fui-native-select,
 .fui-combobox,
-.fui-combobox-control,
-.fui-combobox-field,
-.fui-combobox-input,
-.fui-combobox-selection,
-.fui-combobox-tag,
-.fui-combobox-tag-label,
-.fui-combobox-tag-remove,
-.fui-combobox-trigger,
-.fui-combobox-clear-trigger,
-.fui-combobox-positioner,
-.fui-combobox-content,
-.fui-combobox-list,
-.fui-combobox-empty,
-.fui-combobox-item,
-.fui-combobox-item-text,
-.fui-combobox-item-description,
-.fui-combobox-item-indicator,
 .fui-checkbox,
-.fui-checkbox-control,
-.fui-checkbox-indicator,
-.fui-native-checkbox,
-.fui-tooltip-trigger,
-.fui-tooltip-trigger--generated,
-.fui-tooltip-positioner,
-.fui-tooltip-content,
-.fui-tooltip-arrow,
-.fui-tooltip-arrow-tip,
-.fui-field-description,
-.fui-field-error,
-.fui-icon,
-.fui-sr-only {
+.fui-tooltip,
+.fui-dialog,
+.fui-drawer,
+.fui-toast-group,
+[data-part] {
   box-sizing: border-box;
 }
 
-.fui-field {
-  display: grid;
-  inline-size: 100%;
-  max-inline-size: min(var(--fui-control-max-inline-size), 100%);
-  min-inline-size: 0;
-  gap: var(--fui-space-1-5);
-  color: var(--fui-color-foreground);
-  font-family: inherit;
-  font-size: var(--fui-font-size-control);
-  line-height: var(--fui-line-height-control);
-}
-
-.fui-field-label {
+.fui-select [data-part="label"],
+.fui-combobox [data-part="label"],
+.fui-checkbox [data-part="label"] {
   display: inline-flex;
   align-items: center;
   min-inline-size: 0;
@@ -84,11 +38,11 @@
   }
 }
 
-.fui-select-trigger,
-.fui-select-clear-trigger,
-.fui-combobox-trigger,
-.fui-combobox-clear-trigger,
-.fui-combobox-tag-remove {
+.fui-select [data-part="trigger"],
+.fui-select [data-part="clear-trigger"],
+.fui-combobox [data-part="trigger"],
+.fui-combobox [data-part="clear-trigger"],
+.fui-combobox [data-part="selection"] button {
   margin: 0;
   appearance: none;
   font: inherit;
@@ -96,19 +50,12 @@
   touch-action: manipulation;
 }
 
-.fui-icon {
-  display: block;
-  inline-size: var(--fui-icon-size);
-  block-size: var(--fui-icon-size);
-  flex: none;
-  color: currentColor;
-  pointer-events: none;
-}
-
-.fui-field-description,
-.fui-field-error {
+.fui-select [data-part="description"],
+.fui-combobox [data-part="description"],
+.fui-checkbox [data-part="description"] {
   margin: 0;
   max-inline-size: 100%;
+  color: var(--fui-color-muted-foreground);
   font-size: var(--fui-font-size-caption);
   font-weight: var(--fui-font-weight-normal);
   line-height: var(--fui-line-height-copy);
@@ -116,16 +63,8 @@
   text-wrap: pretty;
 }
 
-.fui-field-description {
-  color: var(--fui-color-muted-foreground);
-}
-
-.fui-field-error {
-  color: var(--fui-color-destructive);
-  font-weight: var(--fui-font-weight-medium);
-}
-
-.fui-sr-only {
+.fui-select [data-part="native-select"],
+.fui-combobox [data-part="native-select"] {
   position: absolute;
   inline-size: 1px;
   block-size: 1px;
@@ -137,44 +76,36 @@
   border: 0;
 }
 
-.fui-native-select,
-.fui-native-checkbox {
-  position: absolute;
-  inline-size: 1px;
-  block-size: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
-}
-
-.fui-combobox-selection[hidden] {
+.fui-combobox [data-part="selection"][hidden] {
   display: none;
 }
 
 @media (forced-colors: active) {
-  .fui-field-label[data-disabled],
-  .fui-field-description {
+  .fui-select [data-part="label"][data-disabled],
+  .fui-combobox [data-part="label"][data-disabled],
+  .fui-checkbox [data-part="label"][data-disabled],
+  .fui-select [data-part="description"],
+  .fui-combobox [data-part="description"],
+  .fui-checkbox [data-part="description"] {
     color: GrayText;
     opacity: 1;
   }
 
-  .fui-field-label[data-invalid],
-  .fui-field-error {
+  .fui-select [data-part="label"][data-invalid],
+  .fui-combobox [data-part="label"][data-invalid],
+  .fui-checkbox [data-part="label"][data-invalid] {
     color: CanvasText;
   }
 }
 
-.fui-select-content[hidden],
-.fui-combobox-content[hidden],
-.fui-select-clear-trigger[hidden],
-.fui-combobox-clear-trigger[hidden],
-.fui-select-item[hidden],
-.fui-combobox-item[hidden],
-.fui-select-item-indicator[hidden],
-.fui-combobox-item-indicator[hidden],
-.fui-combobox-empty[hidden] {
+.fui-select [data-part="content"][hidden],
+.fui-combobox [data-part="content"][hidden],
+.fui-select [data-part="clear-trigger"][hidden],
+.fui-combobox [data-part="clear-trigger"][hidden],
+.fui-select [data-part="item"][hidden],
+.fui-combobox [data-part="item"][hidden],
+.fui-select [data-part="item-indicator"][hidden],
+.fui-combobox [data-part="item-indicator"][hidden],
+.fui-combobox [data-part="empty"][hidden] {
   display: none;
 }

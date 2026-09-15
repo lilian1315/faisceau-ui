@@ -9,14 +9,14 @@ describe("Toast", () => {
     const toaster = createToaster({ duration: Infinity }).mount(document.body);
     const id = toaster.create({ description: "Le document est enregistré.", title: "Enregistré" });
     await flushMachine();
-    const notification = toaster.root.querySelector<HTMLElement>('[data-fui-part="root"]')!;
+    const notification = toaster.root.querySelector<HTMLElement>('[data-part="root"]')!;
     expect(notification.textContent).toContain("Enregistré");
     expect(notification.getAttribute("role")).toBeTruthy();
     toaster.dismiss(id);
     // Removal follows Zag's `removeDelay` (200 ms by default); poll instead of
     // relying on a fixed sleep so the assertion survives parallel-run load.
     await vi.waitFor(() => {
-      expect(toaster.root.querySelector('[data-fui-part="root"]')).toBeNull();
+      expect(toaster.root.querySelector('[data-part="root"]')).toBeNull();
     });
   });
 
@@ -28,7 +28,7 @@ describe("Toast", () => {
     const toaster = enhanceToaster(root, { duration: Infinity });
     toaster.create({ action: { label: "Annuler", onClick: action }, title: "Supprimé" });
     await flushMachine();
-    root.querySelector<HTMLButtonElement>('[data-fui-part="action-trigger"]')!.click();
+    root.querySelector<HTMLButtonElement>('[data-part="action-trigger"]')!.click();
     expect(action).toHaveBeenCalledOnce();
     toaster.destroy();
     expect(root.className).toBe("consumer-region");
@@ -51,16 +51,12 @@ describe("Toast", () => {
     });
     await flushMachine();
 
-    const notification = toaster.root.querySelector<HTMLElement>('[data-fui-part="root"]')!;
-    expect(notification.querySelector('[data-fui-part="title"]')?.textContent).toBe(
-      "Updated title",
-    );
-    expect(notification.querySelector('[data-fui-part="description"]')?.textContent).toBe(
+    const notification = toaster.root.querySelector<HTMLElement>('[data-part="root"]')!;
+    expect(notification.querySelector('[data-part="title"]')?.textContent).toBe("Updated title");
+    expect(notification.querySelector('[data-part="description"]')?.textContent).toBe(
       "Updated description",
     );
-    const action = notification.querySelector<HTMLButtonElement>(
-      '[data-fui-part="action-trigger"]',
-    )!;
+    const action = notification.querySelector<HTMLButtonElement>('[data-part="action-trigger"]')!;
     expect(action.textContent).toBe("Undo");
     action.click();
     expect(firstAction).not.toHaveBeenCalled();

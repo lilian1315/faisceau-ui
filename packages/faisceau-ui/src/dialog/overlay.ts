@@ -71,7 +71,7 @@ function factory(
   if (root) {
     content = requirePart<HTMLElement>(root, "content");
     restores.push(captureAttributes(root), captureAttributes(content));
-    const adoptedTitle = root.querySelector<HTMLElement>('[data-fui-part="title"]');
+    const adoptedTitle = root.querySelector<HTMLElement>('[data-part="title"]');
     if (adoptedTitle) {
       title = adoptedTitle;
       restores.push(captureAttributes(title));
@@ -80,7 +80,7 @@ function factory(
         title.replaceChildren(new Text(options.title));
       }
     } else {
-      title = h("h2", { data: { fuiPart: "title" } }, options.title ?? "");
+      title = h("h2", { data: { part: "title" } }, options.title ?? "");
       content.prepend(title);
       generated.push(title);
     }
@@ -89,7 +89,7 @@ function factory(
         `[Faisceau UI] ${capitalize(variant)} enhancement requires a title part or options.title.`,
       );
     }
-    const adoptedDescription = root.querySelector<HTMLElement>('[data-fui-part="description"]');
+    const adoptedDescription = root.querySelector<HTMLElement>('[data-part="description"]');
     if (adoptedDescription) {
       description = adoptedDescription;
       restores.push(captureAttributes(description));
@@ -98,13 +98,13 @@ function factory(
         description.replaceChildren(new Text(options.description));
       }
     } else if (options.description !== undefined) {
-      description = h("p", { data: { fuiPart: "description" } }, options.description);
+      description = h("p", { data: { part: "description" } }, options.description);
       title.after(description);
       generated.push(description);
     } else {
       description = null;
     }
-    const adoptedClose = root.querySelector<HTMLButtonElement>('[data-fui-part="close-trigger"]');
+    const adoptedClose = root.querySelector<HTMLButtonElement>('[data-part="close-trigger"]');
     if (adoptedClose) {
       close = adoptedClose;
       restores.push(captureAttributes(close));
@@ -113,8 +113,8 @@ function factory(
       content.append(close);
       generated.push(close);
     }
-    backdrop = h("div", { data: { fuiPart: "backdrop" } });
-    positioner = h("div", { data: { fuiPart: "positioner" } });
+    backdrop = h("div", { data: { part: "backdrop" } });
+    positioner = h("div", { data: { part: "positioner" } });
     generated.push(backdrop, positioner);
     marker = root.ownerDocument.createComment(`fui-${variant}-content`);
     content.before(marker);
@@ -163,21 +163,8 @@ function setupOverlay(
   } = options;
   const id = requestedId ?? createId(setup.variant);
   addFuiClasses(root, `fui-${setup.variant}`);
-  for (const part of [
-    "backdrop",
-    "positioner",
-    "content",
-    "title",
-    "description",
-    "close",
-  ] as const) {
-    const element = part === "close" ? view.close : view[part];
-    if (element)
-      addFuiClasses(element, `fui-${setup.variant}-${part === "close" ? "close" : part}`);
-  }
   if (className) root.classList.add(...className.split(/\s+/).filter(Boolean));
-  root.dataset.fuiComponent = setup.variant;
-  root.dataset.fuiPart ||= "root";
+  root.dataset.part ||= "root";
   const zag = createZagMachine(
     dialog.machine,
     { ...behavior, getRootNode: () => getLookupRoot(root), id },
@@ -248,7 +235,7 @@ function setupOverlay(
 function createClose(label = "Fermer"): HTMLButtonElement {
   const close = h("button", {
     ariaLabel: label,
-    data: { fuiPart: "close-trigger" },
+    data: { part: "close-trigger" },
     type: "button",
   });
   close.append(createXIcon());

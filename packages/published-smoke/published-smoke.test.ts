@@ -63,14 +63,14 @@ describe("published package contract", () => {
 });
 
 function requirePart<T extends Element>(root: ParentNode, part: string): T {
-  const className = part === "native-select" ? "fui-native-select" : `fui-select-${part}`;
-  const element = root.querySelector<T>(`.${className}`);
+  const name = part === "value" ? "value-text" : part;
+  const element = root.querySelector<T>(`[data-part="${name}"]`);
   if (!element) throw new Error(`Missing published part: ${part}`);
   return element;
 }
 
 function requireItem(root: ParentNode, value: string): HTMLElement {
-  const item = root.querySelector<HTMLElement>(`.fui-select-item[data-value="${value}"]`);
+  const item = root.querySelector<HTMLElement>(`[data-part="item"][data-value="${value}"]`);
   if (!item) throw new Error(`Missing published item: ${value}`);
   return item;
 }

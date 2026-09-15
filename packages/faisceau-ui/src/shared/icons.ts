@@ -7,31 +7,30 @@ import { h } from "@lilian1315/create-element";
 
 /** Creates the decorative downward chevron used by triggers. */
 export function createChevronDownIcon(): SVGSVGElement {
-  return createLucideIcon(ChevronDown, "fui-icon--chevron-down");
+  return createLucideIcon(ChevronDown);
 }
 
 /** Creates the decorative check mark used by selected items. */
 export function createCheckIcon(): SVGSVGElement {
-  return createLucideIcon(Check, "fui-icon--check");
+  return createLucideIcon(Check);
 }
 
 /** Creates the decorative minus used by indeterminate checkboxes. */
 export function createMinusIcon(): SVGSVGElement {
-  return createLucideIcon(Minus, "fui-icon--minus");
+  return createLucideIcon(Minus);
 }
 
 /** Creates the decorative X used by clear controls. */
 export function createXIcon(): SVGSVGElement {
-  return createLucideIcon(X, "fui-icon--x");
+  return createLucideIcon(X);
 }
 
 /** Alias naming the X icon after its common UI purpose. */
 export const createClearIcon = createXIcon;
 
-function createLucideIcon(iconData: LucideIconData, modifierClass: string): SVGSVGElement {
+function createLucideIcon(iconData: LucideIconData): SVGSVGElement {
   const children = iconData.node.map(createLucideChild);
   const icon = h("svg", null, children);
-  icon.classList.add("fui-icon", modifierClass);
 
   const width = "size" in iconData ? iconData.size : iconData.width;
   const height = "size" in iconData ? iconData.size : iconData.height;

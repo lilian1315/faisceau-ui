@@ -1,6 +1,6 @@
 const PART_NAME_PATTERN = /^[a-z][a-z0-9-]*$/;
 
-/** Adds owned `fui-*` classes without replacing classes supplied by a caller. */
+/** Adds the owned `fui-*` root class without replacing classes supplied by a caller. */
 export function addFuiClasses<T extends Element>(element: T, ...classes: readonly string[]): T {
   for (const className of classes) {
     if (!className.startsWith("fui-") || /\s/.test(className)) {
@@ -15,7 +15,7 @@ export function addFuiClasses<T extends Element>(element: T, ...classes: readonl
   return element;
 }
 
-/** Finds the first descendant with an exact `data-fui-part` value. */
+/** Finds the first descendant with an exact `data-part` value. */
 export function queryPart<T extends Element = HTMLElement>(
   root: ParentNode,
   part: string,
@@ -23,7 +23,7 @@ export function queryPart<T extends Element = HTMLElement>(
   return root.querySelector<T>(partSelector(part));
 }
 
-/** Finds every descendant with an exact `data-fui-part` value. */
+/** Finds every descendant with an exact `data-part` value. */
 export function queryParts<T extends Element = HTMLElement>(root: ParentNode, part: string): T[] {
   return Array.from(root.querySelectorAll<T>(partSelector(part)));
 }
@@ -58,7 +58,7 @@ export function requireParts<const Names extends readonly string[]>(
   return parts;
 }
 
-/** Returns the canonical selector for an exact `data-fui-part` value. */
+/** Returns the canonical selector for an exact `data-part` value. */
 export function partSelector(part: string): string {
   if (!PART_NAME_PATTERN.test(part)) {
     throw new Error(
@@ -66,7 +66,7 @@ export function partSelector(part: string): string {
     );
   }
 
-  return `[data-fui-part="${part}"]`;
+  return `[data-part="${part}"]`;
 }
 
 function describeRoot(root: ParentNode): string {

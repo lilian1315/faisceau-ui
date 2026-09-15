@@ -15,12 +15,11 @@ interface TooltipSetup {
 
 /** Builds a tooltip with a button trigger. Call `.mount(target)` to start it. */
 export function createTooltip(options: TooltipOptions): TooltipController {
-  const root = h("div", { class: "fui-tooltip", data: { fuiComponent: "tooltip" } });
+  const root = h("div", { class: "fui-tooltip" });
   const trigger = h(
     "button",
     {
-      class: "fui-tooltip-trigger fui-tooltip-trigger--generated",
-      data: { fuiPart: "trigger" },
+      data: { part: "trigger" },
       type: "button",
     },
     options.trigger,
@@ -63,9 +62,12 @@ function setupTooltip(
   const { className, content: text, id: requestedId, positioning, ...behavior } = options;
   const popup = createTooltipPopup(text);
   const id = requestedId ?? createId("tooltip");
-  addFuiClasses(setup.trigger, "fui-tooltip-trigger");
+  if (setup.ownsRoot) setup.trigger.dataset.part ||= "trigger";
+  else {
+    addFuiClasses(setup.trigger, "fui-tooltip");
+    setup.trigger.dataset.part ||= "trigger";
+  }
   if (className) setup.trigger.classList.add(...className.split(/\s+/).filter(Boolean));
-  setup.trigger.dataset.fuiPart ||= "trigger";
   setup.trigger.after(popup.positioner);
 
   const zag = createZagMachine(

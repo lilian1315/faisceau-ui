@@ -65,8 +65,8 @@ export const enhance: Story = {
     );
     const root = asDom<HTMLDivElement>(
       <div class="fui-drawer">
-        <aside data-fui-part="content">
-          <h2 data-fui-part="title">Navigation</h2>
+        <aside data-part="content">
+          <h2 data-part="title">Navigation</h2>
           <nav>Accueil · Documents · Réglages</nav>
         </aside>
       </div>,
@@ -77,7 +77,7 @@ export const enhance: Story = {
       enhanceDrawer(root, { ...args, triggerSelector: "#story-drawer-enhance-trigger" }),
     );
     story.setSource(
-      `<button id="story-drawer-enhance-trigger">Navigation</button>\n<div class="fui-drawer">\n  <aside data-fui-part="content">…</aside>\n</div>`,
+      `<button id="story-drawer-enhance-trigger">Navigation</button>\n<div class="fui-drawer">\n  <aside data-part="content">…</aside>\n</div>`,
     );
     return story.root;
   },

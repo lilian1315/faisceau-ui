@@ -18,12 +18,12 @@ describe("Drawer", () => {
     expect(controller.api.get().swipeDirection).toBe("start");
     expect(controller.api.get().snapPoints).toEqual([0.5, 1]);
     expect(
-      controller.root.querySelector<HTMLElement>('[data-fui-part="grabber"]')?.style.touchAction,
+      controller.root.querySelector<HTMLElement>('[data-part="grabber"]')?.style.touchAction,
     ).toBe("none");
-    expect(controller.root.querySelector('[data-fui-part="swipe-area"]')).not.toBeNull();
+    expect(controller.root.querySelector('[data-part="swipe-area"]')).not.toBeNull();
     controller.api.get().setOpen(true);
     await new Promise((resolve) => setTimeout(resolve, 0));
-    expect(controller.root.querySelector('[data-fui-part="content"]')?.getAttribute("role")).toBe(
+    expect(controller.root.querySelector('[data-part="content"]')?.getAttribute("role")).toBe(
       "dialog",
     );
   });
@@ -39,7 +39,7 @@ describe("Drawer", () => {
     }).mount(document.body);
     await new Promise((resolve) => setTimeout(resolve, 0));
     expect(first.hasAttribute("aria-haspopup")).toBe(true);
-    expect(controller.root.querySelector('[data-fui-part="trigger"]')).toBeNull();
+    expect(controller.root.querySelector('[data-part="trigger"]')).toBeNull();
 
     first.click();
     await new Promise((resolve) => setTimeout(resolve, 0));
@@ -54,12 +54,12 @@ describe("Drawer", () => {
     const root = document.createElement("div");
     root.className = "fui-drawer";
     root.innerHTML =
-      '<aside data-fui-part="content"><h2 data-fui-part="title">Navigation</h2><nav>Liens</nav></aside>';
+      '<aside data-part="content"><h2 data-part="title">Navigation</h2><nav>Liens</nav></aside>';
     document.body.append(root);
     const original = root.innerHTML;
     const controller = enhanceDrawer(root);
-    expect(root.querySelector('[data-fui-part="backdrop"]')).not.toBeNull();
-    expect(root.querySelector('[data-fui-part="grabber"]')).not.toBeNull();
+    expect(root.querySelector('[data-part="backdrop"]')).not.toBeNull();
+    expect(root.querySelector('[data-part="grabber"]')).not.toBeNull();
     controller.destroy();
     expect(root.innerHTML).toBe(original);
   });

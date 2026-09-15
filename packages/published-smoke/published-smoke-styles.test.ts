@@ -13,14 +13,14 @@ describe("published per-component styles", () => {
     // The bundle entry is deliberately not imported: each per-component
     // stylesheet must carry its tokens, shared base, and component rules.
     const select = createSelect({ items: ["One", "Two"], label: "Pays" }).mount(document.body);
-    const trigger = select.root.querySelector<HTMLButtonElement>(".fui-select-trigger");
+    const trigger = select.root.querySelector<HTMLButtonElement>('[data-part="trigger"]');
     expect(trigger).toBeInstanceOf(HTMLElement);
     expect(getComputedStyle(trigger!).display).toBe("grid");
     expect(getComputedStyle(trigger!).borderStyle).toBe("solid");
     select.destroy();
 
     const checkbox = createCheckbox({ label: "Terms" }).mount(document.body);
-    const control = checkbox.root.querySelector(".fui-checkbox-control");
+    const control = checkbox.root.querySelector('[data-part="control"]');
     expect(control).toBeInstanceOf(HTMLElement);
     expect(getComputedStyle(control!).display).toBe("grid");
     checkbox.destroy();

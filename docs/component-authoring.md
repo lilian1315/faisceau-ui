@@ -24,8 +24,10 @@ Use `packages/faisceau-ui/src/<component>/` with:
 - `<component>.test.ts` for browser behavior.
 
 Build DOM with `h` from `@lilian1315/create-element`. Give structural nodes one stable
-`fui-*` class; these classes are both the public anatomy and the enhancement lookup contract. Reserve
-`data-*` attributes for Zag behavior/state or actual application data. Add icons to the shared Lucide
+`data-part` attribute; these hooks are both the public anatomy and the enhancement lookup
+contract, following the Zag styling logic. Style parts through root-scoped
+`[data-part="…"]` selectors combined with Zag `data-*` state attributes. Only the root
+carries a `fui-*` class. Add icons to the shared Lucide
 helpers instead of embedding custom SVG.
 
 Bind every Zag prop getter before starting the machine. Supply the shared `getLookupRoot(root)`
@@ -43,7 +45,8 @@ For `create*`:
 
 For `enhance*`:
 
-- validate required native elements and structural `fui-*` classes with an actionable `[Faisceau UI]`
+- validate required native elements, the root `fui-*` class, and required `data-part`
+  hooks with an actionable `[Faisceau UI]`
   error;
 - snapshot caller-owned attributes before adding Zag props;
 - require the complete structural anatomy before mutation; do not generate missing structural nodes;
