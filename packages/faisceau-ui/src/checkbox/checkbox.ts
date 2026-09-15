@@ -3,7 +3,7 @@ import * as checkbox from "@zag-js/checkbox";
 import { createZagMachine } from "faisceau-zag";
 import type { CheckboxController, CheckboxProps } from "./types";
 import { createCheckIcon, createId, createMinusIcon, getLookupRoot } from "../shared";
-import { captureAttributes, captureChildNodes, insertAfter } from "../shared/dom";
+import { captureAttributes, ensureText, insertAfter } from "../shared/dom";
 
 export function createCheckbox(options?: CheckboxProps): CheckboxController {
   return factory(undefined, options);
@@ -24,7 +24,7 @@ function factory(root?: HTMLLabelElement, options?: CheckboxProps): CheckboxCont
   }
 
   const enhanceMode = !!root;
-  let restores: (() => void)[] = [];
+  const restores: (() => void)[] = [];
 
   if (!options) options = {};
 
@@ -34,8 +34,6 @@ function factory(root?: HTMLLabelElement, options?: CheckboxProps): CheckboxCont
   };
 
   let input: HTMLInputElement;
-  let label: HTMLSpanElement | null = null;
-  let description: HTMLParagraphElement | null = null;
   let indicator = h(
     "span",
     { class: "fui-checkbox-indicator" },
@@ -61,12 +59,7 @@ function factory(root?: HTMLLabelElement, options?: CheckboxProps): CheckboxCont
     if (typeof mOptions.required === "undefined") mOptions.required = input.required;
     if (typeof mOptions.readOnly === "undefined") mOptions.readOnly = input.readOnly;
 
-    label = root.querySelector<HTMLSpanElement>("span.fui-field-label");
-    description = root.querySelector<HTMLParagraphElement>("p.fui-field-description");
-
-    [root, input, label, description]
-      .filter((el) => !!el)
-      .forEach((el) => restores.push(captureAttributes(el)));
+    [root, input].forEach((el) => restores.push(captureAttributes(el)));
   } else {
     root = h("label", { class: "fui-checkbox" });
     input = h("input", { class: "fui-checkbox-input" });
@@ -74,29 +67,24 @@ function factory(root?: HTMLLabelElement, options?: CheckboxProps): CheckboxCont
   }
 
   insertAfter(root, control, input);
+  restores.push(() => control.remove());
 
-  label =
-    typeof options.label === "string" && !label ? h("span", { class: "fui-field-label" }) : label;
-  description =
-    typeof options.description === "string" && !description
-      ? h("p", { class: "fui-field-description" })
-      : description;
-
-  if (description) {
-    insertAfter(root, description, control);
-    if (typeof options.description !== "undefined") {
-      if (enhanceMode) restores.push(captureChildNodes(description));
-      description.replaceChildren(new Text(options.description));
-    }
-  }
-
-  if (label) {
-    insertAfter(root, label, control);
-    if (typeof options.label !== "undefined") {
-      if (enhanceMode) restores.push(captureChildNodes(label));
-      label.replaceChildren(new Text(options.label));
-    }
-  }
+  const label = ensureText(
+    root,
+    { tag: "span", class: "fui-field-label" },
+    (parent, node) => insertAfter(parent, node, control),
+    options.label,
+    enhanceMode,
+    restores,
+  );
+  ensureText(
+    root,
+    { tag: "p", class: "fui-field-description" },
+    (parent, node) => insertAfter(parent, node, label ?? control),
+    options.description,
+    enhanceMode,
+    restores,
+  );
 
   mOptions.getRootNode = () => getLookupRoot(root);
   const zag = createZagMachine(checkbox.machine, mOptions, checkbox.connect);
@@ -135,7 +123,6 @@ function factory(root?: HTMLLabelElement, options?: CheckboxProps): CheckboxCont
       zag.destroy();
 
       if (enhanceMode) {
-        control.remove();
         restores?.forEach((r) => r());
         input.checked = zag.api.get().checked;
         return;
