@@ -236,7 +236,7 @@ function setupDrawer(
   const triggers = createTriggerBinding(zag, {
     component: "Drawer",
     getScope: () => getLookupRoot(root),
-    getTriggerProps: (api) => api.getTriggerProps(),
+    getTriggerProps: (api, triggerValue) => api.getTriggerProps({ value: triggerValue }),
   });
   triggers.setSelector(initialSelector);
 

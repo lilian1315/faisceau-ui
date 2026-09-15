@@ -39,6 +39,9 @@ describe("Dialog", () => {
     await flushMachine();
     expect(first.hasAttribute("aria-haspopup")).toBe(true);
     expect(second.hasAttribute("aria-haspopup")).toBe(true);
+    expect(first.id).toBeTruthy();
+    expect(second.id).toBeTruthy();
+    expect(first.id).not.toBe(second.id);
     expect(controller.root.querySelector('[data-fui-part="trigger"]')).toBeNull();
 
     second.click();
@@ -75,6 +78,46 @@ describe("Dialog", () => {
     await flushMachine();
     expect(controller.api.get().open).toBe(true);
     controller.destroy();
+  });
+
+  it("keeps triggers bound after Zag rewrites their attributes", async () => {
+    document.body.innerHTML = '<button id="persist" type="button">Open</button>';
+    const trigger = document.querySelector<HTMLButtonElement>("#persist")!;
+    const controller = createDialog({
+      content: "Contenu",
+      title: "Titre",
+      triggerSelector: "#persist",
+    }).mount(document.body);
+    await flushMachine();
+    // Zag assigns its own trigger id, so the selector no longer matches.
+    expect(trigger.id).not.toBe("persist");
+    // Any DOM mutation runs the observer reconcile; the trigger must survive it.
+    document.body.append(document.createElement("div"));
+    await flushMachine();
+    expect(trigger.hasAttribute("aria-haspopup")).toBe(true);
+    trigger.click();
+    await flushMachine();
+    expect(controller.api.get().open).toBe(true);
+    controller.destroy();
+  });
+
+  it("generates a unique id for triggers missing one and restores it", async () => {
+    document.body.innerHTML =
+      '<button class="gen" type="button">A</button><button class="gen" type="button">B</button>';
+    const [first, second] = Array.from(document.querySelectorAll<HTMLButtonElement>(".gen"));
+    const controller = createDialog({
+      content: "Contenu",
+      title: "Titre",
+      triggerSelector: ".gen",
+    }).mount(document.body);
+    await flushMachine();
+    expect(first.dataset.value).toMatch(/^fui-trigger-/);
+    expect(second.dataset.value).toMatch(/^fui-trigger-/);
+    expect(first.dataset.value).not.toBe(second.dataset.value);
+    expect(first.id).not.toBe(second.id);
+    controller.destroy();
+    expect(first.id).toBe("");
+    expect(second.id).toBe("");
   });
 
   it("rebinds triggers through setTriggerSelector", async () => {

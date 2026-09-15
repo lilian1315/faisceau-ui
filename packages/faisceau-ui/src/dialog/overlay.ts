@@ -193,7 +193,7 @@ function setupOverlay(
   const triggers = createTriggerBinding(zag, {
     component: capitalize(setup.variant),
     getScope: () => getLookupRoot(root),
-    getTriggerProps: (api) => api.getTriggerProps(),
+    getTriggerProps: (api, triggerValue) => api.getTriggerProps({ value: triggerValue }),
   });
   triggers.setSelector(initialSelector);
 

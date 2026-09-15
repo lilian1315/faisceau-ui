@@ -32,6 +32,7 @@ describe("Drawer", () => {
     document.body.innerHTML =
       '<button id="menu-a" type="button">A</button><button id="menu-b" type="button">B</button>';
     const first = document.querySelector<HTMLButtonElement>("#menu-a")!;
+    const second = document.querySelector<HTMLButtonElement>("#menu-b")!;
     const controller = createDrawer({
       content: "Filtres",
       title: "Filtres",
@@ -39,6 +40,8 @@ describe("Drawer", () => {
     }).mount(document.body);
     await new Promise((resolve) => setTimeout(resolve, 0));
     expect(first.hasAttribute("aria-haspopup")).toBe(true);
+    expect(first.id).toBeTruthy();
+    expect(first.id).not.toBe(second.id);
     expect(controller.root.querySelector('[data-fui-part="trigger"]')).toBeNull();
 
     first.click();
