@@ -15,8 +15,8 @@ catalog:
   "@types/node": ^24
   faisceau: 0.3.2
   typescript: ^7.0.2
-  vite: npm:@voidzero-dev/vite-plus-core@0.3.1
-  vite-plus: 0.3.1
+  vite: npm:@voidzero-dev/vite-plus-core@0.3.2
+  vite-plus: 0.3.2
   "@vitest/browser-playwright": 4.1.11
   playwright: ^1.62.1
   vitest: 4.1.11
@@ -66,6 +66,16 @@ minimumReleaseAgeExclude:
   - "@zag-js/types@2.0.0-next.3"
   - "@zag-js/utils@2.0.0-next.3"
   - "@zag-js/vanilla@2.0.0-next.3"
+  - "@voidzero-dev/vite-plus-core@0.3.2"
+  - "@voidzero-dev/vite-plus-darwin-arm64@0.3.2"
+  - "@voidzero-dev/vite-plus-darwin-x64@0.3.2"
+  - "@voidzero-dev/vite-plus-linux-arm64-gnu@0.3.2"
+  - "@voidzero-dev/vite-plus-linux-arm64-musl@0.3.2"
+  - "@voidzero-dev/vite-plus-linux-x64-gnu@0.3.2"
+  - "@voidzero-dev/vite-plus-linux-x64-musl@0.3.2"
+  - "@voidzero-dev/vite-plus-win32-arm64-msvc@0.3.2"
+  - "@voidzero-dev/vite-plus-win32-x64-msvc@0.3.2"
+  - vite-plus@0.3.2
 allowBuilds:
   "@parcel/watcher": false
   esbuild: true
