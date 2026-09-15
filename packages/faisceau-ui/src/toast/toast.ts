@@ -38,8 +38,7 @@ function setupToaster(
   const store = toast.createStore<string>(storeOptions);
   addFuiClasses(root, "fui-toast-group");
   if (className) root.classList.add(...className.split(/\s+/).filter(Boolean));
-  root.dataset.fuiComponent = "toast";
-  root.dataset.fuiPart ||= "group";
+  root.dataset.part ||= "group";
 
   const group = createZagMachine(
     toast.group.machine,
@@ -111,35 +110,22 @@ function createToastItem(
   index: number,
   parent: toast.GroupService,
 ): ToastItem {
-  const title = h(
-    "div",
-    { class: "fui-toast-title", data: { fuiPart: "title" } },
-    data.title ?? "",
-  );
+  const title = h("div", { data: { part: "title" } }, data.title ?? "");
   let description = data.description
-    ? h(
-        "div",
-        { class: "fui-toast-description", data: { fuiPart: "description" } },
-        data.description,
-      )
+    ? h("div", { data: { part: "description" } }, data.description)
     : null;
   const close = h("button", {
-    class: "fui-toast-close",
-    data: { fuiPart: "close-trigger" },
+    data: { part: "close-trigger" },
     type: "button",
   });
   close.append(createXIcon());
   let action = data.action
-    ? h(
-        "button",
-        { class: "fui-toast-action", data: { fuiPart: "action-trigger" }, type: "button" },
-        data.action.label,
-      )
+    ? h("button", { data: { part: "action-trigger" }, type: "button" }, data.action.label)
     : null;
   const element = h(
     "div",
-    { class: "fui-toast", data: { fuiPart: "root" } },
-    h("div", { class: "fui-toast-copy" }, title, description),
+    { data: { part: "root" } },
+    h("div", null, title, description),
     action,
     close,
   );
@@ -174,8 +160,7 @@ function createToastItem(
       if (nextData.description) {
         if (!description) {
           description = h("div", {
-            class: "fui-toast-description",
-            data: { fuiPart: "description" },
+            data: { part: "description" },
           });
           title.after(description);
           disposeDescription = machine.bind(description, (api) => api.getDescriptionProps());
@@ -190,8 +175,7 @@ function createToastItem(
       if (nextData.action) {
         if (!action) {
           action = h("button", {
-            class: "fui-toast-action",
-            data: { fuiPart: "action-trigger" },
+            data: { part: "action-trigger" },
             type: "button",
           });
           close.before(action);

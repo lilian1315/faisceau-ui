@@ -76,7 +76,7 @@ function factory(
   if (root) {
     content = requirePart<HTMLElement>(root, "content");
     restores.push(captureAttributes(root), captureAttributes(content));
-    const adoptedTitle = root.querySelector<HTMLElement>('[data-fui-part="title"]');
+    const adoptedTitle = root.querySelector<HTMLElement>('[data-part="title"]');
     if (adoptedTitle) {
       title = adoptedTitle;
       restores.push(captureAttributes(title));
@@ -85,14 +85,14 @@ function factory(
         title.replaceChildren(new Text(options.title));
       }
     } else {
-      title = h("h2", { data: { fuiPart: "title" } }, options.title ?? "");
+      title = h("h2", { data: { part: "title" } }, options.title ?? "");
       content.prepend(title);
       generated.push(title);
     }
     if (!title.textContent?.trim()) {
       throw new Error("[Faisceau UI] Drawer enhancement requires a title part or options.title.");
     }
-    const adoptedDescription = root.querySelector<HTMLElement>('[data-fui-part="description"]');
+    const adoptedDescription = root.querySelector<HTMLElement>('[data-part="description"]');
     if (adoptedDescription) {
       description = adoptedDescription;
       restores.push(captureAttributes(description));
@@ -101,13 +101,13 @@ function factory(
         description.replaceChildren(new Text(options.description));
       }
     } else if (options.description !== undefined) {
-      description = h("p", { data: { fuiPart: "description" } }, options.description);
+      description = h("p", { data: { part: "description" } }, options.description);
       title.after(description);
       generated.push(description);
     } else {
       description = null;
     }
-    const adoptedClose = root.querySelector<HTMLButtonElement>('[data-fui-part="close-trigger"]');
+    const adoptedClose = root.querySelector<HTMLButtonElement>('[data-part="close-trigger"]');
     if (adoptedClose) {
       close = adoptedClose;
       restores.push(captureAttributes(close));
@@ -116,15 +116,15 @@ function factory(
       content.append(close);
       generated.push(close);
     }
-    grabberIndicator = h("div", { data: { fuiPart: "grabber-indicator" } });
-    grabber = h("div", { data: { fuiPart: "grabber" } }, grabberIndicator);
+    grabberIndicator = h("div", { data: { part: "grabber-indicator" } });
+    grabber = h("div", { data: { part: "grabber" } }, grabberIndicator);
     content.prepend(grabber);
     generated.push(grabber);
-    backdrop = h("div", { data: { fuiPart: "backdrop" } });
-    positioner = h("div", { data: { fuiPart: "positioner" } });
+    backdrop = h("div", { data: { part: "backdrop" } });
+    positioner = h("div", { data: { part: "positioner" } });
     generated.push(backdrop, positioner);
     if (wantsSwipeArea) {
-      swipeArea = h("div", { data: { fuiPart: "swipe-area" } });
+      swipeArea = h("div", { data: { part: "swipe-area" } });
       generated.push(swipeArea);
     }
     marker = root.ownerDocument.createComment("fui-drawer-content");
@@ -139,18 +139,18 @@ function factory(
       throw new Error("[Faisceau UI] Drawer creation requires options.content.");
     const created = options as DrawerOptions;
     root = h("div") as HTMLElement;
-    title = h("h2", { data: { fuiPart: "title" } }, created.title);
+    title = h("h2", { data: { part: "title" } }, created.title);
     description = created.description
-      ? h("p", { data: { fuiPart: "description" } }, created.description)
+      ? h("p", { data: { part: "description" } }, created.description)
       : null;
     close = createClose(created.closeLabel);
-    grabberIndicator = h("div", { data: { fuiPart: "grabber-indicator" } });
-    grabber = h("div", { data: { fuiPart: "grabber" } }, grabberIndicator);
-    const body = h("div", { class: "fui-drawer-body", data: { fuiPart: "body" } }, created.content);
-    content = h("div", { data: { fuiPart: "content" } }, grabber, title, description, body, close);
-    positioner = h("div", { data: { fuiPart: "positioner" } }, content);
-    backdrop = h("div", { data: { fuiPart: "backdrop" } });
-    if (wantsSwipeArea) swipeArea = h("div", { data: { fuiPart: "swipe-area" } });
+    grabberIndicator = h("div", { data: { part: "grabber-indicator" } });
+    grabber = h("div", { data: { part: "grabber" } }, grabberIndicator);
+    const body = h("div", { data: { part: "body" } }, created.content);
+    content = h("div", { data: { part: "content" } }, grabber, title, description, body, close);
+    positioner = h("div", { data: { part: "positioner" } }, content);
+    backdrop = h("div", { data: { part: "backdrop" } });
+    if (wantsSwipeArea) swipeArea = h("div", { data: { part: "swipe-area" } });
     root.append(backdrop, positioner);
     if (swipeArea) root.append(swipeArea);
   }
@@ -197,22 +197,8 @@ function setupDrawer(
   } = options;
   const id = requestedId ?? createId("drawer");
   addFuiClasses(root, "fui-drawer");
-  for (const [element, part] of [
-    [view.backdrop, "backdrop"],
-    [view.positioner, "positioner"],
-    [view.content, "content"],
-    [view.title, "title"],
-    [view.description, "description"],
-    [view.close, "close"],
-    [view.grabber, "grabber"],
-    [view.grabberIndicator, "grabber-indicator"],
-    [view.swipeArea, "swipe-area"],
-  ] as const) {
-    if (element) addFuiClasses(element, `fui-drawer-${part}`);
-  }
   if (className) root.classList.add(...className.split(/\s+/).filter(Boolean));
-  root.dataset.fuiComponent = "drawer";
-  root.dataset.fuiPart ||= "root";
+  root.dataset.part ||= "root";
   const zag = createZagMachine(
     drawer.machine,
     {
@@ -302,7 +288,7 @@ function normalizeSwipeArea(
 function createClose(label = "Fermer"): HTMLButtonElement {
   const close = h("button", {
     ariaLabel: label,
-    data: { fuiPart: "close-trigger" },
+    data: { part: "close-trigger" },
     type: "button",
   });
   close.append(createXIcon());

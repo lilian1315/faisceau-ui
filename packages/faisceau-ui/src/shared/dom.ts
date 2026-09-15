@@ -40,8 +40,7 @@ export function ensureText<Tag extends PrefixedElementTag>(
   root: HTMLElement,
   part: {
     readonly tag: Tag;
-    readonly class: string;
-    readonly data?: { [name: string]: string | boolean | undefined | null };
+    readonly part: string;
   },
   place: (parent: HTMLElement, node: ElementPrefixedTagNameMap[Tag]) => void,
   text: string | undefined,
@@ -52,9 +51,8 @@ export function ensureText<Tag extends PrefixedElementTag>(
   const adopted = node !== null;
   if (typeof text === "string" && !node) {
     const created = h(part.tag, {
-      class: part.class,
-      data: part.data,
-    } as ElementAttributesTagNameMap[Tag] & { children: never });
+      data: { part: part.part },
+    } as unknown as ElementAttributesTagNameMap[Tag] & { children: never });
     place(root, created);
     restores.push(() => created.remove());
     node = created;
@@ -68,16 +66,6 @@ export function ensureText<Tag extends PrefixedElementTag>(
 }
 
 /** Derives the lookup selector from a part spec, mirroring h()'s data serialization. */
-function toSelector(part: {
-  readonly tag: string;
-  readonly class: string;
-  readonly data?: { [name: string]: string | boolean | undefined | null };
-}): string {
-  let selector = `${part.tag}.${part.class}`;
-  for (const [key, value] of Object.entries(part.data ?? {})) {
-    if (typeof value !== "string" && value !== true) continue;
-    const name = `data-${key.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`)}`;
-    selector += value === true || value === "" ? `[${name}]` : `[${name}="${CSS.escape(value)}"]`;
-  }
-  return selector;
+function toSelector(part: { readonly tag: string; readonly part: string }): string {
+  return `${part.tag}[data-part="${CSS.escape(part.part)}"]`;
 }

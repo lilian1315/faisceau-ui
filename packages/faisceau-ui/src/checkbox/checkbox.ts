@@ -34,20 +34,12 @@ function factory(root?: HTMLLabelElement, options?: CheckboxProps): CheckboxCont
   };
 
   let input: HTMLInputElement;
-  let indicator = h(
-    "span",
-    { class: "fui-checkbox-indicator" },
-    createCheckIcon(),
-    createMinusIcon(),
-  );
-  let control = h("span", { class: "fui-checkbox-control" }, indicator);
+  let indicator = h("span", { data: { part: "indicator" } }, createCheckIcon(), createMinusIcon());
+  let control = h("span", { data: { part: "control" } }, indicator);
 
   if (root) {
-    const _input = root.querySelector<HTMLInputElement>(
-      "input[type='checkbox'].fui-checkbox-input",
-    );
-    if (!_input)
-      throw new Error("[Faisceau UI] missing Checkbox `input[type='checkbox'].fui-checkbox-input`");
+    const _input = root.querySelector<HTMLInputElement>(':scope > input[type="checkbox"]');
+    if (!_input) throw new Error('[Faisceau UI] missing Checkbox `input[type="checkbox"]`');
     input = _input;
     if (typeof mOptions.name === "undefined") mOptions.name = input.name;
     if (typeof mOptions.value === "undefined") mOptions.value = input.value;
@@ -62,7 +54,7 @@ function factory(root?: HTMLLabelElement, options?: CheckboxProps): CheckboxCont
     [root, input].forEach((el) => restores.push(captureAttributes(el)));
   } else {
     root = h("label", { class: "fui-checkbox" });
-    input = h("input", { class: "fui-checkbox-input" });
+    input = h("input", { data: { part: "input" }, type: "checkbox" });
     root.append(input);
   }
 
@@ -71,7 +63,7 @@ function factory(root?: HTMLLabelElement, options?: CheckboxProps): CheckboxCont
 
   const label = ensureText(
     root,
-    { tag: "span", class: "fui-field-label" },
+    { tag: "span", part: "label" },
     (parent, node) => insertAfter(parent, node, control),
     options.label,
     enhanceMode,
@@ -79,7 +71,7 @@ function factory(root?: HTMLLabelElement, options?: CheckboxProps): CheckboxCont
   );
   ensureText(
     root,
-    { tag: "p", class: "fui-field-description" },
+    { tag: "p", part: "description" },
     (parent, node) => insertAfter(parent, node, label ?? control),
     options.description,
     enhanceMode,

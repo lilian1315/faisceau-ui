@@ -25,28 +25,20 @@ export function buildControl(options: {
   placeholder?: string;
 }): ComboboxControl {
   const selection = h("span", {
-    class: "fui-combobox-selection",
-    data: { fuiPart: "selection" },
+    data: { part: "selection" },
     hidden: true,
   });
   const input = h("input", {
-    class: "fui-combobox-input",
-    data: { fuiPart: "input" },
+    data: { part: "input" },
     placeholder: options.placeholder,
     type: "text",
   }) as HTMLInputElement;
-  const field = h(
-    "span",
-    { class: "fui-combobox-field", data: { fuiPart: "field" } },
-    selection,
-    input,
-  );
+  const field = h("span", { data: { part: "field" } }, selection, input);
   const clearTrigger = h(
     "button",
     {
       "aria-label": options.clearLabel ?? "Clear selection",
-      class: "fui-combobox-clear-trigger",
-      data: { fuiPart: "clear-trigger" },
+      data: { part: "clear-trigger" },
       hidden: true,
       type: "button",
     },
@@ -54,77 +46,37 @@ export function buildControl(options: {
   ) as HTMLButtonElement;
   const trigger = h(
     "button",
-    { class: "fui-combobox-trigger", data: { fuiPart: "trigger" }, type: "button" },
+    { data: { part: "trigger" }, type: "button" },
     createChevronDownIcon(),
   ) as HTMLButtonElement;
-  const control = h(
-    "div",
-    { class: "fui-combobox-control", data: { fuiPart: "control" } },
-    field,
-    clearTrigger,
-    trigger,
-  );
+  const control = h("div", { data: { part: "control" } }, field, clearTrigger, trigger);
   return { control, field, selection, input, clearTrigger, trigger };
 }
 
 /** Builds the popup shell; items are rendered separately with {@link buildItem}. */
 export function buildPopup(items: readonly FuiItem[], emptyLabel?: string): ComboboxPopup {
-  const list = h(
-    "ul",
-    { class: "fui-combobox-list", data: { fuiPart: "list" } },
-    items.map(buildItem),
-  );
-  const empty = h(
-    "p",
-    { class: "fui-combobox-empty", data: { fuiPart: "empty" }, hidden: true },
-    emptyLabel ?? "No results",
-  );
-  const content = h(
-    "div",
-    { class: "fui-combobox-content", data: { fuiPart: "content" } },
-    list,
-    empty,
-  );
-  const positioner = h(
-    "div",
-    { class: "fui-combobox-positioner", data: { fuiPart: "positioner" } },
-    content,
-  );
+  const list = h("ul", { data: { part: "list" } }, items.map(buildItem));
+  const empty = h("p", { data: { part: "empty" }, hidden: true }, emptyLabel ?? "No results");
+  const content = h("div", { data: { part: "content" } }, list, empty);
+  const positioner = h("div", { data: { part: "positioner" } }, content);
   return { positioner, content, list, empty };
 }
 
 /** Builds one popup row for an item. */
 export function buildItem(item: FuiItem): HTMLLIElement {
-  const text = h(
-    "span",
-    { class: "fui-combobox-item-text", data: { fuiPart: "item-text" } },
-    item.label,
-  );
+  const text = h("span", { data: { part: "item-text" } }, item.label);
   const children: Node[] = [text];
 
   if (item.description) {
-    children.push(
-      h(
-        "span",
-        { class: "fui-combobox-item-description", data: { fuiPart: "item-description" } },
-        item.description,
-      ),
-    );
+    children.push(h("span", { data: { part: "item-description" } }, item.description));
   }
 
-  children.push(
-    h(
-      "span",
-      { class: "fui-combobox-item-indicator", data: { fuiPart: "item-indicator" } },
-      createCheckIcon(),
-    ),
-  );
+  children.push(h("span", { data: { part: "item-indicator" } }, createCheckIcon()));
 
   return h(
     "li",
     {
-      class: "fui-combobox-item",
-      data: { disabled: item.disabled, fuiPart: "item", value: item.value },
+      data: { disabled: item.disabled, part: "item", value: item.value },
     },
     children,
   );
@@ -145,8 +97,7 @@ export function buildNativeSelect(
 ): HTMLSelectElement {
   const native = h("select", {
     "aria-hidden": true,
-    class: "fui-native-select",
-    data: { fuiPart: "native-select" },
+    data: { part: "native-select" },
     disabled: options.disabled,
     multiple: options.multiple,
     name: options.name,

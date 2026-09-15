@@ -51,8 +51,8 @@ export const enhance: Story = {
     );
     const root = asDom<HTMLDivElement>(
       <div class="fui-dialog">
-        <section data-fui-part="content">
-          <h2 data-fui-part="title">Supprimer le document ?</h2>
+        <section data-part="content">
+          <h2 data-part="title">Supprimer le document ?</h2>
           <p>Cette action est définitive.</p>
         </section>
       </div>,
@@ -63,7 +63,7 @@ export const enhance: Story = {
       enhanceDialog(root, { triggerSelector: "#story-dialog-enhance-trigger" }),
     );
     story.setSource(
-      `<button id="story-dialog-enhance-trigger">Supprimer</button>\n<div class="fui-dialog">\n  <section data-fui-part="content">…</section>\n</div>`,
+      `<button id="story-dialog-enhance-trigger">Supprimer</button>\n<div class="fui-dialog">\n  <section data-part="content">…</section>\n</div>`,
     );
     return story.root;
   },

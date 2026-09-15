@@ -3,7 +3,7 @@
 @use "./base";
 @use "./mixins" as *;
 
-.fui-toast-action {
+.fui-toast-group [data-part="action-trigger"] {
   @include fui-trigger-button;
 }
 
@@ -17,7 +17,7 @@
   pointer-events: none;
 }
 
-.fui-toast {
+.fui-toast-group [data-part="root"] {
   position: relative;
   display: flex;
   min-block-size: 4.5rem;
@@ -34,26 +34,33 @@
   &[data-type="error"] {
     border-color: var(--fui-color-destructive);
   }
+
+  > div {
+    min-inline-size: 0;
+    flex: 1;
+  }
 }
 
-.fui-toast-copy {
-  min-inline-size: 0;
-  flex: 1;
-}
-
-.fui-toast-title {
+.fui-toast-group [data-part="title"] {
   font-weight: var(--fui-font-weight-medium);
 }
 
-.fui-toast-description {
+.fui-toast-group [data-part="description"] {
   margin-block-start: var(--fui-space-1);
   color: var(--fui-color-muted-foreground);
   font-size: var(--fui-font-size-caption);
   line-height: var(--fui-line-height-copy);
 }
 
-.fui-toast-close {
+.fui-toast-group [data-part="close-trigger"] {
   @include fui-close-button;
   inset-block-start: 50%;
   transform: translateY(-50%);
+
+  svg {
+    display: block;
+    inline-size: var(--fui-icon-size);
+    block-size: var(--fui-icon-size);
+    pointer-events: none;
+  }
 }

@@ -16,11 +16,11 @@ describe("Dialog", () => {
 
     controller.api.get().setOpen(true);
     await flushMachine();
-    const content = controller.root.querySelector<HTMLElement>('[data-fui-part="content"]')!;
+    const content = controller.root.querySelector<HTMLElement>('[data-part="content"]')!;
     expect(content.hidden).toBe(false);
     expect(content.getAttribute("role")).toBe("dialog");
     expect(content.getAttribute("aria-labelledby")).toBeTruthy();
-    controller.root.querySelector<HTMLButtonElement>('[data-fui-part="close-trigger"]')!.click();
+    controller.root.querySelector<HTMLButtonElement>('[data-part="close-trigger"]')!.click();
     await flushMachine();
     expect(onOpenChange).toHaveBeenLastCalledWith({ open: false });
   });
@@ -42,7 +42,7 @@ describe("Dialog", () => {
     expect(first.id).toBeTruthy();
     expect(second.id).toBeTruthy();
     expect(first.id).not.toBe(second.id);
-    expect(controller.root.querySelector('[data-fui-part="trigger"]')).toBeNull();
+    expect(controller.root.querySelector('[data-part="trigger"]')).toBeNull();
 
     second.click();
     await flushMachine();
@@ -144,11 +144,11 @@ describe("Dialog", () => {
     const root = document.createElement("div");
     root.className = "fui-dialog";
     root.innerHTML =
-      '<section data-fui-part="content"><h2 data-fui-part="title">Profile</h2><p>Body</p></section>';
+      '<section data-part="content"><h2 data-part="title">Profile</h2><p>Body</p></section>';
     document.body.append(root);
     const original = root.innerHTML;
     const controller = enhanceDialog(root);
-    expect(root.querySelector('[data-fui-part="backdrop"]')).not.toBeNull();
+    expect(root.querySelector('[data-part="backdrop"]')).not.toBeNull();
     controller.destroy();
     expect(root.innerHTML).toBe(original);
   });

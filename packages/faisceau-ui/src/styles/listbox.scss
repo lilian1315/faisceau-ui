@@ -3,15 +3,15 @@
 @use "./base";
 @use "./mixins" as *;
 
-.fui-select-positioner,
-.fui-combobox-positioner {
+.fui-select [data-part="positioner"],
+.fui-combobox [data-part="positioner"] {
   --z-index: var(--fui-z-index-popover);
 
   max-inline-size: min(var(--fui-control-max-inline-size), calc(100vw - (2 * var(--fui-space-2))));
 }
 
-.fui-select-content,
-.fui-combobox-content {
+.fui-select [data-part="content"],
+.fui-combobox [data-part="content"] {
   inline-size: 100%;
   min-inline-size: min(8rem, calc(100vw - (2 * var(--fui-space-2))));
   max-inline-size: 100%;
@@ -54,8 +54,8 @@
   }
 }
 
-.fui-select-list,
-.fui-combobox-list {
+.fui-select [data-part="list"],
+.fui-combobox [data-part="list"] {
   display: grid;
   max-block-size: min(
     var(--fui-listbox-max-block-size),
@@ -72,8 +72,8 @@
   overscroll-behavior: contain;
 }
 
-.fui-select-item,
-.fui-combobox-item {
+.fui-select [data-part="item"],
+.fui-combobox [data-part="item"] {
   position: relative;
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -127,8 +127,8 @@
   }
 }
 
-.fui-select-item-text,
-.fui-combobox-item-text {
+.fui-select [data-part="item-text"],
+.fui-combobox [data-part="item-text"] {
   grid-column: 1;
   min-inline-size: 0;
   max-inline-size: 100%;
@@ -136,8 +136,8 @@
   text-align: start;
 }
 
-.fui-select-item-description,
-.fui-combobox-item-description {
+.fui-select [data-part="item-description"],
+.fui-combobox [data-part="item-description"] {
   grid-column: 1;
   min-inline-size: 0;
   max-inline-size: 100%;
@@ -150,8 +150,8 @@
   text-wrap: pretty;
 }
 
-.fui-select-item-indicator,
-.fui-combobox-item-indicator {
+.fui-select [data-part="item-indicator"],
+.fui-combobox [data-part="item-indicator"] {
   position: absolute;
   inset-block-start: 50%;
   inset-inline-start: var(--fui-space-2);
@@ -165,6 +165,13 @@
   pointer-events: none;
   transform: translateY(-50%);
 
+  svg {
+    display: block;
+    inline-size: 100%;
+    block-size: 100%;
+    pointer-events: none;
+  }
+
   &[data-state="checked"] {
     opacity: 1;
   }
@@ -175,20 +182,20 @@
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .fui-select-content[data-state="open"],
-  .fui-combobox-content[data-state="open"] {
+  .fui-select [data-part="content"][data-state="open"],
+  .fui-combobox [data-part="content"][data-state="open"] {
     animation: fui-listbox-in var(--fui-duration-fast) var(--fui-easing-standard);
   }
 
-  .fui-select-item,
-  .fui-combobox-item {
+  .fui-select [data-part="item"],
+  .fui-combobox [data-part="item"] {
     transition-property: color, background-color;
     transition-duration: var(--fui-duration-fast);
     transition-timing-function: var(--fui-easing-standard);
   }
 
-  .fui-select-item-indicator,
-  .fui-combobox-item-indicator {
+  .fui-select [data-part="item-indicator"],
+  .fui-combobox [data-part="item-indicator"] {
     transition-property: opacity;
     transition-duration: var(--fui-duration-fast);
     transition-timing-function: var(--fui-easing-standard);
@@ -196,15 +203,15 @@
 }
 
 @media (any-pointer: coarse) {
-  .fui-select-item,
-  .fui-combobox-item {
+  .fui-select [data-part="item"],
+  .fui-combobox [data-part="item"] {
     min-block-size: var(--fui-control-height-coarse);
   }
 }
 
 @media (forced-colors: active) {
-  .fui-select-content,
-  .fui-combobox-content {
+  .fui-select [data-part="content"],
+  .fui-combobox [data-part="content"] {
     color: CanvasText;
     background: Canvas;
     border-color: CanvasText;
@@ -215,8 +222,8 @@
     }
   }
 
-  .fui-select-item,
-  .fui-combobox-item {
+  .fui-select [data-part="item"],
+  .fui-combobox [data-part="item"] {
     &:focus-visible {
       outline-color: Highlight;
     }
@@ -226,8 +233,7 @@
       background: Highlight;
       forced-color-adjust: none;
 
-      .fui-select-item-description,
-      .fui-combobox-item-description {
+      [data-part="item-description"] {
         color: HighlightText;
       }
     }
@@ -236,8 +242,7 @@
       color: GrayText;
       opacity: 1;
 
-      .fui-select-item-description,
-      .fui-combobox-item-description {
+      [data-part="item-description"] {
         color: GrayText;
       }
     }

@@ -102,8 +102,8 @@ export const enhance: Story = {
     });
     const root = asDom<"div">(
       <div class="fui-combobox">
-        <label class="fui-field-label">Ville</label>
-        <select class="fui-native-select" name="city">
+        <label data-part="label">Ville</label>
+        <select data-part="native-select" name="city">
           <option value="" data-placeholder="" hidden>
             Rechercher une ville…
           </option>

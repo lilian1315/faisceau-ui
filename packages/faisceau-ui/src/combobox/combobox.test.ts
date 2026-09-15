@@ -28,17 +28,19 @@ describe("Combobox", () => {
 
     expect(controller.root.tagName).toBe("DIV");
     expect(controller.root.classList.contains("fui-combobox")).toBe(true);
-    expect(controller.root.querySelector("select.fui-native-select")).not.toBeNull();
-    expect(controller.root.querySelector("input.fui-combobox-input")).not.toBeNull();
-    expect(controller.root.querySelector(".fui-combobox-trigger")).not.toBeNull();
-    expect(controller.root.querySelector(".fui-combobox-clear-trigger")).not.toBeNull();
+    expect(controller.root.querySelector('select[data-part="native-select"]')).not.toBeNull();
+    expect(controller.root.querySelector('input[data-part="input"]')).not.toBeNull();
+    expect(controller.root.querySelector('[data-part="trigger"]')).not.toBeNull();
+    expect(controller.root.querySelector('[data-part="clear-trigger"]')).not.toBeNull();
     expect(
-      controller.root.querySelector<HTMLInputElement>(".fui-combobox-input")?.placeholder,
+      controller.root.querySelector<HTMLInputElement>('[data-part="input"]')?.placeholder,
     ).toBe("Search");
-    expect(controller.root.querySelector("label.fui-field-label")?.textContent).toBe("Value");
-    expect(controller.root.querySelector("p.fui-field-description")?.textContent).toBe("Pick one");
-    expect(controller.root.querySelector(".fui-combobox-empty")?.textContent).toBe("Nothing found");
-    expect(controller.root.querySelectorAll(".fui-combobox-item[data-value]").length).toBe(2);
+    expect(controller.root.querySelector('label[data-part="label"]')?.textContent).toBe("Value");
+    expect(controller.root.querySelector('p[data-part="description"]')?.textContent).toBe(
+      "Pick one",
+    );
+    expect(controller.root.querySelector('[data-part="empty"]')?.textContent).toBe("Nothing found");
+    expect(controller.root.querySelectorAll('[data-part="item"][data-value]').length).toBe(2);
     controller.destroy();
     expect(controller.root.isConnected).toBe(false);
   });
@@ -64,9 +66,9 @@ describe("Combobox", () => {
     expect(input.name).toBe("");
     expect(input.getAttribute("role")).toBe("combobox");
 
-    controller.root.querySelector<HTMLButtonElement>(".fui-combobox-trigger")!.click();
+    controller.root.querySelector<HTMLButtonElement>('[data-part="trigger"]')!.click();
     await flushMachine();
-    controller.root.querySelector<HTMLElement>('.fui-combobox-item[data-value="be"]')!.click();
+    controller.root.querySelector<HTMLElement>('[data-part="item"][data-value="be"]')!.click();
     await flushMachine();
 
     expect(controller.api.get().value).toEqual(["be"]);
@@ -88,9 +90,9 @@ describe("Combobox", () => {
     nativeSelect.addEventListener("input", nativeInput);
     nativeSelect.addEventListener("change", nativeChange);
 
-    controller.root.querySelector<HTMLButtonElement>(".fui-combobox-trigger")!.click();
+    controller.root.querySelector<HTMLButtonElement>('[data-part="trigger"]')!.click();
     await flushMachine();
-    controller.root.querySelector<HTMLElement>('.fui-combobox-item[data-value="Two"]')!.click();
+    controller.root.querySelector<HTMLElement>('[data-part="item"][data-value="Two"]')!.click();
     await flushMachine();
 
     // Like Zag's hidden select, the machine emits its own bubbling change while
@@ -140,24 +142,24 @@ describe("Combobox", () => {
       multiple: true,
       name: "cities",
     }).mount(form);
-    const input = controller.root.querySelector<HTMLInputElement>(".fui-combobox-input")!;
+    const input = controller.root.querySelector<HTMLInputElement>('[data-part="input"]')!;
     const nativeSelect = controller.root.querySelector<HTMLSelectElement>("select")!;
 
     expect(nativeSelect.multiple).toBe(true);
-    expect(controller.root.hasAttribute("data-fui-multiple")).toBe(true);
+    expect(controller.root.hasAttribute("data-multiple")).toBe(true);
     expect(
       controller.root.querySelector('[role="listbox"]')?.getAttribute("aria-multiselectable"),
     ).toBe("true");
     expect(readTags(controller.root)).toEqual(["Paris"]);
     const parisRemove = controller.root.querySelector<HTMLButtonElement>(
-      '.fui-combobox-tag-remove[data-value="paris"]',
+      '[data-part="selection"] button[data-value="paris"]',
     )!;
     expect(parisRemove.getAttribute("aria-label")).toBe("Remove Paris");
     expect(parisRemove.querySelector('svg[data-fui-icon="x"]')).not.toBeNull();
 
-    controller.root.querySelector<HTMLButtonElement>(".fui-combobox-trigger")!.click();
+    controller.root.querySelector<HTMLButtonElement>('[data-part="trigger"]')!.click();
     await flushMachine();
-    controller.root.querySelector<HTMLElement>('.fui-combobox-item[data-value="lyon"]')!.click();
+    controller.root.querySelector<HTMLElement>('[data-part="item"][data-value="lyon"]')!.click();
     await flushMachine();
 
     expect(controller.api.get().open).toBe(true);
@@ -273,13 +275,13 @@ describe("Combobox", () => {
     expect(controller.api.get().inputValue).toBe("ly");
     expect(requireItem(controller.root, "Lyon").hidden).toBe(false);
     expect(requireItem(controller.root, "Paris").hidden).toBe(true);
-    expect(controller.root.querySelector<HTMLElement>(".fui-combobox-empty")!.hidden).toBe(true);
+    expect(controller.root.querySelector<HTMLElement>('[data-part="empty"]')!.hidden).toBe(true);
 
     controller.api.get().setInputValue("xyz");
     await flushMachine();
 
-    expect(controller.root.querySelector<HTMLElement>(".fui-combobox-empty")!.hidden).toBe(false);
-    expect(controller.root.querySelectorAll(".fui-combobox-item:not([hidden])")).toHaveLength(0);
+    expect(controller.root.querySelector<HTMLElement>('[data-part="empty"]')!.hidden).toBe(false);
+    expect(controller.root.querySelectorAll('[data-part="item"]:not([hidden])')).toHaveLength(0);
     controller.destroy();
   });
 
@@ -319,7 +321,7 @@ describe("Combobox", () => {
     controller.api.get().setInputValue("");
     await flushMachine();
 
-    expect(controller.root.querySelector('.fui-combobox-item[data-value="be"]')).toBe(retained);
+    expect(controller.root.querySelector('[data-part="item"][data-value="be"]')).toBe(retained);
     expect(retained.textContent).toContain("Belgium");
     expect(controller.api.get().collection.items.map((item) => item.value)).toEqual(["be", "ch"]);
     expect(
@@ -334,29 +336,29 @@ describe("Combobox", () => {
   it("enhances caller markup, starts immediately, then restores it", async () => {
     const root = document.createElement("div");
     root.className = "fui-combobox consumer-root";
-    root.innerHTML = `<label class="fui-field-label">Commande</label><select class="fui-native-select" name="command"><option value="" data-placeholder="" hidden>Rechercher</option><option value="build" selected>Build</option><option value="test">Test</option></select>`;
+    root.innerHTML = `<label data-part="label">Commande</label><select data-part="native-select" name="command"><option value="" data-placeholder="" hidden>Rechercher</option><option value="build" selected>Build</option><option value="test">Test</option></select>`;
     document.body.append(root);
     const nativeSelect = root.querySelector<HTMLSelectElement>("select")!;
 
     const controller = enhanceCombobox(root, {});
     expect(controller.started).toBe(true);
     expect(controller.api.get().value).toEqual(["build"]);
-    expect(root.querySelector(".fui-combobox-trigger")).not.toBeNull();
-    expect(root.querySelector<HTMLInputElement>(".fui-combobox-input")?.placeholder).toBe(
+    expect(root.querySelector('[data-part="trigger"]')).not.toBeNull();
+    expect(root.querySelector<HTMLInputElement>('[data-part="input"]')?.placeholder).toBe(
       "Rechercher",
     );
 
-    controller.root.querySelector<HTMLButtonElement>(".fui-combobox-trigger")!.click();
+    controller.root.querySelector<HTMLButtonElement>('[data-part="trigger"]')!.click();
     await flushMachine();
-    controller.root.querySelector<HTMLElement>('.fui-combobox-item[data-value="test"]')!.click();
+    controller.root.querySelector<HTMLElement>('[data-part="item"][data-value="test"]')!.click();
     await flushMachine();
     expect(controller.api.get().value).toEqual(["test"]);
 
     controller.destroy();
-    expect(root.querySelector(".fui-combobox-trigger")).toBeNull();
-    expect(root.querySelector(".fui-combobox-positioner")).toBeNull();
+    expect(root.querySelector('[data-part="trigger"]')).toBeNull();
+    expect(root.querySelector('[data-part="positioner"]')).toBeNull();
     expect(root.className).toBe("fui-combobox consumer-root");
-    expect(root.querySelector("label.fui-field-label")?.textContent).toBe("Commande");
+    expect(root.querySelector('label[data-part="label"]')?.textContent).toBe("Commande");
     expect(nativeSelect.name).toBe("command");
     expect(nativeSelect.value).toBe("test");
   });
@@ -372,7 +374,7 @@ describe("Combobox", () => {
     }).mount(document.body);
     const input = controller.root.querySelector<HTMLInputElement>("input")!;
 
-    controller.root.querySelector<HTMLButtonElement>(".fui-combobox-trigger")!.click();
+    controller.root.querySelector<HTMLButtonElement>('[data-part="trigger"]')!.click();
     await flushMachine();
 
     input.dispatchEvent(
@@ -388,30 +390,29 @@ describe("Combobox", () => {
     controller.destroy();
   });
 
-  it("uses Lucide icons and only authors fui-prefixed classes", () => {
+  it("uses Lucide icons and only keeps a fui-* class on its root", () => {
     const controller = createCombobox({ items: ["One", "Two"], label: "Value" });
     expect(controller.root.querySelector('svg[data-fui-icon="chevron-down"]')).not.toBeNull();
     expect(controller.root.querySelector('svg[data-fui-icon="check"]')).not.toBeNull();
-    const classes = Array.from(controller.root.querySelectorAll("[class]"), (element) => [
+    const descendantClasses = Array.from(controller.root.querySelectorAll("[class]"), (element) => [
       ...element.classList,
     ]).flat();
 
-    expect(
-      [...controller.root.classList, ...classes].every((name) => name.startsWith("fui-")),
-    ).toBe(true);
+    expect(controller.root.classList.contains("fui-combobox")).toBe(true);
+    expect(descendantClasses.filter((name) => name.startsWith("fui-"))).toEqual([]);
     controller.destroy();
   });
 });
 
 function readTags(root: ParentNode): string[] {
   return Array.from(
-    root.querySelectorAll<HTMLElement>(".fui-combobox-tag-label"),
+    root.querySelectorAll<HTMLElement>('[data-part="selection"] > span > span'),
     (element) => element.textContent ?? "",
   );
 }
 
 function requireItem(root: ParentNode, value: string): HTMLElement {
-  const item = root.querySelector<HTMLElement>(`.fui-combobox-item[data-value="${value}"]`);
+  const item = root.querySelector<HTMLElement>(`[data-part="item"][data-value="${value}"]`);
   if (!item) throw new Error(`Missing test item: ${value}`);
   return item;
 }

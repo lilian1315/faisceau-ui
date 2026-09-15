@@ -81,8 +81,8 @@ export const enhance: Story = {
     });
     const root = asDom<"label">(
       <label class="fui-checkbox">
-        <input type="checkbox" class="fui-checkbox-input" checked />
-        <span class="fui-field-label">Recevoir les nouveautés</span>
+        <input type="checkbox" data-part="input" checked />
+        <span data-part="label">Recevoir les nouveautés</span>
       </label>,
     );
 
