@@ -22,6 +22,8 @@ export interface TriggerBinding {
 /**
  * Binds every element matching `selector` to a Zag trigger getter.
  * Triggers are never owned: only their Zag props are applied and restored.
+ * A mutation observer keeps the binding in sync when matching elements are
+ * added after start, such as Storybook trees attached after `mount()`.
  */
 export function createTriggerBinding<TApi>(
   zag: BindableZag<TApi>,
@@ -32,40 +34,83 @@ export function createTriggerBinding<TApi>(
   },
 ): TriggerBinding {
   let selector: string | undefined;
-  let disposers: Array<() => void> = [];
-  let restores: Array<() => void> = [];
+  const bound = new Map<Element, { dispose: () => void; restore: () => void }>();
+  let observer: MutationObserver | null = null;
+  let observedScope: Document | ShadowRoot | null = null;
 
-  function cleanup(): void {
-    for (const dispose of disposers) dispose();
-    disposers = [];
-    for (const restore of restores) restore();
-    restores = [];
-  }
-
-  function apply(next: string | undefined): void {
-    cleanup();
-    selector = next;
-    if (!next) return;
-    let elements: Element[];
+  function query(): Element[] {
+    if (!selector) return [];
     try {
-      elements = Array.from(options.getScope().querySelectorAll(next));
+      return Array.from(options.getScope().querySelectorAll(selector));
     } catch {
       throw new Error(
-        `[Faisceau UI] ${options.component} triggerSelector is not a valid selector: "${next}".`,
+        `[Faisceau UI] ${options.component} triggerSelector is not a valid selector: "${selector}".`,
       );
     }
-    for (const element of elements) {
-      restores.push(captureAttributes(element));
-      disposers.push(zag.bind(element, (api) => options.getTriggerProps(api)));
+  }
+
+  function reconcile(): void {
+    const current = new Set(query());
+    for (const [element, entry] of bound) {
+      if (!current.has(element)) {
+        entry.dispose();
+        entry.restore();
+        bound.delete(element);
+      }
     }
+    for (const element of current) {
+      if (!bound.has(element)) {
+        const restore = captureAttributes(element);
+        const dispose = zag.bind(element, (api) => options.getTriggerProps(api));
+        bound.set(element, { dispose, restore });
+      }
+    }
+  }
+
+  function ensureObserved(): void {
+    if (!selector) return;
+    const scope = options.getScope();
+    if (observer && observedScope === scope) return;
+    observer?.disconnect();
+    observedScope = scope;
+    const node: Node | null = scope instanceof Document ? scope.documentElement : scope;
+    if (!node) {
+      observer = null;
+      return;
+    }
+    observer = new MutationObserver(() => {
+      // The lookup root can move (detached tree mounted into a document),
+      // so re-target the observer before reconciling.
+      ensureObserved();
+      reconcile();
+    });
+    observer.observe(node, { childList: true, subtree: true });
+  }
+
+  function cleanup(): void {
+    observer?.disconnect();
+    observer = null;
+    observedScope = null;
+    for (const entry of bound.values()) {
+      entry.dispose();
+      entry.restore();
+    }
+    bound.clear();
   }
 
   return {
     setSelector(next) {
-      apply(next);
+      cleanup();
+      selector = next;
+      if (!next) return;
+      // Validate eagerly so typos throw synchronously instead of in the observer.
+      reconcile();
+      ensureObserved();
     },
     refresh() {
-      if (selector) apply(selector);
+      if (!selector) return;
+      ensureObserved();
+      reconcile();
     },
     destroy() {
       cleanup();

@@ -52,6 +52,31 @@ describe("Dialog", () => {
     expect(document.querySelector("#open-b")).not.toBeNull();
   });
 
+  it("picks up triggers attached after start", async () => {
+    const canvas = document.createElement("div");
+    const trigger = document.createElement("button");
+    trigger.id = "late-trigger";
+    trigger.type = "button";
+    trigger.textContent = "Late";
+    canvas.append(trigger);
+    const host = document.createElement("div");
+    canvas.append(host);
+    const controller = createDialog({
+      content: "Contenu",
+      title: "Titre",
+      triggerSelector: "#late-trigger",
+    });
+    controller.mount(host);
+    expect(trigger.hasAttribute("aria-haspopup")).toBe(false);
+    document.body.append(canvas);
+    await flushMachine();
+    expect(trigger.hasAttribute("aria-haspopup")).toBe(true);
+    trigger.click();
+    await flushMachine();
+    expect(controller.api.get().open).toBe(true);
+    controller.destroy();
+  });
+
   it("rebinds triggers through setTriggerSelector", async () => {
     document.body.innerHTML =
       '<button id="before" type="button">Before</button><button id="after" type="button">After</button>';
