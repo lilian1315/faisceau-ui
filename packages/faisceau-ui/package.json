@@ -99,7 +99,7 @@
     "jsr-exports-lint": "catalog:",
     "playwright": "catalog:",
     "publint": "catalog:",
-    "sass": "catalog:",
+    "sass-embedded": "catalog:",
     "vitest": "catalog:"
   }
 }

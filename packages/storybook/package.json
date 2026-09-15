@@ -17,7 +17,7 @@
     "@storybook/addon-docs": "10.6.0",
     "@storybook/html-vite": "10.6.0",
     "@types/node": "catalog:",
-    "sass": "catalog:",
+    "sass-embedded": "catalog:",
     "storybook": "10.6.0"
   }
 }

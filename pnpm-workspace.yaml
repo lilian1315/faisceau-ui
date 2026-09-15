@@ -27,7 +27,7 @@ catalog:
   publint: ^0.3.24
   yaml: ^2.9.0
   bumpp: ^12.3.0
-  sass: ^1.104.1
+  sass-embedded: ^1.104.1
 overrides:
   vite@*: "catalog:"
   vitest@*: "catalog:"
@@ -67,4 +67,5 @@ minimumReleaseAgeExclude:
   - "@zag-js/utils@2.0.0-next.3"
   - "@zag-js/vanilla@2.0.0-next.3"
 allowBuilds:
+  "@parcel/watcher": false
   esbuild: true
