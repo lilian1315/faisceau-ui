@@ -165,8 +165,8 @@ settings:
 catalogs:
   default:
     '@lilian1315/create-element':
-      specifier: 0.13.1
-      version: 0.13.1
+      specifier: 0.14.1
+      version: 0.14.1
     '@lucide/icons':
       specifier: 1.41.0
       version: 1.41.0
@@ -268,7 +268,7 @@ importers:
     dependencies:
       '@lilian1315/create-element':
         specifier: 'catalog:'
-        version: 0.13.1(faisceau@0.3.2)
+        version: 0.14.1(faisceau@0.3.2)
       '@lucide/icons':
         specifier: 'catalog:'
         version: 1.41.0
@@ -391,7 +391,7 @@ importers:
     dependencies:
       '@lilian1315/create-element':
         specifier: 'catalog:'
-        version: 0.13.1(faisceau@0.3.2)
+        version: 0.14.1(faisceau@0.3.2)
       faisceau:
         specifier: 'catalog:'
         version: 0.3.2
@@ -634,8 +634,8 @@ packages:
   '@jridgewell/trace-mapping@0.3.31':
     resolution: {integrity: sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw==}
 
-  '@lilian1315/create-element@0.13.1':
-    resolution: {integrity: sha512-OEPGnVvlCYctBexor4QRuHzbrcjo82otJaKokugW9oRyvYDAqgBgsoJ9r9dSvEbbV7p1uCmsOKH01QC0gD7FlQ==}
+  '@lilian1315/create-element@0.14.1':
+    resolution: {integrity: sha512-wEu7iCPptmw728pf8G7FD3isw84z1bYcZVrCbpT3sE3svSOkfb3Qf/v0NLrasSmwsQhHyhEnbimYNkyNU1wECQ==}
     peerDependencies:
       '@preact/signals-core': 1.13.0
       '@vue/reactivity': 3.5.28
@@ -2590,7 +2590,7 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.6.0
 
-  '@lilian1315/create-element@0.13.1(faisceau@0.3.2)':
+  '@lilian1315/create-element@0.14.1(faisceau@0.3.2)':
     dependencies:
       '@lilian1315/elements-writable-properties-types': 0.1.12
     optionalDependencies:
