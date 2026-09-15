@@ -71,7 +71,7 @@ function factory(
   let swipeArea: HTMLElement | null = null;
   let marker: Comment | null = null;
 
-  const wantsSwipeArea = options.swipeArea === true;
+  const wantsSwipeArea = normalizeSwipeArea(options.swipeArea) !== null;
 
   if (root) {
     content = requirePart<HTMLElement>(root, "content");
@@ -187,9 +187,10 @@ function setupDrawer(
   const {
     className,
     closeLabel: _closeLabel,
+    contentDraggable,
     description: _description,
     id: requestedId,
-    swipeArea: _swipeArea,
+    swipeArea: swipeAreaOption,
     title: _title,
     triggerSelector: initialSelector,
     ...behavior
@@ -225,13 +226,16 @@ function setupDrawer(
   zag.bind(root, (api) => ({ "data-side": api.getContentState().swipeDirection }));
   zag.bind(view.backdrop, (api) => api.getBackdropProps());
   zag.bind(view.positioner, (api) => api.getPositionerProps());
-  zag.bind(view.content, (api) => api.getContentProps());
+  zag.bind(view.content, (api) => api.getContentProps({ draggable: contentDraggable ?? true }));
   zag.bind(view.title, (api) => api.getTitleProps());
   if (view.description) zag.bind(view.description, (api) => api.getDescriptionProps());
   zag.bind(view.close, (api) => api.getCloseTriggerProps());
   zag.bind(view.grabber, (api) => api.getGrabberProps());
   zag.bind(view.grabberIndicator, (api) => api.getGrabberIndicatorProps());
-  if (view.swipeArea) zag.bind(view.swipeArea, (api) => api.getSwipeAreaProps());
+  if (view.swipeArea) {
+    const swipeAreaProps = normalizeSwipeArea(swipeAreaOption) ?? {};
+    zag.bind(view.swipeArea, (api) => api.getSwipeAreaProps({ ...swipeAreaProps }));
+  }
 
   const triggers = createTriggerBinding(zag, {
     component: "Drawer",
@@ -286,6 +290,13 @@ function setupDrawer(
   };
   if (setup.enhanceMode) controller.start();
   return controller;
+}
+
+function normalizeSwipeArea(
+  swipeArea: boolean | drawer.SwipeAreaProps | undefined,
+): drawer.SwipeAreaProps | null {
+  if (!swipeArea) return null;
+  return swipeArea === true ? {} : { ...swipeArea };
 }
 
 function createClose(label = "Fermer"): HTMLButtonElement {

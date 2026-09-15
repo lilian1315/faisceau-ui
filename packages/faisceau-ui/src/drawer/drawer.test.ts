@@ -53,6 +53,24 @@ describe("Drawer", () => {
     expect(document.querySelector("#menu-a")).not.toBeNull();
   });
 
+  it("configures the swipe area and content dragging like the Zag docs", async () => {
+    const controller = createDrawer({
+      content: "Filtres",
+      contentDraggable: false,
+      swipeArea: { disabled: true },
+      title: "Filtres",
+    }).mount(document.body);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    const swipeArea = controller.root.querySelector('[data-fui-part="swipe-area"]')!;
+    expect(swipeArea.hasAttribute("data-disabled")).toBe(true);
+    controller.api.get().setOpen(true);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(controller.root.querySelector('[data-fui-part="content"]')?.getAttribute("role")).toBe(
+      "dialog",
+    );
+    controller.destroy();
+  });
+
   it("enhances content-only markup and restores it", () => {
     const root = document.createElement("div");
     root.className = "fui-drawer";

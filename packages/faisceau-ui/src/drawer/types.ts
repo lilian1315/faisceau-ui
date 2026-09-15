@@ -11,8 +11,19 @@ interface DrawerViewOptions {
   /** CSS selector resolved against the lookup root; every match opens the drawer. */
   triggerSelector?: string;
   closeLabel?: string;
-  /** Generate an edge swipe area in addition to external triggers. */
-  swipeArea?: boolean;
+  /**
+   * Generate an edge swipe area in addition to external triggers.
+   * `true` uses the defaults; an object configures `getSwipeAreaProps`
+   * (`disabled`, or an `swipeDirection` override defaulting to the opposite
+   * of the drawer's `swipeDirection`).
+   */
+  swipeArea?: boolean | drawer.SwipeAreaProps;
+  /**
+   * Whether the drawer content itself is draggable.
+   * When false, only the grabber drags. Maps to `getContentProps`.
+   * @default true
+   */
+  contentDraggable?: boolean;
 }
 export type DrawerOptions = DrawerMachineOptions & DrawerViewOptions;
 export type EnhanceDrawerOptions = DrawerMachineOptions &
