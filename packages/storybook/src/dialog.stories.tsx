@@ -13,18 +13,25 @@ export const create: Story = {
       eyebrow: "createDialog",
       title: "Dialogue modal",
       description:
-        "Trigger, backdrop, positioner, contenu titré et bouton de fermeture sont reliés à Zag Dialog.",
+        "Backdrop, positioner, contenu titré et bouton de fermeture sont reliés à Zag Dialog. Les triggers restent externes et sont désignés par triggerSelector.",
     });
+    const trigger = asDom<HTMLButtonElement>(
+      <button class="fui-story__button" id="story-dialog-trigger" type="button">
+        Modifier le profil
+      </button>,
+    );
     const host = asDom<HTMLDivElement>(<div />);
-    story.canvas.append(host);
+    story.canvas.append(trigger, host);
     const controller = createDialog({
-      trigger: "Modifier le profil",
+      triggerSelector: "#story-dialog-trigger",
       title: "Modifier le profil",
       description: "Les changements seront visibles immédiatement.",
       content: "Formulaire ou contenu libre.",
     }).mount(host);
     trackController(story.root, controller);
-    story.setSource(`createDialog({ trigger, title, description, content }).mount(target)`);
+    story.setSource(
+      `createDialog({ triggerSelector: "#story-dialog-trigger", title, description, content }).mount(target)`,
+    );
     return story.root;
   },
 };
@@ -35,23 +42,28 @@ export const enhance: Story = {
       eyebrow: "enhanceDialog",
       title: "Progressive enhancement",
       description:
-        "Le script conserve le trigger et le contenu, puis génère les éléments structurels manquants.",
+        "Le script conserve le contenu, puis génère les éléments structurels manquants. Un bouton externe ouvre le dialogue via triggerSelector.",
     });
+    const trigger = asDom<HTMLButtonElement>(
+      <button class="fui-story__button" id="story-dialog-enhance-trigger" type="button">
+        Supprimer
+      </button>,
+    );
     const root = asDom<HTMLDivElement>(
-      <div>
-        <button class="fui-story__button" data-fui-part="trigger" type="button">
-          Supprimer
-        </button>
+      <div class="fui-dialog">
         <section data-fui-part="content">
           <h2 data-fui-part="title">Supprimer le document ?</h2>
           <p>Cette action est définitive.</p>
         </section>
       </div>,
     );
-    story.canvas.append(root);
-    trackController(story.root, enhanceDialog(root));
+    story.canvas.append(trigger, root);
+    trackController(
+      story.root,
+      enhanceDialog(root, { triggerSelector: "#story-dialog-enhance-trigger" }),
+    );
     story.setSource(
-      `<div>\n  <button data-fui-part="trigger">Supprimer</button>\n  <section data-fui-part="content">…</section>\n</div>`,
+      `<button id="story-dialog-enhance-trigger">Supprimer</button>\n<div class="fui-dialog">\n  <section data-fui-part="content">…</section>\n</div>`,
     );
     return story.root;
   },

@@ -115,15 +115,15 @@ same invariant; component files retain only their Zag-specific mapping.
 
 ## Implemented components
 
-| Component | Zag primitive      | Existing markup           | Native form | Notable behavior                                          |
-| --------- | ------------------ | ------------------------- | ----------- | --------------------------------------------------------- |
-| Select    | `@zag-js/select`   | One native `<select>`     | Yes         | Multiple mode; selected-item alignment by default         |
-| Combobox  | `@zag-js/combobox` | One native `<select>`     | Yes         | Filtering, removable multiple-value tags                  |
-| Checkbox  | `@zag-js/checkbox` | One checkbox input        | Yes         | Checked and indeterminate states                          |
-| Tooltip   | `@zag-js/tooltip`  | Existing trigger/title    | No          | Restores the native `title` on teardown                   |
-| Dialog    | `@zag-js/dialog`   | Trigger and content parts | No          | Generated backdrop, positioner, close control             |
-| Drawer    | `@zag-js/drawer`   | Trigger and content parts | No          | Logical swipe direction, snap points, grabber, swipe area |
-| Toast     | `@zag-js/toast`    | Existing empty region     | No          | Group service, child machines, public toast store         |
+| Component | Zag primitive      | Existing markup                          | Native form | Notable behavior                                                                                   |
+| --------- | ------------------ | ---------------------------------------- | ----------- | -------------------------------------------------------------------------------------------------- |
+| Select    | `@zag-js/select`   | One native `<select>`                    | Yes         | Multiple mode; selected-item alignment by default                                                  |
+| Combobox  | `@zag-js/combobox` | One native `<select>`                    | Yes         | Filtering, removable multiple-value tags                                                           |
+| Checkbox  | `@zag-js/checkbox` | One checkbox input                       | Yes         | Checked and indeterminate states                                                                   |
+| Tooltip   | `@zag-js/tooltip`  | Existing trigger/title                   | No          | Restores the native `title` on teardown                                                            |
+| Dialog    | `@zag-js/dialog`   | Content part, external `triggerSelector` | No          | Generated backdrop, positioner, close control; triggers bound by selector, never owned             |
+| Drawer    | `@zag-js/drawer`   | Content part, external `triggerSelector` | No          | Logical swipe direction, snap points, grabber, swipe area; triggers bound by selector, never owned |
+| Toast     | `@zag-js/toast`    | Existing empty region                    | No          | Group service, child machines, public toast store                                                  |
 
 Select enables Zag's native selected-item alignment by default. Multiple mode disables it.
 

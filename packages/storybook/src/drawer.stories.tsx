@@ -22,24 +22,29 @@ export const create: Story = {
       eyebrow: "createDrawer",
       title: "Panneau latéral",
       description:
-        "La machine Zag Drawer gère le focus, les snap points et les gestes de glissement.",
+        "La machine Zag Drawer gère le focus, les snap points et les gestes de glissement. Le trigger reste externe.",
     });
+    const trigger = asDom<HTMLButtonElement>(
+      <button class="fui-story__button" id="story-drawer-trigger" type="button">
+        Ouvrir le panneau
+      </button>,
+    );
     const host = asDom<HTMLDivElement>(<div />);
-    story.canvas.append(host);
+    story.canvas.append(trigger, host);
     trackController(
       story.root,
       createDrawer({
         ...args,
         snapPoints: [0.5, 1],
         swipeArea: true,
-        trigger: "Ouvrir le panneau",
+        triggerSelector: "#story-drawer-trigger",
         title: "Filtres",
         description: "Affinez les résultats affichés.",
         content: "Contrôles de filtrage.",
       }).mount(host),
     );
     story.setSource(
-      `createDrawer({ swipeDirection: "${args.swipeDirection}", snapPoints: [0.5, 1], swipeArea: true, trigger, title, content }).mount(target)`,
+      `createDrawer({ swipeDirection: "${args.swipeDirection}", snapPoints: [0.5, 1], swipeArea: true, triggerSelector, title, content }).mount(target)`,
     );
     return story.root;
   },
@@ -50,23 +55,29 @@ export const enhance: Story = {
     const story = createStoryShell({
       eyebrow: "enhanceDrawer",
       title: "Drawer enrichi",
-      description: "Seuls le trigger et le contenu métier sont nécessaires dans le HTML initial.",
+      description:
+        "Seul le contenu métier est nécessaire dans le HTML initial ; le trigger est externe.",
     });
+    const trigger = asDom<HTMLButtonElement>(
+      <button class="fui-story__button" id="story-drawer-enhance-trigger" type="button">
+        Navigation
+      </button>,
+    );
     const root = asDom<HTMLDivElement>(
-      <div>
-        <button class="fui-story__button" data-fui-part="trigger" type="button">
-          Navigation
-        </button>
+      <div class="fui-drawer">
         <aside data-fui-part="content">
           <h2 data-fui-part="title">Navigation</h2>
           <nav>Accueil · Documents · Réglages</nav>
         </aside>
       </div>,
     );
-    story.canvas.append(root);
-    trackController(story.root, enhanceDrawer(root, args));
+    story.canvas.append(trigger, root);
+    trackController(
+      story.root,
+      enhanceDrawer(root, { ...args, triggerSelector: "#story-drawer-enhance-trigger" }),
+    );
     story.setSource(
-      `<button data-fui-part="trigger">Navigation</button>\n<aside data-fui-part="content">…</aside>`,
+      `<button id="story-drawer-enhance-trigger">Navigation</button>\n<div class="fui-drawer">\n  <aside data-fui-part="content">…</aside>\n</div>`,
     );
     return story.root;
   },

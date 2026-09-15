@@ -3,10 +3,6 @@
 @use "./base";
 @use "./mixins" as *;
 
-.fui-dialog-trigger {
-  @include fui-trigger-button;
-}
-
 .fui-dialog-backdrop {
   @include fui-overlay-backdrop;
 }

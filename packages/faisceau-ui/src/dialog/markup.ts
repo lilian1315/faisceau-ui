@@ -10,7 +10,6 @@ export interface OverlayView {
   description: HTMLElement | null;
   positioner: HTMLElement;
   title: HTMLElement;
-  trigger: HTMLButtonElement;
 }
 
 export function createOverlayView(options: {
@@ -18,14 +17,8 @@ export function createOverlayView(options: {
   content: string;
   description?: string;
   title: string;
-  trigger: string;
   variant: OverlayVariant;
 }): OverlayView {
-  const trigger = h(
-    "button",
-    { class: `fui-${options.variant}-trigger`, data: { fuiPart: "trigger" }, type: "button" },
-    options.trigger,
-  );
   const title = h(
     "h2",
     { class: `fui-${options.variant}-title`, data: { fuiPart: "title" } },
@@ -62,5 +55,5 @@ export function createOverlayView(options: {
     class: `fui-${options.variant}-backdrop`,
     data: { fuiPart: "backdrop" },
   });
-  return { backdrop, close, content, description, positioner, title, trigger };
+  return { backdrop, close, content, description, positioner, title };
 }

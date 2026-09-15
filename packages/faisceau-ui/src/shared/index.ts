@@ -22,6 +22,9 @@ export { createId } from "./id.ts";
 /** DOM lookup and snapshot helpers shared by Zag-powered components. */
 export { captureAttributes, getLookupRoot } from "./dom.ts";
 
+/** External trigger-selector bindings for overlay components. */
+export { createTriggerBinding, type TriggerBinding } from "./triggers.ts";
+
 /** Lucide icons rendered through @lilian1315/create-element. */
 export {
   createCheckIcon,

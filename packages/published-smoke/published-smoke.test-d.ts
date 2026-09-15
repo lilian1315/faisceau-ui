@@ -18,14 +18,14 @@ test("exposes the declarations shipped through every public UI entry", () => {
   assertType<EnhanceSelectProps>({ clearable: true });
   assertType<CheckboxProps>({ label: "Terms" });
   assertType<TooltipOptions>({ content: "Help", trigger: "Info" });
-  assertType<DialogOptions>({ content: "Body", title: "Title", trigger: "Open" });
+  assertType<DialogOptions>({ content: "Body", title: "Title", triggerSelector: "#open" });
   assertType<DrawerOptions>({
     content: "Body",
     swipeDirection: "end",
     snapPoints: [0.5, 1],
     swipeArea: true,
     title: "Title",
-    trigger: "Open",
+    triggerSelector: "#open",
   });
   assertType<ToasterOptions>({ placement: "bottom-end" });
   expectTypeOf(createSelect({ items, label: "Pays" })).toMatchTypeOf<SelectController>();

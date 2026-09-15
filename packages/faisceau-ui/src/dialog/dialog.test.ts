@@ -12,7 +12,6 @@ describe("Dialog", () => {
       description: "Cette action est réversible.",
       onOpenChange,
       title: "Confirmer",
-      trigger: "Ouvrir",
     }).mount(document.body);
 
     controller.api.get().setOpen(true);
@@ -26,10 +25,58 @@ describe("Dialog", () => {
     expect(onOpenChange).toHaveBeenLastCalledWith({ open: false });
   });
 
-  it("enhances and restores existing markup", () => {
+  it("binds every trigger matching the selector without owning them", async () => {
+    document.body.innerHTML =
+      '<button id="open-a" type="button">A</button><button id="open-b" type="button">B</button>';
+    const first = document.querySelector<HTMLButtonElement>("#open-a")!;
+    const second = document.querySelector<HTMLButtonElement>("#open-b")!;
+    const controller = createDialog({
+      content: "Contenu",
+      title: "Titre",
+      triggerSelector: "#open-a, #open-b",
+    }).mount(document.body);
+
+    await flushMachine();
+    expect(first.hasAttribute("aria-haspopup")).toBe(true);
+    expect(second.hasAttribute("aria-haspopup")).toBe(true);
+    expect(controller.root.querySelector('[data-fui-part="trigger"]')).toBeNull();
+
+    second.click();
+    await flushMachine();
+    expect(controller.api.get().open).toBe(true);
+
+    controller.destroy();
+    expect(first.hasAttribute("aria-haspopup")).toBe(false);
+    expect(second.hasAttribute("aria-haspopup")).toBe(false);
+    expect(document.querySelector("#open-a")).not.toBeNull();
+    expect(document.querySelector("#open-b")).not.toBeNull();
+  });
+
+  it("rebinds triggers through setTriggerSelector", async () => {
+    document.body.innerHTML =
+      '<button id="before" type="button">Before</button><button id="after" type="button">After</button>';
+    const before = document.querySelector<HTMLButtonElement>("#before")!;
+    const after = document.querySelector<HTMLButtonElement>("#after")!;
+    const controller = createDialog({
+      content: "Contenu",
+      title: "Titre",
+      triggerSelector: "#before",
+    }).mount(document.body);
+    await flushMachine();
+    expect(before.hasAttribute("aria-haspopup")).toBe(true);
+
+    controller.setTriggerSelector("#after");
+    await flushMachine();
+    expect(before.hasAttribute("aria-haspopup")).toBe(false);
+    expect(after.hasAttribute("aria-haspopup")).toBe(true);
+    controller.destroy();
+  });
+
+  it("enhances content-only markup and restores it", () => {
     const root = document.createElement("div");
+    root.className = "fui-dialog";
     root.innerHTML =
-      '<button data-fui-part="trigger">Edit</button><section data-fui-part="content"><h2 data-fui-part="title">Profile</h2><p>Body</p></section>';
+      '<section data-fui-part="content"><h2 data-fui-part="title">Profile</h2><p>Body</p></section>';
     document.body.append(root);
     const original = root.innerHTML;
     const controller = enhanceDialog(root);

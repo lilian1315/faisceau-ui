@@ -10,12 +10,18 @@ export interface DialogViewOptions {
   title: string;
   description?: string;
   content: string;
-  trigger: string;
+  /** CSS selector resolved against the lookup root; every match opens the dialog. */
+  triggerSelector?: string;
   closeLabel?: string;
 }
 
 export type DialogOptions = DialogMachineOptions & DialogViewOptions;
 export type EnhanceDialogOptions = DialogMachineOptions &
-  Partial<Omit<DialogViewOptions, "content" | "trigger">>;
+  Partial<Omit<DialogViewOptions, "content">>;
 export type DialogApi = dialog.Api;
-export type DialogController = FuiController<DialogApi>;
+export interface DialogController extends FuiController<DialogApi> {
+  /** Replaces the trigger selector and rebinds every matching element. */
+  setTriggerSelector(selector: string | undefined): void;
+  /** Re-resolves the current selector, picking up triggers added after start. */
+  refreshTriggers(): void;
+}
