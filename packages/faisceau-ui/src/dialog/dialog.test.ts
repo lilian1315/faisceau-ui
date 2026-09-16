@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vite-plus/test";
 
+import "../styles/index.scss";
 import { createDialog, enhanceDialog } from "./dialog.ts";
 
 afterEach(() => document.body.replaceChildren());
@@ -140,6 +141,49 @@ describe("Dialog", () => {
     controller.destroy();
   });
 
+  it("groups the title and close button in a header with a scrolling body", () => {
+    const controller = createDialog({
+      content: "Contenu de confirmation",
+      description: "Cette action est réversible.",
+      title: "Confirmer",
+    }).mount(document.body);
+
+    const header = controller.root.querySelector(".fui-dialog-header")!;
+    expect(header).not.toBeNull();
+    expect(header.querySelector(".fui-dialog-title")?.textContent).toBe("Confirmer");
+    expect(header.querySelector(".fui-dialog-description")?.textContent).toBe(
+      "Cette action est réversible.",
+    );
+    expect(header.querySelector(".fui-dialog-close")).not.toBeNull();
+    const content = controller.root.querySelector(".fui-dialog-content")!;
+    expect(content.children[0]).toBe(header);
+    expect(content.children[1]?.classList.contains("fui-dialog-body")).toBe(true);
+    controller.destroy();
+  });
+
+  it("flags the body scroll edges while only the body scrolls", async () => {
+    const controller = createDialog({ content: "Body", title: "Titre" }).mount(document.body);
+    const body = controller.root.querySelector<HTMLElement>(".fui-dialog-body")!;
+    const spacer = document.createElement("div");
+    spacer.style.height = "2000px";
+    controller.api.get().setOpen(true);
+    await flushMachine();
+    body.append(spacer);
+    await vi.waitFor(() => expect(body.hasAttribute("data-scroll-bottom")).toBe(true));
+    expect(body.hasAttribute("data-scroll-top")).toBe(false);
+    body.scrollTop = 500;
+    body.dispatchEvent(new Event("scroll"));
+    await vi.waitFor(() => expect(body.hasAttribute("data-scroll-top")).toBe(true));
+    expect(body.hasAttribute("data-scroll-bottom")).toBe(true);
+    body.scrollTop = body.scrollHeight;
+    body.dispatchEvent(new Event("scroll"));
+    await vi.waitFor(() => expect(body.hasAttribute("data-scroll-bottom")).toBe(false));
+    expect(body.hasAttribute("data-scroll-top")).toBe(true);
+    controller.destroy();
+    expect(body.hasAttribute("data-scroll-top")).toBe(false);
+    expect(body.hasAttribute("data-scroll-bottom")).toBe(false);
+  });
+
   it("enhances content-only markup and restores it", () => {
     const root = document.createElement("div");
     root.className = "fui-dialog";
@@ -149,6 +193,43 @@ describe("Dialog", () => {
     const original = root.innerHTML;
     const controller = enhanceDialog(root);
     expect(root.querySelector(".fui-dialog-backdrop")).not.toBeNull();
+    const header = root.querySelector(".fui-dialog-header")!;
+    expect(header.querySelector(".fui-dialog-title")?.textContent).toBe("Profile");
+    expect(header.querySelector(".fui-dialog-close")).not.toBeNull();
+    const content = root.querySelector(".fui-dialog-content")!;
+    expect(content.children[0]).toBe(header);
+    const body = content.children[1]!;
+    expect(body.classList.contains("fui-dialog-body")).toBe(true);
+    expect(body.querySelector("p")?.textContent).toBe("Body");
+    controller.destroy();
+    expect(root.innerHTML).toBe(original);
+  });
+
+  it("adopts a caller-provided header and restores it", () => {
+    const root = document.createElement("div");
+    root.className = "fui-dialog";
+    root.innerHTML =
+      '<section class="fui-dialog-content"><div class="fui-dialog-header"><h2 class="fui-dialog-title">Profile</h2></div><p>Body</p></section>';
+    document.body.append(root);
+    const original = root.innerHTML;
+    const controller = enhanceDialog(root);
+    const header = root.querySelector(".fui-dialog-header")!;
+    expect(header.querySelector(".fui-dialog-title")?.textContent).toBe("Profile");
+    expect(header.querySelector(".fui-dialog-close")).not.toBeNull();
+    expect(root.querySelector(".fui-dialog-body > p")?.textContent).toBe("Body");
+    controller.destroy();
+    expect(root.innerHTML).toBe(original);
+  });
+
+  it("adopts a caller-provided body and restores it", () => {
+    const root = document.createElement("div");
+    root.className = "fui-dialog";
+    root.innerHTML =
+      '<section class="fui-dialog-content"><h2 class="fui-dialog-title">Profile</h2><div class="fui-dialog-body"><p>Body</p></div></section>';
+    document.body.append(root);
+    const original = root.innerHTML;
+    const controller = enhanceDialog(root);
+    expect(root.querySelector(".fui-dialog-body > p")?.textContent).toBe("Body");
     controller.destroy();
     expect(root.innerHTML).toBe(original);
   });

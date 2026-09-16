@@ -32,19 +32,32 @@
   block-size: 100%;
   inline-size: min(26rem, 90vw);
   border-radius: 0;
+  overflow: hidden;
   transform: translate3d(var(--drawer-translate-x, 0), var(--drawer-translate-y, 0), 0);
   touch-action: none;
+  &:not([hidden]) {
+    display: flex;
+    flex-direction: column;
+  }
 
   .fui-drawer[data-side="top"] &,
   .fui-drawer[data-side="bottom"] & {
     block-size: auto;
+    max-block-size: 100%;
     inline-size: 100%;
   }
 }
 
 .fui-drawer-grabber {
+  position: sticky;
+  inset-block-start: calc(var(--fui-space-6) * -1);
+  z-index: 2;
   display: grid;
+  flex: none;
   min-block-size: 2.75rem;
+  margin: calc(var(--fui-space-6) * -1) calc(var(--fui-space-6) * -1) 0;
+  padding-inline: var(--fui-space-6);
+  background: var(--fui-color-surface-popover);
   cursor: grab;
   place-items: center;
   touch-action: none;
@@ -95,6 +108,19 @@
   font-size: 1.125rem;
 }
 
+.fui-drawer-header {
+  @include fui-overlay-header;
+  // Sticks just below the grabber (grabber block size minus content padding).
+  inset-block-start: calc(2.75rem - var(--fui-space-6));
+  flex: none;
+  margin-block-start: 0;
+  padding-block-start: 0;
+}
+
+.fui-drawer-header .fui-drawer-description {
+  margin-block-end: 0;
+}
+
 .fui-drawer-description {
   margin: var(--fui-space-2) 0 var(--fui-space-4);
   color: var(--fui-color-muted-foreground);
@@ -102,6 +128,8 @@
 }
 
 .fui-drawer-body {
+  @include fui-overlay-body;
+  @include fui-scroll-edge-shadows;
   line-height: var(--fui-line-height-copy);
 }
 

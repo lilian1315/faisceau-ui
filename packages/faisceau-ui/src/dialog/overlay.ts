@@ -4,6 +4,7 @@ import * as dialog from "@zag-js/dialog";
 
 import {
   addFuiClasses,
+  bindScrollShadows,
   captureAttributes,
   createId,
   createTriggerBinding,
@@ -61,6 +62,8 @@ function factory(
   options ??= {};
 
   let content: HTMLElement;
+  let header: HTMLElement;
+  let body: HTMLElement;
   let title: HTMLElement;
   let description: HTMLElement | null;
   let close: HTMLButtonElement;
@@ -72,6 +75,17 @@ function factory(
   if (root) {
     content = requireFuiClass<HTMLElement>(root, `${classPrefix}-content`);
     restores.push(captureAttributes(root), captureAttributes(content));
+    const adoptedHeader = root.querySelector<HTMLElement>(`.${classPrefix}-header`);
+    if (adoptedHeader) {
+      header = adoptedHeader;
+      restores.push(captureAttributes(header), captureChildren(header));
+    } else {
+      header = h("div", { class: `${classPrefix}-header` });
+      generated.push(header);
+    }
+    // Snapshot content children before adopted parts move into the header so
+    // destroy() can put caller-owned nodes back in their original order.
+    restores.push(captureChildren(content));
     const adoptedTitle = root.querySelector<HTMLElement>(`.${classPrefix}-title`);
     if (adoptedTitle) {
       title = adoptedTitle;
@@ -80,9 +94,10 @@ function factory(
         restores.push(captureChildren(title));
         title.replaceChildren(new Text(options.title));
       }
+      if (title.parentElement !== header) header.prepend(title);
     } else {
       title = h("h2", { class: `${classPrefix}-title` }, options.title ?? "");
-      content.prepend(title);
+      header.prepend(title);
       generated.push(title);
     }
     if (!title.textContent?.trim()) {
@@ -98,6 +113,7 @@ function factory(
         restores.push(captureChildren(description));
         description.replaceChildren(new Text(options.description));
       }
+      if (description.parentElement !== header) title.after(description);
     } else if (options.description !== undefined) {
       description = h("p", { class: `${classPrefix}-description` }, options.description);
       title.after(description);
@@ -109,10 +125,28 @@ function factory(
     if (adoptedClose) {
       close = adoptedClose;
       restores.push(captureAttributes(close));
+      if (close.parentElement !== header) header.append(close);
     } else {
       close = createClose(variant, options.closeLabel);
-      content.append(close);
+      header.append(close);
       generated.push(close);
+    }
+    if (!adoptedHeader) content.prepend(header);
+    const adoptedBody = root.querySelector<HTMLElement>(`.${classPrefix}-body`);
+    if (adoptedBody) {
+      body = adoptedBody;
+      restores.push(captureAttributes(body), captureChildren(body));
+    } else {
+      body = h("div", { class: `${classPrefix}-body` });
+      generated.push(body);
+    }
+    // Only the body scrolls: gather every leftover content node into it.
+    for (const node of Array.from(content.childNodes)) {
+      if (node !== header && node !== body) body.append(node);
+    }
+    if (!adoptedBody) {
+      if (header.parentElement === content) header.after(body);
+      else content.append(body);
     }
     backdrop = h("div", { class: `${classPrefix}-backdrop` });
     positioner = h("div", { class: `${classPrefix}-positioner` });
@@ -128,17 +162,22 @@ function factory(
       throw new Error(`[Faisceau UI] ${capitalize(variant)} creation requires options.content.`);
     root = h("div", { class: `fui-${variant}` }) as HTMLElement;
     const view = createOverlayView({ ...(options as DialogOptions), variant });
-    ({ backdrop, close, content, description, positioner, title } = view);
+    ({ backdrop, body, close, content, description, header, positioner, title } = view);
     root.append(backdrop, positioner);
   }
 
-  return setupOverlay(root, { backdrop, close, content, description, positioner, title }, options, {
-    enhanceMode,
-    generated,
-    marker,
-    restores,
-    variant,
-  });
+  return setupOverlay(
+    root,
+    { backdrop, body, close, content, description, header, positioner, title },
+    options,
+    {
+      enhanceMode,
+      generated,
+      marker,
+      restores,
+      variant,
+    },
+  );
 }
 
 function setupOverlay(
@@ -168,8 +207,10 @@ function setupOverlay(
     "backdrop",
     "positioner",
     "content",
+    "header",
     "title",
     "description",
+    "body",
     "close",
   ] as const) {
     const element = part === "close" ? view.close : view[part];
@@ -196,6 +237,7 @@ function setupOverlay(
     getTriggerProps: (api, triggerValue) => api.getTriggerProps({ value: triggerValue }),
   });
   triggers.setSelector(initialSelector);
+  const unbindScrollShadows = bindScrollShadows(view.body);
 
   let started = false;
   let destroyed = false;
@@ -230,6 +272,7 @@ function setupOverlay(
     destroy() {
       if (destroyed) return;
       destroyed = true;
+      unbindScrollShadows();
       triggers.destroy();
       zag.destroy();
       if (setup.enhanceMode) {

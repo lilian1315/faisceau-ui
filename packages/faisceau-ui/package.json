@@ -87,6 +87,7 @@
     "@zag-js/checkbox": "catalog:",
     "@zag-js/combobox": "catalog:",
     "@zag-js/dialog": "catalog:",
+    "@zag-js/dom-query": "catalog:",
     "@zag-js/drawer": "catalog:",
     "@zag-js/select": "catalog:",
     "@zag-js/toast": "catalog:",

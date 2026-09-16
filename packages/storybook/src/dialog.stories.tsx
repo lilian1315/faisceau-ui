@@ -11,9 +11,9 @@ export const create: Story = {
   render: () => {
     const story = createStoryShell({
       eyebrow: "createDialog",
-      title: "Dialogue modal",
+      title: "Dialogue modale",
       description:
-        "Backdrop, positioner, contenu titré et bouton de fermeture sont reliés à Zag Dialog. Les triggers restent externes et sont désignés par triggerSelector.",
+        "Backdrop, positioner, contenu titré et bouton de fermeture sont reliés à Zag Dialog. Les triggers restent externes et sont désignés par triggerSelector. Le corps de la boîte défile indépendamment du header, avec des ombres de bordure apparaissant quand le contenu dépasse les bords.",
     });
     const trigger = asDom<HTMLButtonElement>(
       <button class="fui-story__button" id="story-dialog-trigger" type="button">
@@ -26,7 +26,11 @@ export const create: Story = {
       triggerSelector: "#story-dialog-trigger",
       title: "Modifier le profil",
       description: "Les changements seront visibles immédiatement.",
-      content: "Formulaire ou contenu libre.",
+      content: Array.from(
+        { length: 20 },
+        (_, i) =>
+          `Ligne de contenu numéro ${i + 1} — texte suffisant pour permettre le défilement du corps de la boîte de dialogue.`,
+      ).join("\n"),
     }).mount(host);
     trackController(story.root, controller);
     story.setSource(
@@ -54,6 +58,16 @@ export const enhance: Story = {
         <section class="fui-dialog-content">
           <h2 class="fui-dialog-title">Supprimer le document ?</h2>
           <p>Cette action est définitive.</p>
+          <p>Ligne 1 — texte suffisant pour permettre le défilement du corps.</p>
+          <p>Ligne 2 — texte suffisant pour permettre le défilement du corps.</p>
+          <p>Ligne 3 — texte suffisant pour permettre le défilement du corps.</p>
+          <p>Ligne 4 — texte suffisant pour permettre le défilement du corps.</p>
+          <p>Ligne 5 — texte suffisant pour permettre le défilement du corps.</p>
+          <p>Ligne 6 — texte suffisant pour permettre le défilement du corps.</p>
+          <p>Ligne 7 — texte suffisant pour permettre le défilement du corps.</p>
+          <p>Ligne 8 — texte suffisant pour permettre le défilement du corps.</p>
+          <p>Ligne 9 — texte suffisant pour permettre le défilement du corps.</p>
+          <p>Ligne 10 — texte suffisant pour permettre le défilement du corps.</p>
         </section>
       </div>,
     );

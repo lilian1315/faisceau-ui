@@ -15,6 +15,9 @@ export { createId } from "./id.ts";
 /** DOM lookup and snapshot helpers shared by Zag-powered components. */
 export { captureAttributes, getLookupRoot } from "./dom.ts";
 
+/** Scroll-edge shadow flags for overlay body scrollers. */
+export { bindScrollShadows } from "./scroll-shadow.ts";
+
 /** External trigger-selector bindings for overlay components. */
 export { createTriggerBinding, type TriggerBinding } from "./triggers.ts";
 

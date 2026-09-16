@@ -1,5 +1,6 @@
-import { afterEach, describe, expect, it } from "vite-plus/test";
+import { afterEach, describe, expect, it, vi } from "vite-plus/test";
 
+import "../styles/index.scss";
 import { createDrawer, enhanceDrawer } from "./drawer.ts";
 
 afterEach(() => document.body.replaceChildren());
@@ -71,6 +72,37 @@ describe("Drawer", () => {
     controller.destroy();
   });
 
+  it("groups the title and close button in a header with a scrolling body", async () => {
+    const controller = createDrawer({
+      content: "Navigation secondaire",
+      title: "Menu",
+    }).mount(document.body);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    const header = controller.root.querySelector(".fui-drawer-header")!;
+    expect(header.querySelector(".fui-drawer-title")?.textContent).toBe("Menu");
+    expect(header.querySelector(".fui-drawer-close")).not.toBeNull();
+    expect(header.previousElementSibling?.classList.contains("fui-drawer-grabber")).toBe(true);
+    expect(header.nextElementSibling?.classList.contains("fui-drawer-body")).toBe(true);
+    controller.destroy();
+  });
+
+  it("flags the body scroll edges while only the body scrolls", async () => {
+    const controller = createDrawer({ content: "Body", title: "Menu" }).mount(document.body);
+    const body = controller.root.querySelector<HTMLElement>(".fui-drawer-body")!;
+    const spacer = document.createElement("div");
+    spacer.style.height = "2000px";
+    controller.api.get().setOpen(true);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    body.append(spacer);
+    await vi.waitFor(() => expect(body.hasAttribute("data-scroll-bottom")).toBe(true));
+    expect(body.hasAttribute("data-scroll-top")).toBe(false);
+    body.scrollTop = body.scrollHeight;
+    body.dispatchEvent(new Event("scroll"));
+    await vi.waitFor(() => expect(body.hasAttribute("data-scroll-bottom")).toBe(false));
+    expect(body.hasAttribute("data-scroll-top")).toBe(true);
+    controller.destroy();
+  });
+
   it("enhances content-only markup and restores it", () => {
     const root = document.createElement("div");
     root.className = "fui-drawer";
@@ -81,6 +113,10 @@ describe("Drawer", () => {
     const controller = enhanceDrawer(root);
     expect(root.querySelector(".fui-drawer-backdrop")).not.toBeNull();
     expect(root.querySelector(".fui-drawer-grabber")).not.toBeNull();
+    const header = root.querySelector(".fui-drawer-header")!;
+    expect(header.querySelector(".fui-drawer-title")?.textContent).toBe("Navigation");
+    expect(header.querySelector(".fui-drawer-close")).not.toBeNull();
+    expect(root.querySelector(".fui-drawer-body > nav")?.textContent).toBe("Liens");
     controller.destroy();
     expect(root.innerHTML).toBe(original);
   });
