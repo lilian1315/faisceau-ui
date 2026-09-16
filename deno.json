@@ -14,6 +14,7 @@
     "@zag-js/checkbox": "npm:@zag-js/checkbox@2.0.0-next.3",
     "@zag-js/combobox": "npm:@zag-js/combobox@2.0.0-next.3",
     "@zag-js/dialog": "npm:@zag-js/dialog@2.0.0-next.3",
+    "@zag-js/dom-query": "npm:@zag-js/dom-query@2.0.0-next.3",
     "@zag-js/drawer": "npm:@zag-js/drawer@2.0.0-next.3",
     "@zag-js/select": "npm:@zag-js/select@2.0.0-next.3",
     "@zag-js/toast": "npm:@zag-js/toast@2.0.0-next.3",
