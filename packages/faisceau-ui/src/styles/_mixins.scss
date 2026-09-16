@@ -76,7 +76,7 @@
 
 @mixin fui-overlay-content {
   position: relative;
-  inline-size: min(32rem, 100%);
+  max-inline-size: 100%;
   padding: var(--fui-space-6);
   border: var(--fui-border-width) solid var(--fui-color-border);
   border-radius: var(--fui-radius-md);

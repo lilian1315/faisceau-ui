@@ -15,12 +15,12 @@
 
 .fui-dialog-content {
   @include fui-overlay-content;
+  max-height: 100%;
+  overflow: auto;
 }
 
 .fui-dialog-title {
-  margin: 0;
   padding-inline-end: 2.5rem;
-  font-size: 1.125rem;
 }
 
 .fui-dialog-description {
