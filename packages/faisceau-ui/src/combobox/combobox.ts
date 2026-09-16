@@ -57,8 +57,9 @@ function factory(
   let initialValue: string[];
 
   if (root) {
-    const found = root.querySelector<HTMLSelectElement>("select.fui-native-select");
-    if (!found) throw new Error("[Faisceau UI] missing Combobox `select.fui-native-select`");
+    const found = root.querySelector<HTMLSelectElement>("select.fui-combobox-native-select");
+    if (!found)
+      throw new Error("[Faisceau UI] missing Combobox `select.fui-combobox-native-select`");
     nativeSelect = found;
     restores.push(captureAttributes(root), captureAttributes(nativeSelect));
     if (typeof options.multiple === "undefined") multiple = nativeSelect.multiple;

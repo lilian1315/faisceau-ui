@@ -91,7 +91,7 @@ export const enhance: Story = {
     const root = asDom<"div">(
       <div class="fui-select">
         <label class="fui-field-label">Pays</label>
-        <select class="fui-native-select" name="country">
+        <select class="fui-select-native-select" name="country">
           <option value="fr" selected>
             France
           </option>

@@ -9,7 +9,7 @@ import {
   createTriggerBinding,
   createXIcon,
   getLookupRoot,
-  requirePart,
+  requireFuiClass,
 } from "../shared/index.js";
 import { captureChildNodes as captureChildren } from "../shared/dom.ts";
 import { createOverlayView, type OverlayVariant, type OverlayView } from "./markup.ts";
@@ -67,11 +67,12 @@ function factory(
   let backdrop: HTMLElement;
   let positioner: HTMLElement;
   let marker: Comment | null = null;
+  const classPrefix = `fui-${variant}`;
 
   if (root) {
-    content = requirePart<HTMLElement>(root, "content");
+    content = requireFuiClass<HTMLElement>(root, `${classPrefix}-content`);
     restores.push(captureAttributes(root), captureAttributes(content));
-    const adoptedTitle = root.querySelector<HTMLElement>('[data-fui-part="title"]');
+    const adoptedTitle = root.querySelector<HTMLElement>(`.${classPrefix}-title`);
     if (adoptedTitle) {
       title = adoptedTitle;
       restores.push(captureAttributes(title));
@@ -80,7 +81,7 @@ function factory(
         title.replaceChildren(new Text(options.title));
       }
     } else {
-      title = h("h2", { data: { fuiPart: "title" } }, options.title ?? "");
+      title = h("h2", { class: `${classPrefix}-title` }, options.title ?? "");
       content.prepend(title);
       generated.push(title);
     }
@@ -89,7 +90,7 @@ function factory(
         `[Faisceau UI] ${capitalize(variant)} enhancement requires a title part or options.title.`,
       );
     }
-    const adoptedDescription = root.querySelector<HTMLElement>('[data-fui-part="description"]');
+    const adoptedDescription = root.querySelector<HTMLElement>(`.${classPrefix}-description`);
     if (adoptedDescription) {
       description = adoptedDescription;
       restores.push(captureAttributes(description));
@@ -98,23 +99,23 @@ function factory(
         description.replaceChildren(new Text(options.description));
       }
     } else if (options.description !== undefined) {
-      description = h("p", { data: { fuiPart: "description" } }, options.description);
+      description = h("p", { class: `${classPrefix}-description` }, options.description);
       title.after(description);
       generated.push(description);
     } else {
       description = null;
     }
-    const adoptedClose = root.querySelector<HTMLButtonElement>('[data-fui-part="close-trigger"]');
+    const adoptedClose = root.querySelector<HTMLButtonElement>(`.${classPrefix}-close`);
     if (adoptedClose) {
       close = adoptedClose;
       restores.push(captureAttributes(close));
     } else {
-      close = createClose(options.closeLabel);
+      close = createClose(variant, options.closeLabel);
       content.append(close);
       generated.push(close);
     }
-    backdrop = h("div", { data: { fuiPart: "backdrop" } });
-    positioner = h("div", { data: { fuiPart: "positioner" } });
+    backdrop = h("div", { class: `${classPrefix}-backdrop` });
+    positioner = h("div", { class: `${classPrefix}-positioner` });
     generated.push(backdrop, positioner);
     marker = root.ownerDocument.createComment(`fui-${variant}-content`);
     content.before(marker);
@@ -177,7 +178,6 @@ function setupOverlay(
   }
   if (className) root.classList.add(...className.split(/\s+/).filter(Boolean));
   root.dataset.fuiComponent = setup.variant;
-  root.dataset.fuiPart ||= "root";
   const zag = createZagMachine(
     dialog.machine,
     { ...behavior, getRootNode: () => getLookupRoot(root), id },
@@ -245,10 +245,10 @@ function setupOverlay(
   return controller;
 }
 
-function createClose(label = "Fermer"): HTMLButtonElement {
+function createClose(variant: OverlayVariant, label = "Fermer"): HTMLButtonElement {
   const close = h("button", {
     ariaLabel: label,
-    data: { fuiPart: "close-trigger" },
+    class: `fui-${variant}-close`,
     type: "button",
   });
   close.append(createXIcon());

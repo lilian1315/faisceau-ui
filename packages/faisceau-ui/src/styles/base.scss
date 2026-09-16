@@ -16,7 +16,7 @@
 .fui-select-item-text,
 .fui-select-item-description,
 .fui-select-item-indicator,
-.fui-native-select,
+.fui-select-native-select,
 .fui-combobox,
 .fui-combobox-control,
 .fui-combobox-field,
@@ -35,6 +35,7 @@
 .fui-combobox-item-text,
 .fui-combobox-item-description,
 .fui-combobox-item-indicator,
+.fui-combobox-native-select,
 .fui-checkbox,
 .fui-checkbox-control,
 .fui-checkbox-indicator,
@@ -137,7 +138,8 @@
   border: 0;
 }
 
-.fui-native-select,
+.fui-select-native-select,
+.fui-combobox-native-select,
 .fui-native-checkbox {
   position: absolute;
   inline-size: 1px;

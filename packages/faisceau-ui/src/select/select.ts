@@ -46,8 +46,8 @@ function factory(
   let initialValue: string[];
 
   if (root) {
-    const found = root.querySelector<HTMLSelectElement>("select.fui-native-select");
-    if (!found) throw new Error("[Faisceau UI] missing Select `select.fui-native-select`");
+    const found = root.querySelector<HTMLSelectElement>("select.fui-select-native-select");
+    if (!found) throw new Error("[Faisceau UI] missing Select `select.fui-select-native-select`");
     nativeSelect = found;
     restores.push(captureAttributes(root), captureAttributes(nativeSelect));
     if (typeof options.multiple === "undefined") multiple = nativeSelect.multiple;

@@ -18,12 +18,12 @@ describe("Drawer", () => {
     expect(controller.api.get().swipeDirection).toBe("start");
     expect(controller.api.get().snapPoints).toEqual([0.5, 1]);
     expect(
-      controller.root.querySelector<HTMLElement>('[data-fui-part="grabber"]')?.style.touchAction,
+      controller.root.querySelector<HTMLElement>(".fui-drawer-grabber")?.style.touchAction,
     ).toBe("none");
-    expect(controller.root.querySelector('[data-fui-part="swipe-area"]')).not.toBeNull();
+    expect(controller.root.querySelector(".fui-drawer-swipe-area")).not.toBeNull();
     controller.api.get().setOpen(true);
     await new Promise((resolve) => setTimeout(resolve, 0));
-    expect(controller.root.querySelector('[data-fui-part="content"]')?.getAttribute("role")).toBe(
+    expect(controller.root.querySelector(".fui-drawer-content")?.getAttribute("role")).toBe(
       "dialog",
     );
   });
@@ -42,7 +42,7 @@ describe("Drawer", () => {
     expect(first.hasAttribute("aria-haspopup")).toBe(true);
     expect(first.id).toBeTruthy();
     expect(first.id).not.toBe(second.id);
-    expect(controller.root.querySelector('[data-fui-part="trigger"]')).toBeNull();
+    expect(controller.root.querySelector(".fui-drawer-trigger")).toBeNull();
 
     first.click();
     await new Promise((resolve) => setTimeout(resolve, 0));
@@ -61,11 +61,11 @@ describe("Drawer", () => {
       title: "Filtres",
     }).mount(document.body);
     await new Promise((resolve) => setTimeout(resolve, 0));
-    const swipeArea = controller.root.querySelector('[data-fui-part="swipe-area"]')!;
+    const swipeArea = controller.root.querySelector(".fui-drawer-swipe-area")!;
     expect(swipeArea.hasAttribute("data-disabled")).toBe(true);
     controller.api.get().setOpen(true);
     await new Promise((resolve) => setTimeout(resolve, 0));
-    expect(controller.root.querySelector('[data-fui-part="content"]')?.getAttribute("role")).toBe(
+    expect(controller.root.querySelector(".fui-drawer-content")?.getAttribute("role")).toBe(
       "dialog",
     );
     controller.destroy();
@@ -75,12 +75,12 @@ describe("Drawer", () => {
     const root = document.createElement("div");
     root.className = "fui-drawer";
     root.innerHTML =
-      '<aside data-fui-part="content"><h2 data-fui-part="title">Navigation</h2><nav>Liens</nav></aside>';
+      '<aside class="fui-drawer-content"><h2 class="fui-drawer-title">Navigation</h2><nav>Liens</nav></aside>';
     document.body.append(root);
     const original = root.innerHTML;
     const controller = enhanceDrawer(root);
-    expect(root.querySelector('[data-fui-part="backdrop"]')).not.toBeNull();
-    expect(root.querySelector('[data-fui-part="grabber"]')).not.toBeNull();
+    expect(root.querySelector(".fui-drawer-backdrop")).not.toBeNull();
+    expect(root.querySelector(".fui-drawer-grabber")).not.toBeNull();
     controller.destroy();
     expect(root.innerHTML).toBe(original);
   });

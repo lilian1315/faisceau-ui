@@ -28,7 +28,7 @@ describe("Combobox", () => {
 
     expect(controller.root.tagName).toBe("DIV");
     expect(controller.root.classList.contains("fui-combobox")).toBe(true);
-    expect(controller.root.querySelector("select.fui-native-select")).not.toBeNull();
+    expect(controller.root.querySelector("select.fui-combobox-native-select")).not.toBeNull();
     expect(controller.root.querySelector("input.fui-combobox-input")).not.toBeNull();
     expect(controller.root.querySelector(".fui-combobox-trigger")).not.toBeNull();
     expect(controller.root.querySelector(".fui-combobox-clear-trigger")).not.toBeNull();
@@ -334,7 +334,7 @@ describe("Combobox", () => {
   it("enhances caller markup, starts immediately, then restores it", async () => {
     const root = document.createElement("div");
     root.className = "fui-combobox consumer-root";
-    root.innerHTML = `<label class="fui-field-label">Commande</label><select class="fui-native-select" name="command"><option value="" data-placeholder="" hidden>Rechercher</option><option value="build" selected>Build</option><option value="test">Test</option></select>`;
+    root.innerHTML = `<label class="fui-field-label">Commande</label><select class="fui-combobox-native-select" name="command"><option value="" data-placeholder="" hidden>Rechercher</option><option value="build" selected>Build</option><option value="test">Test</option></select>`;
     document.body.append(root);
     const nativeSelect = root.querySelector<HTMLSelectElement>("select")!;
 

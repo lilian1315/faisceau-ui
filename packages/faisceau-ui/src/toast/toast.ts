@@ -39,7 +39,6 @@ function setupToaster(
   addFuiClasses(root, "fui-toast-group");
   if (className) root.classList.add(...className.split(/\s+/).filter(Boolean));
   root.dataset.fuiComponent = "toast";
-  root.dataset.fuiPart ||= "group";
 
   const group = createZagMachine(
     toast.group.machine,
@@ -111,34 +110,21 @@ function createToastItem(
   index: number,
   parent: toast.GroupService,
 ): ToastItem {
-  const title = h(
-    "div",
-    { class: "fui-toast-title", data: { fuiPart: "title" } },
-    data.title ?? "",
-  );
+  const title = h("div", { class: "fui-toast-title" }, data.title ?? "");
   let description = data.description
-    ? h(
-        "div",
-        { class: "fui-toast-description", data: { fuiPart: "description" } },
-        data.description,
-      )
+    ? h("div", { class: "fui-toast-description" }, data.description)
     : null;
   const close = h("button", {
     class: "fui-toast-close",
-    data: { fuiPart: "close-trigger" },
     type: "button",
   });
   close.append(createXIcon());
   let action = data.action
-    ? h(
-        "button",
-        { class: "fui-toast-action", data: { fuiPart: "action-trigger" }, type: "button" },
-        data.action.label,
-      )
+    ? h("button", { class: "fui-toast-action", type: "button" }, data.action.label)
     : null;
   const element = h(
     "div",
-    { class: "fui-toast", data: { fuiPart: "root" } },
+    { class: "fui-toast" },
     h("div", { class: "fui-toast-copy" }, title, description),
     action,
     close,
@@ -175,7 +161,6 @@ function createToastItem(
         if (!description) {
           description = h("div", {
             class: "fui-toast-description",
-            data: { fuiPart: "description" },
           });
           title.after(description);
           disposeDescription = machine.bind(description, (api) => api.getDescriptionProps());
@@ -191,7 +176,6 @@ function createToastItem(
         if (!action) {
           action = h("button", {
             class: "fui-toast-action",
-            data: { fuiPart: "action-trigger" },
             type: "button",
           });
           close.before(action);

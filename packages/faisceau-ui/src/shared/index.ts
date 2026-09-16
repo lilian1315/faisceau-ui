@@ -6,15 +6,8 @@ export {
   type KeyedReconciler,
 } from "./keyed-reconciler.ts";
 
-/** DOM part discovery helpers. All owned class names are validated as `fui-*`. */
-export {
-  addFuiClasses,
-  partSelector,
-  queryPart,
-  queryParts,
-  requirePart,
-  requireParts,
-} from "./parts.ts";
+/** Structural class helpers. All owned class names are validated as `fui-*`. */
+export { addFuiClasses, requireFuiClass } from "./parts.ts";
 
 /** Unique DOM id generation. */
 export { createId } from "./id.ts";

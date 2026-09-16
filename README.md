@@ -195,7 +195,7 @@ le reset du formulaire.
 <form id="settings">
   <div class="fui-select" id="mode-select">
     <label class="fui-field-label">Mode d'affichage</label>
-    <select class="fui-native-select" name="display-mode" required>
+    <select class="fui-select-native-select" name="display-mode" required>
       <option value="" data-placeholder>Choisir un mode</option>
       <option value="simple" selected>Simple</option>
       <option value="expert">Expert</option>
@@ -219,7 +219,7 @@ sélectionnable normal.
 ```html
 <div class="fui-combobox" id="command-combobox">
   <label class="fui-field-label">Commande</label>
-  <select class="fui-native-select" name="command">
+  <select class="fui-combobox-native-select" name="command">
     <option value="" data-placeholder>Rechercher une commande</option>
     <option value="build">Build</option>
     <option value="test">Test</option>
@@ -284,7 +284,8 @@ enhanceTooltip(document.querySelector<HTMLElement>("[title]")!);
 ## Dialog, Drawer et Toast
 
 Dialog et Drawer acceptent le même modèle : la variante `create*` construit le panneau,
-tandis que `enhance*` part d'un contenu existant marqué avec `data-fui-part="content"`.
+tandis que `enhance*` part d'un contenu existant portant la classe namespacée
+`fui-dialog-content` ou `fui-drawer-content`.
 Les triggers ne sont jamais possédés : chaque composant accepte un `triggerSelector`
 dont tous les éléments correspondants ouvrent le panneau. Drawer utilise sa machine Zag dédiée :
 il expose directement `swipeDirection`, les snap points, le grabber et une zone de swipe optionnelle.

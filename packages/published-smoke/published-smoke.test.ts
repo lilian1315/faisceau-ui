@@ -63,7 +63,7 @@ describe("published package contract", () => {
 });
 
 function requirePart<T extends Element>(root: ParentNode, part: string): T {
-  const className = part === "native-select" ? "fui-native-select" : `fui-select-${part}`;
+  const className = `fui-select-${part}`;
   const element = root.querySelector<T>(`.${className}`);
   if (!element) throw new Error(`Missing published part: ${part}`);
   return element;

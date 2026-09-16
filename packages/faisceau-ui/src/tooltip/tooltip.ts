@@ -20,7 +20,6 @@ export function createTooltip(options: TooltipOptions): TooltipController {
     "button",
     {
       class: "fui-tooltip-trigger fui-tooltip-trigger--generated",
-      data: { fuiPart: "trigger" },
       type: "button",
     },
     options.trigger,
@@ -65,7 +64,6 @@ function setupTooltip(
   const id = requestedId ?? createId("tooltip");
   addFuiClasses(setup.trigger, "fui-tooltip-trigger");
   if (className) setup.trigger.classList.add(...className.split(/\s+/).filter(Boolean));
-  setup.trigger.dataset.fuiPart ||= "trigger";
   setup.trigger.after(popup.positioner);
 
   const zag = createZagMachine(

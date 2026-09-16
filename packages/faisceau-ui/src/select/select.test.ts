@@ -27,7 +27,7 @@ describe("Select3", () => {
 
     expect(controller.root.tagName).toBe("DIV");
     expect(controller.root.classList.contains("fui-select")).toBe(true);
-    expect(controller.root.querySelector("select.fui-native-select")).not.toBeNull();
+    expect(controller.root.querySelector("select.fui-select-native-select")).not.toBeNull();
     expect(controller.root.querySelector(".fui-select-trigger")).not.toBeNull();
     expect(controller.root.querySelector(".fui-select-value")?.textContent).toBe("Choose");
     expect(controller.root.querySelector("label.fui-field-label")?.textContent).toBe("Value");
@@ -147,7 +147,7 @@ describe("Select3", () => {
   it("enhances caller markup, starts immediately, then restores it", async () => {
     const root = document.createElement("div");
     root.className = "fui-select consumer-root";
-    root.innerHTML = `<label class="fui-field-label">Pays</label><select class="fui-native-select" name="country"><option value="" data-placeholder="" hidden>Choisir</option><option value="fr" selected>France</option><option value="be">Belgique</option></select>`;
+    root.innerHTML = `<label class="fui-field-label">Pays</label><select class="fui-select-native-select" name="country"><option value="" data-placeholder="" hidden>Choisir</option><option value="fr" selected>France</option><option value="be">Belgique</option></select>`;
     document.body.append(root);
     const nativeSelect = root.querySelector<HTMLSelectElement>("select")!;
 

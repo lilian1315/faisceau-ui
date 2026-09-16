@@ -6,8 +6,8 @@ Faisceau reactivity, DOM created with `@lilian1315/create-element`, and vanilla 
 ### Required conventions
 
 - Use the dedicated Zag machine when one exists, pinned to the workspace's Zag Next version.
-- Keep component-owned CSS classes prefixed with `fui-` and DOM parts named with
-  `data-fui-part`.
+- Use component-namespaced `fui-<component>-<part>` classes as the sole DOM anatomy contract; do
+  not add parallel part-specific data attributes.
 - Use Lucide through the shared icon helpers; keep icons decorative unless they convey meaning.
 - Provide both `create*` and `enhance*` when a component can reasonably adopt existing markup.
 - A created controller starts after insertion through `mount()` or `start()`. An enhanced
