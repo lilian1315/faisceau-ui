@@ -16,11 +16,24 @@
 .fui-dialog-content {
   @include fui-overlay-content;
   max-height: 100%;
-  overflow: auto;
+  overflow: hidden;
+  &:not([hidden]) {
+    display: flex;
+    flex-direction: column;
+  }
 }
 
 .fui-dialog-title {
   padding-inline-end: 2.5rem;
+}
+
+.fui-dialog-header {
+  @include fui-overlay-header;
+  flex: none;
+}
+
+.fui-dialog-header .fui-dialog-description {
+  margin-block-end: 0;
 }
 
 .fui-dialog-description {
@@ -30,6 +43,8 @@
 }
 
 .fui-dialog-body {
+  @include fui-overlay-body;
+  @include fui-scroll-edge-shadows;
   line-height: var(--fui-line-height-copy);
 }
 

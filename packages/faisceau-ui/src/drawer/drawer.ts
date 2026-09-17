@@ -3,6 +3,7 @@ import { createZagMachine } from "faisceau-zag";
 import * as drawer from "@zag-js/drawer";
 import {
   addFuiClasses,
+  bindScrollShadows,
   captureAttributes,
   createId,
   createTriggerBinding,
@@ -15,11 +16,13 @@ import type { DrawerController, DrawerOptions, EnhanceDrawerOptions } from "./ty
 
 interface DrawerView {
   backdrop: HTMLElement;
+  body: HTMLElement;
   close: HTMLButtonElement;
   content: HTMLElement;
   description: HTMLElement | null;
   grabber: HTMLElement;
   grabberIndicator: HTMLElement;
+  header: HTMLElement;
   positioner: HTMLElement;
   swipeArea: HTMLElement | null;
   title: HTMLElement;
@@ -61,6 +64,8 @@ function factory(
   options ??= {};
 
   let content: HTMLElement;
+  let header: HTMLElement;
+  let body: HTMLElement;
   let title: HTMLElement;
   let description: HTMLElement | null;
   let close: HTMLButtonElement;
@@ -76,6 +81,17 @@ function factory(
   if (root) {
     content = requireFuiClass<HTMLElement>(root, "fui-drawer-content");
     restores.push(captureAttributes(root), captureAttributes(content));
+    const adoptedHeader = root.querySelector<HTMLElement>(".fui-drawer-header");
+    if (adoptedHeader) {
+      header = adoptedHeader;
+      restores.push(captureAttributes(header), captureChildNodes(header));
+    } else {
+      header = h("div", { class: "fui-drawer-header" });
+      generated.push(header);
+    }
+    // Snapshot content children before adopted parts move into the header so
+    // destroy() can put caller-owned nodes back in their original order.
+    restores.push(captureChildNodes(content));
     const adoptedTitle = root.querySelector<HTMLElement>(".fui-drawer-title");
     if (adoptedTitle) {
       title = adoptedTitle;
@@ -84,9 +100,10 @@ function factory(
         restores.push(captureChildNodes(title));
         title.replaceChildren(new Text(options.title));
       }
+      if (title.parentElement !== header) header.prepend(title);
     } else {
       title = h("h2", { class: "fui-drawer-title" }, options.title ?? "");
-      content.prepend(title);
+      header.prepend(title);
       generated.push(title);
     }
     if (!title.textContent?.trim()) {
@@ -100,6 +117,7 @@ function factory(
         restores.push(captureChildNodes(description));
         description.replaceChildren(new Text(options.description));
       }
+      if (description.parentElement !== header) title.after(description);
     } else if (options.description !== undefined) {
       description = h("p", { class: "fui-drawer-description" }, options.description);
       title.after(description);
@@ -111,15 +129,33 @@ function factory(
     if (adoptedClose) {
       close = adoptedClose;
       restores.push(captureAttributes(close));
+      if (close.parentElement !== header) header.append(close);
     } else {
       close = createClose(options.closeLabel);
-      content.append(close);
+      header.append(close);
       generated.push(close);
     }
     grabberIndicator = h("div", { class: "fui-drawer-grabber-indicator" });
     grabber = h("div", { class: "fui-drawer-grabber" }, grabberIndicator);
     content.prepend(grabber);
     generated.push(grabber);
+    if (!adoptedHeader) grabber.after(header);
+    const adoptedBody = root.querySelector<HTMLElement>(".fui-drawer-body");
+    if (adoptedBody) {
+      body = adoptedBody;
+      restores.push(captureAttributes(body), captureChildNodes(body));
+    } else {
+      body = h("div", { class: "fui-drawer-body" });
+      generated.push(body);
+    }
+    // Only the body scrolls: gather every leftover content node into it.
+    for (const node of Array.from(content.childNodes)) {
+      if (node !== header && node !== grabber && node !== body) body.append(node);
+    }
+    if (!adoptedBody) {
+      if (header.parentElement === content) header.after(body);
+      else content.append(body);
+    }
     backdrop = h("div", { class: "fui-drawer-backdrop" });
     positioner = h("div", { class: "fui-drawer-positioner" });
     generated.push(backdrop, positioner);
@@ -146,8 +182,9 @@ function factory(
     close = createClose(created.closeLabel);
     grabberIndicator = h("div", { class: "fui-drawer-grabber-indicator" });
     grabber = h("div", { class: "fui-drawer-grabber" }, grabberIndicator);
-    const body = h("div", { class: "fui-drawer-body" }, created.content);
-    content = h("div", { class: "fui-drawer-content" }, grabber, title, description, body, close);
+    body = h("div", { class: "fui-drawer-body" }, created.content);
+    header = h("div", { class: "fui-drawer-header" }, title, description, close);
+    content = h("div", { class: "fui-drawer-content" }, grabber, header, body);
     positioner = h("div", { class: "fui-drawer-positioner" }, content);
     backdrop = h("div", { class: "fui-drawer-backdrop" });
     if (wantsSwipeArea) swipeArea = h("div", { class: "fui-drawer-swipe-area" });
@@ -159,11 +196,13 @@ function factory(
     root,
     {
       backdrop,
+      body,
       close,
       content,
       description,
       grabber,
       grabberIndicator,
+      header,
       positioner,
       swipeArea,
       title,
@@ -201,8 +240,10 @@ function setupDrawer(
     [view.backdrop, "backdrop"],
     [view.positioner, "positioner"],
     [view.content, "content"],
+    [view.header, "header"],
     [view.title, "title"],
     [view.description, "description"],
+    [view.body, "body"],
     [view.close, "close"],
     [view.grabber, "grabber"],
     [view.grabberIndicator, "grabber-indicator"],
@@ -242,6 +283,7 @@ function setupDrawer(
     getTriggerProps: (api, triggerValue) => api.getTriggerProps({ value: triggerValue }),
   });
   triggers.setSelector(initialSelector);
+  const unbindScrollShadows = bindScrollShadows(view.body);
 
   let started = false;
   let destroyed = false;
@@ -276,6 +318,7 @@ function setupDrawer(
     destroy() {
       if (destroyed) return;
       destroyed = true;
+      unbindScrollShadows();
       triggers.destroy();
       zag.destroy();
       if (setup.enhanceMode) {
