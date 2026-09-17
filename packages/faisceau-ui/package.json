@@ -19,6 +19,7 @@
   "exports": {
     ".": "./dist/index.mjs",
     "./checkbox": "./dist/checkbox/index.mjs",
+    "./collapsible": "./dist/collapsible/index.mjs",
     "./combobox": "./dist/combobox/index.mjs",
     "./dialog": "./dist/dialog/index.mjs",
     "./drawer": "./dist/drawer/index.mjs",
@@ -36,6 +37,11 @@
       "default": "./dist/styles/checkbox.css"
     },
     "./styles/checkbox.scss": "./src/styles/checkbox.scss",
+    "./styles/collapsible.css": {
+      "types": "./dist/styles/collapsible.css.d.ts",
+      "default": "./dist/styles/collapsible.css"
+    },
+    "./styles/collapsible.scss": "./src/styles/collapsible.scss",
     "./styles/combobox.css": {
       "types": "./dist/styles/combobox.css.d.ts",
       "default": "./dist/styles/combobox.css"
@@ -85,6 +91,7 @@
     "@lilian1315/create-element": "catalog:",
     "@lucide/icons": "catalog:",
     "@zag-js/checkbox": "catalog:",
+    "@zag-js/collapsible": "catalog:",
     "@zag-js/combobox": "catalog:",
     "@zag-js/dialog": "catalog:",
     "@zag-js/drawer": "catalog:",

@@ -18,6 +18,7 @@ export default defineConfig({
     entry: [
       "src/index.ts",
       "src/checkbox/index.ts",
+      "src/collapsible/index.ts",
       "src/combobox/index.ts",
       "src/select/index.ts",
       "src/tooltip/index.ts",

@@ -2,7 +2,7 @@
 
 Faisceau UI est une bibliothèque de composants DOM accessibles pour navigateurs modernes. Elle associe les machines d'état de [Zag.js](https://zagjs.com/) à [`@lilian1315/create-element`](https://github.com/lilian1315/create-element) et [`faisceau`](https://github.com/lilian1315/faisceau), sans dépendre d'un framework. Son apparence s'inspire de shadcn/ui, avec des styles Sass compilés en CSS, les icônes open source de [Lucide](https://lucide.dev/) et des classes internes préfixées par `fui-`.
 
-La bibliothèque fournit actuellement Select, Combobox, Checkbox, Tooltip, Dialog, Drawer et
+La bibliothèque fournit actuellement Select, Combobox, Checkbox, Collapsible, Tooltip, Dialog, Drawer et
 Toast. Chaque composant peut construire son propre DOM ou adopter un markup HTML déjà présent.
 
 ## Architecture
@@ -43,7 +43,7 @@ est accompagnée de sa déclaration de types, inutile donc de déclarer un modul
 `*.css` pour les importer depuis TypeScript.
 
 Chaque composant est également disponible depuis son sous-chemin, par exemple
-`faisceau-ui/select`, `faisceau-ui/dialog` ou
+`faisceau-ui/select`, `faisceau-ui/collapsible`, `faisceau-ui/dialog` ou
 `faisceau-ui/toast`.
 
 Pour utiliser directement le pont de bas niveau :
@@ -268,6 +268,22 @@ Pour l'enhancement, le label, l'input natif et le contrôle visuel suffisent :
 import { enhanceCheckbox } from "faisceau-ui";
 
 enhanceCheckbox(document.querySelector<HTMLLabelElement>("#newsletter")!, {});
+```
+
+## Collapsible
+
+`createCollapsible` construit un disclosure accessible. `enhanceCollapsible` adopte une anatomie
+existante composée de `.fui-collapsible-trigger`, `.fui-collapsible-trigger-text`,
+`.fui-collapsible-indicator` et `.fui-collapsible-content`.
+
+```ts
+import { createCollapsible } from "faisceau-ui";
+
+createCollapsible({
+  trigger: "Réglages avancés",
+  content: "Options rarement utilisées",
+  defaultOpen: false,
+}).mount(document.body);
 ```
 
 ## Tooltip

@@ -2,6 +2,7 @@ import { assertType, expectTypeOf, test } from "vite-plus/test";
 import { createSelect, type FuiItemInput, type SelectController } from "faisceau-ui";
 import type { ComboboxProps } from "faisceau-ui/combobox";
 import type { CheckboxProps } from "faisceau-ui/checkbox";
+import type { CollapsibleOptions } from "faisceau-ui/collapsible";
 import type { EnhanceSelectProps } from "faisceau-ui/select";
 import type { TooltipOptions } from "faisceau-ui/tooltip";
 import type { DialogOptions } from "faisceau-ui/dialog";
@@ -17,6 +18,7 @@ test("exposes the declarations shipped through every public UI entry", () => {
   assertType<ComboboxProps>({ items, label: "Pays" });
   assertType<EnhanceSelectProps>({ clearable: true });
   assertType<CheckboxProps>({ label: "Terms" });
+  assertType<CollapsibleOptions>({ content: "Details", trigger: "Toggle" });
   assertType<TooltipOptions>({ content: "Help", trigger: "Info" });
   assertType<DialogOptions>({ content: "Body", title: "Title", triggerSelector: "#open" });
   assertType<DrawerOptions>({

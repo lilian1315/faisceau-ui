@@ -1,8 +1,15 @@
 import "faisceau-ui/styles/index.css";
 
 import { afterEach, describe, expect, it } from "vite-plus/test";
-import { createCheckbox, createSelect, createTooltip, enhanceCombobox } from "faisceau-ui";
+import {
+  createCheckbox,
+  createCollapsible,
+  createSelect,
+  createTooltip,
+  enhanceCombobox,
+} from "faisceau-ui";
 import { createCheckbox as createCheckboxFromSubpath } from "faisceau-ui/checkbox";
+import { createCollapsible as createCollapsibleFromSubpath } from "faisceau-ui/collapsible";
 import { createCombobox as createComboboxFromSubpath } from "faisceau-ui/combobox";
 import { createDialog as createDialogFromSubpath } from "faisceau-ui/dialog";
 import { createDrawer as createDrawerFromSubpath } from "faisceau-ui/drawer";
@@ -28,11 +35,15 @@ describe("published package contract", () => {
     expect(typeof enhanceCombobox).toBe("function");
     expect(typeof enhanceSelectFromSubpath).toBe("function");
     expect(typeof createCheckboxFromSubpath).toBe("function");
+    expect(typeof createCollapsibleFromSubpath).toBe("function");
     expect(typeof createDialogFromSubpath).toBe("function");
     expect(typeof createDrawerFromSubpath).toBe("function");
     expect(typeof createToasterFromSubpath).toBe("function");
     expect(typeof createTooltipFromSubpath).toBe("function");
     expect(createCheckbox({ label: "Terms" }).root).toBeInstanceOf(HTMLElement);
+    expect(createCollapsible({ content: "Details", trigger: "Toggle" }).root).toBeInstanceOf(
+      HTMLElement,
+    );
     expect(createTooltip({ content: "Help", trigger: "Info" }).root).toBeInstanceOf(HTMLElement);
     expect(typeof createZagMachine).toBe("function");
     expect(typeof normalizeProps).toBe("object");

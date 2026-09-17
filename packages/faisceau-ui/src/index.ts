@@ -28,6 +28,13 @@ export type { FuiItem, FuiItemInput } from "./shared/index.ts";
 export type { FuiController, FuiReactive } from "./types.ts";
 export { createCheckbox, enhanceCheckbox } from "./checkbox/index.ts";
 export type { CheckboxApi, CheckboxController, CheckboxProps } from "./checkbox/index.ts";
+export { createCollapsible, enhanceCollapsible } from "./collapsible/index.ts";
+export type {
+  CollapsibleApi,
+  CollapsibleController,
+  CollapsibleOptions,
+  EnhanceCollapsibleOptions,
+} from "./collapsible/index.ts";
 export { createDialog, enhanceDialog } from "./dialog/index.ts";
 export type {
   DialogApi,

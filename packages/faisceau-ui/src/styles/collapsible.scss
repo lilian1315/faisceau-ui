@@ -1,0 +1,66 @@
+// Self-contained Collapsible styles: tokens, shared base, and collapsible rules.
+@use "./tokens";
+@use "./base";
+@use "./mixins" as *;
+
+.fui-collapsible {
+  inline-size: min(100%, 32rem);
+  border: var(--fui-border-width) solid var(--fui-color-border);
+  border-radius: var(--fui-radius-md);
+  background: var(--fui-color-surface);
+  color: var(--fui-color-foreground);
+  overflow: hidden;
+}
+
+.fui-collapsible-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  inline-size: 100%;
+  min-block-size: var(--fui-control-height-coarse);
+  padding: var(--fui-space-2) var(--fui-space-3);
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-weight: var(--fui-font-weight-medium);
+  text-align: start;
+  cursor: pointer;
+  transition: background-color var(--fui-duration-fast) var(--fui-easing-standard);
+
+  &:hover {
+    background: var(--fui-color-accent);
+  }
+
+  &:focus-visible {
+    @include fui-focus-ring;
+    position: relative;
+    z-index: 1;
+  }
+
+  &:active:not(:disabled) {
+    scale: 0.99;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+  }
+}
+
+.fui-collapsible-indicator {
+  display: grid;
+  flex: none;
+  place-items: center;
+  transition: rotate var(--fui-duration-fast) var(--fui-easing-standard);
+
+  &[data-state="open"] {
+    rotate: 180deg;
+  }
+}
+
+.fui-collapsible-content {
+  padding: 0 var(--fui-space-3) var(--fui-space-3);
+  color: var(--fui-color-muted-foreground);
+  line-height: var(--fui-line-height-copy);
+}

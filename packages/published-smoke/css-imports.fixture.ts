@@ -3,6 +3,7 @@
 // `vite/client` (this fixture runs under a tsconfig with `"types": []`).
 import "faisceau-ui/styles/index.css";
 import "faisceau-ui/styles/checkbox.css";
+import "faisceau-ui/styles/collapsible.css";
 import "faisceau-ui/styles/select.css";
 import "faisceau-ui/styles/combobox.css";
 import "faisceau-ui/styles/tooltip.css";

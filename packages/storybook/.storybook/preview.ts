@@ -13,6 +13,7 @@ const preview: Preview = {
         order: [
           "Introduction",
           "Checkbox",
+          "Collapsible",
           "Select",
           "Combobox",
           "Tooltip",
