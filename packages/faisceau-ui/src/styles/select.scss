@@ -169,7 +169,6 @@
   background: #efefef;
   position: relative;
   z-index: calc(var(--layer-index, 0) * 2 + 1);
-  block-size: auto !important;
 }
 
 .fui-select-list {
