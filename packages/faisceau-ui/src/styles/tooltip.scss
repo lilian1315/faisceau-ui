@@ -23,16 +23,20 @@
   font: inherit;
   font-size: var(--fui-font-size-control);
   font-weight: var(--fui-font-weight-medium);
-  transition:
-    background-color var(--fui-duration-fast) var(--fui-easing-standard),
-    scale var(--fui-duration-fast) var(--fui-easing-standard);
+  @include fui-control-transition(background-color, scale);
 
   &:hover {
     background: var(--fui-color-accent);
   }
 
   &:active {
-    scale: 0.96;
+    background: var(--fui-color-accent);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    &:active {
+      scale: 0.96;
+    }
   }
 
   &:focus-visible {

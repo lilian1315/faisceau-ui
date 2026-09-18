@@ -1,8 +1,6 @@
-// Shared foundation: design tokens plus field, icon, and utility rules.
+// Shared foundation: design tokens, component anatomy, icon, and utility rules.
 @use "./tokens";
 
-.fui-select,
-.fui-field,
 .fui-field-label,
 .fui-select-control,
 .fui-select-trigger,
@@ -51,18 +49,6 @@
 .fui-icon,
 .fui-sr-only {
   box-sizing: border-box;
-}
-
-.fui-field {
-  display: grid;
-  inline-size: 100%;
-  max-inline-size: min(var(--fui-control-max-inline-size), 100%);
-  min-inline-size: 0;
-  gap: var(--fui-space-1-5);
-  color: var(--fui-color-foreground);
-  font-family: inherit;
-  font-size: var(--fui-font-size-control);
-  line-height: var(--fui-line-height-control);
 }
 
 .fui-field-label {

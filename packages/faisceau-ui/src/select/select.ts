@@ -99,7 +99,7 @@ function factory(
   );
 
   // Every other part is always generated fresh, in both modes.
-  const { control, trigger, value: valueText, clearTrigger } = buildControl(options);
+  const { control, trigger, value: valueText, indicator, clearTrigger } = buildControl(options);
   insertAfter(root, control, nativeSelect);
   restores.push(() => control.remove());
   const { positioner, content, list } = buildPopup(items);
@@ -142,6 +142,7 @@ function factory(
   zag.bind(control, (api) => api.getControlProps());
   zag.bind(trigger, (api) => api.getTriggerProps());
   zag.bind(valueText, (api) => api.getValueTextProps());
+  zag.bind(indicator, (api) => api.getIndicatorProps());
   zag.bind(positioner, (api) => api.getPositionerProps());
   zag.bind(content, (api) => api.getContentProps());
   zag.bind(list, (api) => api.getListProps());

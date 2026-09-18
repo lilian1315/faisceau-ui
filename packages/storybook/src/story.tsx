@@ -22,7 +22,7 @@ export function createStoryShell(options: StoryShellOptions): StoryShell {
   );
   const source = asDom<HTMLElement>(<code />);
   const root = asDom<HTMLElement>(
-    <article class="fui-story">
+    <article class="fui-story" lang="fr">
       <header class="fui-story__header">
         <span class="fui-story__eyebrow">{options.eyebrow}</span>
         <h2 class="fui-story__title">{options.title}</h2>
@@ -32,7 +32,7 @@ export function createStoryShell(options: StoryShellOptions): StoryShell {
       {output}
       <aside class="fui-story__inspect">
         <details>
-          <summary>Inspecter le markup source</summary>
+          <summary>Voir le code source</summary>
           <pre>{source}</pre>
         </details>
       </aside>

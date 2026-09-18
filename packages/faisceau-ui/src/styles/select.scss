@@ -4,13 +4,30 @@
 @use "./listbox";
 @use "./mixins" as *;
 
+.fui-select {
+  box-sizing: border-box;
+  display: grid;
+  inline-size: 100%;
+  max-inline-size: min(var(--fui-control-max-inline-size), 100%);
+  min-inline-size: 0;
+  gap: var(--fui-space-1-5);
+  color: var(--fui-color-foreground);
+  font-family: inherit;
+  font-size: var(--fui-font-size-control);
+  line-height: var(--fui-line-height-control);
+}
+
 .fui-select-control {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr);
   align-items: stretch;
   inline-size: 100%;
   min-inline-size: 0;
   gap: var(--fui-space-1-5);
+
+  &:has(.fui-select-clear-trigger:not([hidden])) {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
 
   &[data-focus] .fui-select-trigger {
     border-color: var(--fui-color-ring);
@@ -147,7 +164,26 @@
 }
 
 .fui-select-content {
-  min-inline-size: min(8rem, calc(100vw - (2 * var(--fui-space-2))));
+  display: flex;
+  flex-direction: column;
+  inline-size: min(var(--fui-control-max-inline-size), calc(100vw - (2 * var(--fui-space-2))));
+  max-block-size: min(
+    var(--fui-listbox-max-block-size),
+    var(--available-height, calc(100dvh - (2 * var(--fui-space-2))))
+  );
+  block-size: auto !important;
+}
+
+.fui-select-list {
+  flex: 1 1 auto;
+  min-block-size: 0;
+  max-block-size: none;
+  grid-auto-rows: max-content;
+
+  &:focus-visible {
+    @include fui-focus-ring;
+    outline-offset: calc(-1 * var(--fui-focus-ring-width));
+  }
 }
 
 @media (hover: hover) {
@@ -158,6 +194,11 @@
 }
 
 @media (prefers-reduced-motion: no-preference) {
+  .fui-select-content[data-state="open"] {
+    // Zag measures the selected text during opening; transforms skew alignment.
+    animation-name: fui-select-in;
+  }
+
   .fui-select-trigger,
   .fui-select-clear-trigger {
     transition-property: color, background-color, border-color, box-shadow;
@@ -169,6 +210,16 @@
     transition-property: color, transform;
     transition-duration: var(--fui-duration-fast);
     transition-timing-function: var(--fui-easing-standard);
+  }
+}
+
+@keyframes fui-select-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
   }
 }
 
@@ -185,6 +236,10 @@
 }
 
 @media (forced-colors: active) {
+  .fui-select-list:focus-visible {
+    outline-color: Highlight;
+  }
+
   .fui-select-trigger,
   .fui-select-clear-trigger {
     color: ButtonText;

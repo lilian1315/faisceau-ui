@@ -5,7 +5,10 @@
 
 .fui-select-positioner,
 .fui-combobox-positioner {
-  --z-index: var(--fui-z-index-popover);
+  // Zag writes --z-index inline on the positioner. Keep the application base
+  // elevation in CSS while allowing its layer index to participate.
+  --z-index: calc(var(--fui-z-index-popover) + var(--layer-index, 0)) !important;
+  z-index: var(--z-index);
 
   max-inline-size: min(var(--fui-control-max-inline-size), calc(100vw - (2 * var(--fui-space-2))));
 }

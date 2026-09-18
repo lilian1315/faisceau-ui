@@ -26,7 +26,7 @@
   font-weight: var(--fui-font-weight-medium);
   text-align: start;
   cursor: pointer;
-  transition: background-color var(--fui-duration-fast) var(--fui-easing-standard);
+  @include fui-control-transition(background-color);
 
   &:hover {
     background: var(--fui-color-accent);
@@ -34,12 +34,13 @@
 
   &:focus-visible {
     @include fui-focus-ring;
+    outline-offset: calc(-1 * var(--fui-focus-ring-width));
     position: relative;
     z-index: 1;
   }
 
   &:active:not(:disabled) {
-    scale: 0.99;
+    background: var(--fui-color-accent);
   }
 
   &:disabled {
@@ -52,7 +53,7 @@
   display: grid;
   flex: none;
   place-items: center;
-  transition: rotate var(--fui-duration-fast) var(--fui-easing-standard);
+  @include fui-control-transition(rotate);
 
   &[data-state="open"] {
     rotate: 180deg;

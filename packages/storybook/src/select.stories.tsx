@@ -12,6 +12,29 @@ const countries = [
   { value: "be", label: "Belgique", description: "Europe" },
   { value: "ch", label: "Suisse", description: "Europe" },
   { value: "mc", label: "Monaco", disabled: true },
+  { value: "de", label: "Allemagne", description: "Europe" },
+  { value: "es", label: "Espagne", description: "Europe" },
+  { value: "it", label: "Italie", description: "Europe" },
+  { value: "pt", label: "Portugal", description: "Europe" },
+  { value: "nl", label: "Pays-Bas", description: "Europe" },
+  { value: "lu", label: "Luxembourg", description: "Europe" },
+  { value: "ie", label: "Irlande", description: "Europe" },
+  { value: "at", label: "Autriche", description: "Europe" },
+  { value: "dk", label: "Danemark", description: "Europe" },
+  { value: "se", label: "Suède", description: "Europe" },
+  { value: "no", label: "Norvège", description: "Europe" },
+  { value: "fi", label: "Finlande", description: "Europe" },
+  { value: "is", label: "Islande", description: "Europe" },
+  { value: "gr", label: "Grèce", description: "Europe" },
+  { value: "hr", label: "Croatie", description: "Europe" },
+  { value: "cz", label: "Tchéquie", description: "Europe" },
+  { value: "pl", label: "Pologne", description: "Europe" },
+  { value: "hu", label: "Hongrie", description: "Europe" },
+  { value: "ro", label: "Roumanie", description: "Europe" },
+  { value: "bg", label: "Bulgarie", description: "Europe" },
+  { value: "ee", label: "Estonie", description: "Europe" },
+  { value: "lv", label: "Lettonie", description: "Europe" },
+  { value: "lt", label: "Lituanie", description: "Europe" },
 ] as const;
 
 const meta = {
@@ -103,7 +126,13 @@ export const enhance: Story = {
     const source = root.outerHTML;
 
     story.canvas.append(root);
-    const controller = enhanceSelect(root, args);
+    const controller = enhanceSelect(root, {
+      ...args,
+      onValueChange: (details) => {
+        story.output.textContent = `value = ${details.value.join(", ") || "(vide)"}`;
+        args.onValueChange?.(details);
+      },
+    });
 
     trackController(story.root, controller);
     story.setSource(source);
