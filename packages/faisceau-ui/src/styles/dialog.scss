@@ -23,10 +23,6 @@
   }
 }
 
-.fui-dialog-title {
-  padding-inline-end: 2.5rem;
-}
-
 .fui-dialog-header {
   @include fui-overlay-header;
   flex: none;
@@ -46,6 +42,10 @@
   @include fui-overlay-body;
   @include fui-scroll-edge-shadows;
   line-height: var(--fui-line-height-copy);
+}
+
+.fui-dialog-body-content {
+  @include fui-overlay-body-content;
 }
 
 .fui-dialog-close {

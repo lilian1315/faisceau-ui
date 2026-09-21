@@ -106,15 +106,18 @@
 }
 
 // Scrollable overlay body shared by dialog and drawer: the only scrolling
-// region of the content. Spans the content padding full-bleed so the scrollbar
-// and edge shadows sit at the content edges.
+// region of the content. It is full-bleed so the scrollbar and edge shadows
+// sit at the content edges; the body-content part owns readable content padding.
 @mixin fui-overlay-body {
   flex: 1 1 auto;
   min-block-size: 0;
   margin: 0 calc(var(--fui-space-6) * -1) calc(var(--fui-space-6) * -1);
-  padding: 0 var(--fui-space-6) var(--fui-space-6);
   overflow-y: auto;
   overscroll-behavior: contain;
+}
+
+@mixin fui-overlay-body-content {
+  padding: 0 var(--fui-space-6) var(--fui-space-6);
 }
 
 // Scroll-edge shadows for an overlay body: zero-footprint sticky sentinels
@@ -127,7 +130,7 @@
     position: sticky;
     z-index: 1;
     display: block;
-    block-size: var(--fui-space-3);
+    block-size: var(--fui-space-4);
     pointer-events: none;
     opacity: 0;
     @include fui-control-transition(opacity);
@@ -135,13 +138,13 @@
 
   &::before {
     inset-block-start: 0;
-    margin-block-end: calc(var(--fui-space-3) * -1);
+    margin-block-end: calc(var(--fui-space-4) * -1);
     background: linear-gradient(to bottom, var(--fui-color-popover-shadow), transparent);
   }
 
   &::after {
     inset-block-end: 0;
-    margin-block-start: calc(var(--fui-space-3) * -1);
+    margin-block-start: calc(var(--fui-space-4) * -1);
     background: linear-gradient(to top, var(--fui-color-popover-shadow), transparent);
   }
 

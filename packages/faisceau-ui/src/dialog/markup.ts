@@ -6,6 +6,7 @@ export type OverlayVariant = "dialog" | "drawer";
 export interface OverlayView {
   backdrop: HTMLElement;
   body: HTMLElement;
+  bodyContent: HTMLElement;
   close: HTMLButtonElement;
   content: HTMLElement;
   description: HTMLElement | null;
@@ -32,9 +33,10 @@ export function createOverlayView(options: {
   });
   close.append(createXIcon());
   const header = h("div", { class: `fui-${options.variant}-header` }, title, description, close);
-  const body = h("div", { class: `fui-${options.variant}-body` }, options.content);
+  const bodyContent = h("div", { class: `fui-${options.variant}-body-content` }, options.content);
+  const body = h("div", { class: `fui-${options.variant}-body` }, bodyContent);
   const content = h("div", { class: `fui-${options.variant}-content` }, header, body);
   const positioner = h("div", { class: `fui-${options.variant}-positioner` }, content);
   const backdrop = h("div", { class: `fui-${options.variant}-backdrop` });
-  return { backdrop, body, close, content, description, header, positioner, title };
+  return { backdrop, body, bodyContent, close, content, description, header, positioner, title };
 }

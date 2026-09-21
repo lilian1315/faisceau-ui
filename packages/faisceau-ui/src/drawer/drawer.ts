@@ -17,6 +17,7 @@ import type { DrawerController, DrawerOptions, EnhanceDrawerOptions } from "./ty
 interface DrawerView {
   backdrop: HTMLElement;
   body: HTMLElement;
+  bodyContent: HTMLElement;
   close: HTMLButtonElement;
   content: HTMLElement;
   description: HTMLElement | null;
@@ -66,6 +67,7 @@ function factory(
   let content: HTMLElement;
   let header: HTMLElement;
   let body: HTMLElement;
+  let bodyContent: HTMLElement;
   let title: HTMLElement;
   let description: HTMLElement | null;
   let close: HTMLButtonElement;
@@ -156,6 +158,16 @@ function factory(
       if (header.parentElement === content) header.after(body);
       else content.append(body);
     }
+    const adoptedBodyContent = body.querySelector<HTMLElement>(".fui-drawer-body-content");
+    if (adoptedBodyContent) {
+      bodyContent = adoptedBodyContent;
+      restores.push(captureAttributes(bodyContent));
+    } else {
+      bodyContent = h("div", { class: "fui-drawer-body-content" });
+      generated.push(bodyContent);
+      for (const node of Array.from(body.childNodes)) bodyContent.append(node);
+      body.append(bodyContent);
+    }
     backdrop = h("div", { class: "fui-drawer-backdrop" });
     positioner = h("div", { class: "fui-drawer-positioner" });
     generated.push(backdrop, positioner);
@@ -182,7 +194,8 @@ function factory(
     close = createClose(created.closeLabel);
     grabberIndicator = h("div", { class: "fui-drawer-grabber-indicator" });
     grabber = h("div", { class: "fui-drawer-grabber" }, grabberIndicator);
-    body = h("div", { class: "fui-drawer-body" }, created.content);
+    bodyContent = h("div", { class: "fui-drawer-body-content" }, created.content);
+    body = h("div", { class: "fui-drawer-body" }, bodyContent);
     header = h("div", { class: "fui-drawer-header" }, title, description, close);
     content = h("div", { class: "fui-drawer-content" }, grabber, header, body);
     positioner = h("div", { class: "fui-drawer-positioner" }, content);
@@ -197,6 +210,7 @@ function factory(
     {
       backdrop,
       body,
+      bodyContent,
       close,
       content,
       description,
@@ -244,6 +258,7 @@ function setupDrawer(
     [view.title, "title"],
     [view.description, "description"],
     [view.body, "body"],
+    [view.bodyContent, "body-content"],
     [view.close, "close"],
     [view.grabber, "grabber"],
     [view.grabberIndicator, "grabber-indicator"],

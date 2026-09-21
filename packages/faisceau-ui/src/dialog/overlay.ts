@@ -64,6 +64,7 @@ function factory(
   let content: HTMLElement;
   let header: HTMLElement;
   let body: HTMLElement;
+  let bodyContent: HTMLElement;
   let title: HTMLElement;
   let description: HTMLElement | null;
   let close: HTMLButtonElement;
@@ -148,6 +149,16 @@ function factory(
       if (header.parentElement === content) header.after(body);
       else content.append(body);
     }
+    const adoptedBodyContent = body.querySelector<HTMLElement>(`.${classPrefix}-body-content`);
+    if (adoptedBodyContent) {
+      bodyContent = adoptedBodyContent;
+      restores.push(captureAttributes(bodyContent));
+    } else {
+      bodyContent = h("div", { class: `${classPrefix}-body-content` });
+      generated.push(bodyContent);
+      for (const node of Array.from(body.childNodes)) bodyContent.append(node);
+      body.append(bodyContent);
+    }
     backdrop = h("div", { class: `${classPrefix}-backdrop` });
     positioner = h("div", { class: `${classPrefix}-positioner` });
     generated.push(backdrop, positioner);
@@ -162,13 +173,14 @@ function factory(
       throw new Error(`[Faisceau UI] ${capitalize(variant)} creation requires options.content.`);
     root = h("div", { class: `fui-${variant}` }) as HTMLElement;
     const view = createOverlayView({ ...(options as DialogOptions), variant });
-    ({ backdrop, body, close, content, description, header, positioner, title } = view);
+    ({ backdrop, body, bodyContent, close, content, description, header, positioner, title } =
+      view);
     root.append(backdrop, positioner);
   }
 
   return setupOverlay(
     root,
-    { backdrop, body, close, content, description, header, positioner, title },
+    { backdrop, body, bodyContent, close, content, description, header, positioner, title },
     options,
     {
       enhanceMode,
@@ -211,11 +223,15 @@ function setupOverlay(
     "title",
     "description",
     "body",
+    "bodyContent",
     "close",
   ] as const) {
     const element = part === "close" ? view.close : view[part];
     if (element)
-      addFuiClasses(element, `fui-${setup.variant}-${part === "close" ? "close" : part}`);
+      addFuiClasses(
+        element,
+        `fui-${setup.variant}-${part === "bodyContent" ? "body-content" : part}`,
+      );
   }
   if (className) root.classList.add(...className.split(/\s+/).filter(Boolean));
   root.dataset.fuiComponent = setup.variant;

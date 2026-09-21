@@ -133,6 +133,10 @@
   line-height: var(--fui-line-height-copy);
 }
 
+.fui-drawer-body-content {
+  @include fui-overlay-body-content;
+}
+
 .fui-drawer-close {
   @include fui-close-button;
 }

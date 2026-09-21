@@ -158,6 +158,9 @@ describe("Dialog", () => {
     const content = controller.root.querySelector(".fui-dialog-content")!;
     expect(content.children[0]).toBe(header);
     expect(content.children[1]?.classList.contains("fui-dialog-body")).toBe(true);
+    expect(
+      content.children[1]?.firstElementChild?.classList.contains("fui-dialog-body-content"),
+    ).toBe(true);
     controller.destroy();
   });
 
@@ -216,7 +219,7 @@ describe("Dialog", () => {
     const header = root.querySelector(".fui-dialog-header")!;
     expect(header.querySelector(".fui-dialog-title")?.textContent).toBe("Profile");
     expect(header.querySelector(".fui-dialog-close")).not.toBeNull();
-    expect(root.querySelector(".fui-dialog-body > p")?.textContent).toBe("Body");
+    expect(root.querySelector(".fui-dialog-body-content > p")?.textContent).toBe("Body");
     controller.destroy();
     expect(root.innerHTML).toBe(original);
   });
@@ -225,11 +228,11 @@ describe("Dialog", () => {
     const root = document.createElement("div");
     root.className = "fui-dialog";
     root.innerHTML =
-      '<section class="fui-dialog-content"><h2 class="fui-dialog-title">Profile</h2><div class="fui-dialog-body"><p>Body</p></div></section>';
+      '<section class="fui-dialog-content"><h2 class="fui-dialog-title">Profile</h2><div class="fui-dialog-body"><div class="fui-dialog-body-content"><p>Body</p></div></div></section>';
     document.body.append(root);
     const original = root.innerHTML;
     const controller = enhanceDialog(root);
-    expect(root.querySelector(".fui-dialog-body > p")?.textContent).toBe("Body");
+    expect(root.querySelector(".fui-dialog-body-content > p")?.textContent).toBe("Body");
     controller.destroy();
     expect(root.innerHTML).toBe(original);
   });

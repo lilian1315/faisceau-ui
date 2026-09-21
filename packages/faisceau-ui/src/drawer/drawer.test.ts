@@ -83,6 +83,9 @@ describe("Drawer", () => {
     expect(header.querySelector(".fui-drawer-close")).not.toBeNull();
     expect(header.previousElementSibling?.classList.contains("fui-drawer-grabber")).toBe(true);
     expect(header.nextElementSibling?.classList.contains("fui-drawer-body")).toBe(true);
+    expect(
+      header.nextElementSibling?.firstElementChild?.classList.contains("fui-drawer-body-content"),
+    ).toBe(true);
     controller.destroy();
   });
 
@@ -116,7 +119,7 @@ describe("Drawer", () => {
     const header = root.querySelector(".fui-drawer-header")!;
     expect(header.querySelector(".fui-drawer-title")?.textContent).toBe("Navigation");
     expect(header.querySelector(".fui-drawer-close")).not.toBeNull();
-    expect(root.querySelector(".fui-drawer-body > nav")?.textContent).toBe("Liens");
+    expect(root.querySelector(".fui-drawer-body-content > nav")?.textContent).toBe("Liens");
     controller.destroy();
     expect(root.innerHTML).toBe(original);
   });
