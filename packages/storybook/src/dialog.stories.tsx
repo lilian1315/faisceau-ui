@@ -28,7 +28,7 @@ export const create: Story = {
       description: "Les changements seront visibles immédiatement.",
       footer: "Annuler · Enregistrer les modifications",
       content: Array.from(
-        { length: 20 },
+        { length: 200 },
         (_, i) =>
           `Ligne de contenu numéro ${i + 1} — texte suffisant pour permettre le défilement du corps de la boîte de dialogue.`,
       ).join("\n"),
