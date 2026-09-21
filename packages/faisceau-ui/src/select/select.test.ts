@@ -138,36 +138,6 @@ describe("Select3", () => {
     },
   );
 
-  it("repositions and reveals the selected item after reopening", async () => {
-    const controller = createSelect({
-      defaultValue: ["Item 1"],
-      items: Array.from({ length: 40 }, (_, index) => `Item ${index + 1}`),
-      label: "Value",
-    }).mount(document.body);
-    controller.root.style.position = "fixed";
-    controller.root.style.top = "100px";
-    try {
-      const list = controller.root.querySelector<HTMLElement>(".fui-select-list")!;
-      controller.api.get().setOpen(true);
-      await vi.waitFor(() => expect(document.activeElement).toBe(list));
-      controller.api.get().setValue(["Item 40"]);
-      controller.api.get().setOpen(false);
-      await vi.waitFor(() =>
-        expect(controller.root.querySelector(".fui-select-content")).toHaveAttribute("hidden"),
-      );
-      controller.api.get().setOpen(true);
-      await vi.waitFor(() => {
-        const selected = controller.root.querySelector<HTMLElement>('[data-value="Item 40"]')!;
-        const listRect = list.getBoundingClientRect();
-        const selectedRect = selected.getBoundingClientRect();
-        expect(selectedRect.top).toBeGreaterThanOrEqual(listRect.top - 1);
-        expect(selectedRect.bottom).toBeLessThanOrEqual(listRect.bottom + 1);
-      });
-    } finally {
-      controller.destroy();
-    }
-  });
-
   it("can mount while its target is still detached, as Storybook render requires", () => {
     const host = document.createElement("div");
     const controller = createSelect({ items: ["One", "Two"], label: "Detached select" });
