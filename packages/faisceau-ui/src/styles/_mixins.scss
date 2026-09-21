@@ -120,6 +120,15 @@
   padding: 0 var(--fui-space-6) var(--fui-space-6);
 }
 
+@mixin fui-overlay-footer {
+  z-index: 1;
+  flex: none;
+  margin: 0 calc(var(--fui-space-6) * -1) calc(var(--fui-space-6) * -1);
+  padding: var(--fui-space-4) var(--fui-space-6) var(--fui-space-6);
+  // border-block-start: var(--fui-border-width) solid var(--fui-color-border);
+  background: var(--fui-color-surface-popover);
+}
+
 // Scroll-edge shadows for an overlay body: zero-footprint sticky sentinels
 // above the body content, revealed through the data-scroll-top/bottom flags
 // set by bindScrollShadows when the matching edge hides content.
@@ -139,13 +148,13 @@
   &::before {
     inset-block-start: 0;
     margin-block-end: calc(var(--fui-space-4) * -1);
-    background: linear-gradient(to bottom, var(--fui-color-popover-shadow), transparent);
+    background: linear-gradient(to bottom, var(--fui-color-background), transparent);
   }
 
   &::after {
     inset-block-end: 0;
     margin-block-start: calc(var(--fui-space-4) * -1);
-    background: linear-gradient(to top, var(--fui-color-popover-shadow), transparent);
+    background: linear-gradient(to top, var(--fui-color-background), transparent);
   }
 
   &[data-scroll-top]::before,

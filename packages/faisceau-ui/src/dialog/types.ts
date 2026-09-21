@@ -10,6 +10,8 @@ export interface DialogViewOptions {
   title: string;
   description?: string;
   content: string;
+  /** Optional fixed action area rendered below the scrolling body. */
+  footer?: string;
   /** CSS selector resolved against the lookup root; every match opens the dialog. */
   triggerSelector?: string;
   closeLabel?: string;

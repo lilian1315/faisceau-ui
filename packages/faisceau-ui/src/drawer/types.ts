@@ -8,6 +8,8 @@ interface DrawerViewOptions {
   title: string;
   description?: string;
   content: string;
+  /** Optional fixed action area rendered below the scrolling body. */
+  footer?: string;
   /** CSS selector resolved against the lookup root; every match opens the drawer. */
   triggerSelector?: string;
   closeLabel?: string;

@@ -89,6 +89,19 @@ describe("Drawer", () => {
     controller.destroy();
   });
 
+  it("adds an optional fixed footer after the scrolling body", () => {
+    const controller = createDrawer({
+      content: "Navigation secondaire",
+      footer: "Fermer",
+      title: "Menu",
+    }).mount(document.body);
+
+    const body = controller.root.querySelector(".fui-drawer-body")!;
+    expect(body.nextElementSibling?.classList.contains("fui-drawer-footer")).toBe(true);
+    expect(body.nextElementSibling?.textContent).toBe("Fermer");
+    controller.destroy();
+  });
+
   it("flags the body scroll edges while only the body scrolls", async () => {
     const controller = createDrawer({ content: "Body", title: "Menu" }).mount(document.body);
     const body = controller.root.querySelector<HTMLElement>(".fui-drawer-body")!;
@@ -120,6 +133,22 @@ describe("Drawer", () => {
     expect(header.querySelector(".fui-drawer-title")?.textContent).toBe("Navigation");
     expect(header.querySelector(".fui-drawer-close")).not.toBeNull();
     expect(root.querySelector(".fui-drawer-body-content > nav")?.textContent).toBe("Liens");
+    controller.destroy();
+    expect(root.innerHTML).toBe(original);
+  });
+
+  it("adopts a caller-provided footer and restores it", () => {
+    const root = document.createElement("div");
+    root.className = "fui-drawer";
+    root.innerHTML =
+      '<aside class="fui-drawer-content"><h2 class="fui-drawer-title">Navigation</h2><nav>Liens</nav><footer class="fui-drawer-footer">Fermer</footer></aside>';
+    document.body.append(root);
+    const original = root.innerHTML;
+    const controller = enhanceDrawer(root);
+    expect(root.querySelector(".fui-drawer-footer")?.textContent).toBe("Fermer");
+    expect(root.querySelector(".fui-drawer-body")?.nextElementSibling).toBe(
+      root.querySelector(".fui-drawer-footer"),
+    );
     controller.destroy();
     expect(root.innerHTML).toBe(original);
   });

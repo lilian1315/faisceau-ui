@@ -25,6 +25,7 @@ interface SetupOptions extends DialogMachineOptions {
   className?: string;
   closeLabel?: string;
   description?: string;
+  footer?: string;
   id?: string;
   title?: string;
   triggerSelector?: string;
@@ -65,6 +66,7 @@ function factory(
   let header: HTMLElement;
   let body: HTMLElement;
   let bodyContent: HTMLElement;
+  let footer: HTMLElement | null;
   let title: HTMLElement;
   let description: HTMLElement | null;
   let close: HTMLButtonElement;
@@ -159,6 +161,22 @@ function factory(
       for (const node of Array.from(body.childNodes)) bodyContent.append(node);
       body.append(bodyContent);
     }
+    const adoptedFooter = root.querySelector<HTMLElement>(`.${classPrefix}-footer`);
+    if (adoptedFooter) {
+      footer = adoptedFooter;
+      restores.push(captureAttributes(footer));
+      if (options.footer !== undefined) {
+        restores.push(captureChildren(footer));
+        footer.replaceChildren(new Text(options.footer));
+      }
+      if (footer.parentElement !== content) body.after(footer);
+    } else if (options.footer !== undefined) {
+      footer = h("div", { class: `${classPrefix}-footer` }, options.footer);
+      body.after(footer);
+      generated.push(footer);
+    } else {
+      footer = null;
+    }
     backdrop = h("div", { class: `${classPrefix}-backdrop` });
     positioner = h("div", { class: `${classPrefix}-positioner` });
     generated.push(backdrop, positioner);
@@ -173,14 +191,24 @@ function factory(
       throw new Error(`[Faisceau UI] ${capitalize(variant)} creation requires options.content.`);
     root = h("div", { class: `fui-${variant}` }) as HTMLElement;
     const view = createOverlayView({ ...(options as DialogOptions), variant });
-    ({ backdrop, body, bodyContent, close, content, description, header, positioner, title } =
-      view);
+    ({
+      backdrop,
+      body,
+      bodyContent,
+      close,
+      content,
+      description,
+      footer,
+      header,
+      positioner,
+      title,
+    } = view);
     root.append(backdrop, positioner);
   }
 
   return setupOverlay(
     root,
-    { backdrop, body, bodyContent, close, content, description, header, positioner, title },
+    { backdrop, body, bodyContent, close, content, description, footer, header, positioner, title },
     options,
     {
       enhanceMode,
@@ -208,6 +236,7 @@ function setupOverlay(
     className,
     closeLabel: _closeLabel,
     description: _description,
+    footer: _footer,
     id: requestedId,
     title: _title,
     triggerSelector: initialSelector,
@@ -224,6 +253,7 @@ function setupOverlay(
     "description",
     "body",
     "bodyContent",
+    "footer",
     "close",
   ] as const) {
     const element = part === "close" ? view.close : view[part];

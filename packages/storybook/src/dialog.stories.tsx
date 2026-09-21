@@ -26,6 +26,7 @@ export const create: Story = {
       triggerSelector: "#story-dialog-trigger",
       title: "Modifier le profil",
       description: "Les changements seront visibles immédiatement.",
+      footer: "Annuler · Enregistrer les modifications",
       content: Array.from(
         { length: 20 },
         (_, i) =>
@@ -34,7 +35,7 @@ export const create: Story = {
     }).mount(host);
     trackController(story.root, controller);
     story.setSource(
-      `createDialog({ triggerSelector: "#story-dialog-trigger", title, description, content }).mount(target)`,
+      `createDialog({ triggerSelector: "#story-dialog-trigger", title, description, content, footer }).mount(target)`,
     );
     return story.root;
   },
@@ -68,6 +69,7 @@ export const enhance: Story = {
           <p>Ligne 8 — texte suffisant pour permettre le défilement du corps.</p>
           <p>Ligne 9 — texte suffisant pour permettre le défilement du corps.</p>
           <p>Ligne 10 — texte suffisant pour permettre le défilement du corps.</p>
+          <footer class="fui-dialog-footer">Annuler · Supprimer le document</footer>
         </section>
       </div>,
     );
@@ -77,7 +79,7 @@ export const enhance: Story = {
       enhanceDialog(root, { triggerSelector: "#story-dialog-enhance-trigger" }),
     );
     story.setSource(
-      `<button id="story-dialog-enhance-trigger">Supprimer</button>\n<div class="fui-dialog">\n  <section class="fui-dialog-content">…</section>\n</div>`,
+      `<button id="story-dialog-enhance-trigger">Supprimer</button>\n<div class="fui-dialog">\n  <section class="fui-dialog-content">\n    …\n    <footer class="fui-dialog-footer">…</footer>\n  </section>\n</div>`,
     );
     return story.root;
   },

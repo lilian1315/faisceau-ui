@@ -21,6 +21,7 @@ interface DrawerView {
   close: HTMLButtonElement;
   content: HTMLElement;
   description: HTMLElement | null;
+  footer: HTMLElement | null;
   grabber: HTMLElement;
   grabberIndicator: HTMLElement;
   header: HTMLElement;
@@ -33,6 +34,7 @@ interface DrawerSetupOptions extends EnhanceDrawerOptions {
   className?: string;
   closeLabel?: string;
   description?: string;
+  footer?: string;
   id?: string;
   title?: string;
   triggerSelector?: string;
@@ -68,6 +70,7 @@ function factory(
   let header: HTMLElement;
   let body: HTMLElement;
   let bodyContent: HTMLElement;
+  let footer: HTMLElement | null;
   let title: HTMLElement;
   let description: HTMLElement | null;
   let close: HTMLButtonElement;
@@ -168,6 +171,22 @@ function factory(
       for (const node of Array.from(body.childNodes)) bodyContent.append(node);
       body.append(bodyContent);
     }
+    const adoptedFooter = root.querySelector<HTMLElement>(".fui-drawer-footer");
+    if (adoptedFooter) {
+      footer = adoptedFooter;
+      restores.push(captureAttributes(footer));
+      if (options.footer !== undefined) {
+        restores.push(captureChildNodes(footer));
+        footer.replaceChildren(new Text(options.footer));
+      }
+      if (footer.parentElement !== content) body.after(footer);
+    } else if (options.footer !== undefined) {
+      footer = h("div", { class: "fui-drawer-footer" }, options.footer);
+      body.after(footer);
+      generated.push(footer);
+    } else {
+      footer = null;
+    }
     backdrop = h("div", { class: "fui-drawer-backdrop" });
     positioner = h("div", { class: "fui-drawer-positioner" });
     generated.push(backdrop, positioner);
@@ -196,8 +215,12 @@ function factory(
     grabber = h("div", { class: "fui-drawer-grabber" }, grabberIndicator);
     bodyContent = h("div", { class: "fui-drawer-body-content" }, created.content);
     body = h("div", { class: "fui-drawer-body" }, bodyContent);
+    footer =
+      created.footer === undefined
+        ? null
+        : h("div", { class: "fui-drawer-footer" }, created.footer);
     header = h("div", { class: "fui-drawer-header" }, title, description, close);
-    content = h("div", { class: "fui-drawer-content" }, grabber, header, body);
+    content = h("div", { class: "fui-drawer-content" }, grabber, header, body, footer);
     positioner = h("div", { class: "fui-drawer-positioner" }, content);
     backdrop = h("div", { class: "fui-drawer-backdrop" });
     if (wantsSwipeArea) swipeArea = h("div", { class: "fui-drawer-swipe-area" });
@@ -214,6 +237,7 @@ function factory(
       close,
       content,
       description,
+      footer,
       grabber,
       grabberIndicator,
       header,
@@ -242,6 +266,7 @@ function setupDrawer(
     closeLabel: _closeLabel,
     contentDraggable,
     description: _description,
+    footer: _footer,
     id: requestedId,
     swipeArea: swipeAreaOption,
     title: _title,
@@ -259,6 +284,7 @@ function setupDrawer(
     [view.description, "description"],
     [view.body, "body"],
     [view.bodyContent, "body-content"],
+    [view.footer, "footer"],
     [view.close, "close"],
     [view.grabber, "grabber"],
     [view.grabberIndicator, "grabber-indicator"],

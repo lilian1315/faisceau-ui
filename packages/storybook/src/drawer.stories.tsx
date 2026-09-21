@@ -40,6 +40,7 @@ export const create: Story = {
         triggerSelector: "#story-drawer-trigger",
         title: "Filtres",
         description: "Affinez les résultats affichés.",
+        footer: "Réinitialiser · Appliquer les filtres",
         content: Array.from(
           { length: 20 },
           (_, i) =>
@@ -48,7 +49,7 @@ export const create: Story = {
       }).mount(host),
     );
     story.setSource(
-      `createDrawer({ swipeDirection: "${args.swipeDirection}", snapPoints: [0.5, 1], swipeArea: true, triggerSelector, title, content }).mount(target)`,
+      `createDrawer({ swipeDirection: "${args.swipeDirection}", snapPoints: [0.5, 1], swipeArea: true, triggerSelector, title, content, footer }).mount(target)`,
     );
     return story.root;
   },
@@ -82,6 +83,7 @@ export const enhance: Story = {
           <p>Ligne 8 — texte suffisant pour permettre le défilement.</p>
           <p>Ligne 9 — texte suffisant pour permettre le défilement.</p>
           <p>Ligne 10 — texte suffisant pour permettre le défilement.</p>
+          <footer class="fui-drawer-footer">Annuler · Appliquer</footer>
         </aside>
       </div>,
     );
@@ -91,7 +93,7 @@ export const enhance: Story = {
       enhanceDrawer(root, { ...args, triggerSelector: "#story-drawer-enhance-trigger" }),
     );
     story.setSource(
-      `<button id="story-drawer-enhance-trigger">Navigation</button>\n<div class="fui-drawer">\n  <aside class="fui-drawer-content">…</aside>\n</div>`,
+      `<button id="story-drawer-enhance-trigger">Navigation</button>\n<div class="fui-drawer">\n  <aside class="fui-drawer-content">\n    …\n    <footer class="fui-drawer-footer">…</footer>\n  </aside>\n</div>`,
     );
     return story.root;
   },

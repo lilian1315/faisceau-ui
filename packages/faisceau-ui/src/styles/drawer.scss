@@ -137,6 +137,14 @@
   @include fui-overlay-body-content;
 }
 
+.fui-drawer-body:has(+ .fui-drawer-footer) {
+  margin-block-end: 0;
+}
+
+.fui-drawer-footer {
+  @include fui-overlay-footer;
+}
+
 .fui-drawer-close {
   @include fui-close-button;
 }

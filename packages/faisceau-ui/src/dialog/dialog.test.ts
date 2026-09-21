@@ -164,6 +164,19 @@ describe("Dialog", () => {
     controller.destroy();
   });
 
+  it("adds an optional fixed footer after the scrolling body", () => {
+    const controller = createDialog({
+      content: "Contenu",
+      footer: "Annuler · Confirmer",
+      title: "Confirmer",
+    }).mount(document.body);
+
+    const body = controller.root.querySelector(".fui-dialog-body")!;
+    expect(body.nextElementSibling?.classList.contains("fui-dialog-footer")).toBe(true);
+    expect(body.nextElementSibling?.textContent).toBe("Annuler · Confirmer");
+    controller.destroy();
+  });
+
   it("flags the body scroll edges while only the body scrolls", async () => {
     const controller = createDialog({ content: "Body", title: "Titre" }).mount(document.body);
     const body = controller.root.querySelector<HTMLElement>(".fui-dialog-body")!;
@@ -233,6 +246,22 @@ describe("Dialog", () => {
     const original = root.innerHTML;
     const controller = enhanceDialog(root);
     expect(root.querySelector(".fui-dialog-body-content > p")?.textContent).toBe("Body");
+    controller.destroy();
+    expect(root.innerHTML).toBe(original);
+  });
+
+  it("adopts a caller-provided footer and restores it", () => {
+    const root = document.createElement("div");
+    root.className = "fui-dialog";
+    root.innerHTML =
+      '<section class="fui-dialog-content"><h2 class="fui-dialog-title">Profile</h2><p>Body</p><footer class="fui-dialog-footer">Actions</footer></section>';
+    document.body.append(root);
+    const original = root.innerHTML;
+    const controller = enhanceDialog(root);
+    expect(root.querySelector(".fui-dialog-footer")?.textContent).toBe("Actions");
+    expect(root.querySelector(".fui-dialog-body")?.nextElementSibling).toBe(
+      root.querySelector(".fui-dialog-footer"),
+    );
     controller.destroy();
     expect(root.innerHTML).toBe(original);
   });

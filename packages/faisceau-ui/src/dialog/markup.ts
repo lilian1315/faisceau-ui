@@ -10,6 +10,7 @@ export interface OverlayView {
   close: HTMLButtonElement;
   content: HTMLElement;
   description: HTMLElement | null;
+  footer: HTMLElement | null;
   header: HTMLElement;
   positioner: HTMLElement;
   title: HTMLElement;
@@ -19,6 +20,7 @@ export function createOverlayView(options: {
   closeLabel?: string;
   content: string;
   description?: string;
+  footer?: string;
   title: string;
   variant: OverlayVariant;
 }): OverlayView {
@@ -35,8 +37,23 @@ export function createOverlayView(options: {
   const header = h("div", { class: `fui-${options.variant}-header` }, title, description, close);
   const bodyContent = h("div", { class: `fui-${options.variant}-body-content` }, options.content);
   const body = h("div", { class: `fui-${options.variant}-body` }, bodyContent);
-  const content = h("div", { class: `fui-${options.variant}-content` }, header, body);
+  const footer =
+    options.footer === undefined
+      ? null
+      : h("div", { class: `fui-${options.variant}-footer` }, options.footer);
+  const content = h("div", { class: `fui-${options.variant}-content` }, header, body, footer);
   const positioner = h("div", { class: `fui-${options.variant}-positioner` }, content);
   const backdrop = h("div", { class: `fui-${options.variant}-backdrop` });
-  return { backdrop, body, bodyContent, close, content, description, header, positioner, title };
+  return {
+    backdrop,
+    body,
+    bodyContent,
+    close,
+    content,
+    description,
+    footer,
+    header,
+    positioner,
+    title,
+  };
 }

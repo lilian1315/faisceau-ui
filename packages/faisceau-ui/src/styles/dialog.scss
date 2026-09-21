@@ -48,6 +48,14 @@
   @include fui-overlay-body-content;
 }
 
+.fui-dialog-body:has(+ .fui-dialog-footer) {
+  margin-block-end: 0;
+}
+
+.fui-dialog-footer {
+  @include fui-overlay-footer;
+}
+
 .fui-dialog-close {
   @include fui-close-button;
 }
