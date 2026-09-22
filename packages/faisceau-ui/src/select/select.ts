@@ -1,191 +1,227 @@
-import { h } from "@lilian1315/create-element";
 import * as select from "@zag-js/select";
-import { effect } from "faisceau";
+import { effect, signal } from "faisceau";
 import { createZagMachine } from "faisceau-zag";
-
+import { captureAttributes, captureChildNodes, getLookupRoot, insertAfter } from "../shared/dom.ts";
+import { createId } from "../shared/id.ts";
+import { normalizeItems } from "../shared/items.ts";
+import type { FuiItem } from "../shared/items.ts";
+import { requireFuiClass } from "../shared/parts.ts";
+import { createAlignedPositioning } from "./alignment.ts";
+import { createMarkup } from "./markup.ts";
+import { bindNativeEvents, readValue, writeValue } from "./native.ts";
 import type { EnhanceSelectProps, SelectController, SelectProps } from "./types.ts";
-import {
-  createId,
-  getLookupRoot,
-  normalizeItems,
-  type FuiItem,
-  type FuiItemInput,
-} from "../shared/index.js";
-import { captureAttributes, captureChildNodes, ensureText, insertAfter } from "../shared/dom.ts";
-import { buildControl, buildNativeSelect, buildOptions, buildPopup } from "./markup.ts";
 
-export function createSelect(options: SelectProps): SelectController {
-  return factory(undefined, options);
-}
-
-export function enhanceSelect(
-  root: HTMLDivElement,
-  options?: EnhanceSelectProps,
-): SelectController {
-  return factory(root, options);
-}
-
-function factory(
-  root?: HTMLDivElement,
-  options?: SelectProps | EnhanceSelectProps,
-): SelectController {
-  if (root && !root.classList.contains("fui-select")) {
-    throw new Error("[Faisceau UI] Select enhance mode need a root with the `fui-select` class");
-  }
-
-  const enhanceMode = !!root;
-  const restores: (() => void)[] = [];
-  options ??= { items: [] };
-  if (typeof options.alignItemWithTrigger === "undefined") options.alignItemWithTrigger = true;
-
-  let multiple: boolean = options.multiple ?? false;
-  const placeholder = options.placeholder ?? "Select an option";
-
-  let nativeSelect: HTMLSelectElement;
-  let items: FuiItem[];
-  let initialValue: string[];
-
-  if (root) {
-    const found = root.querySelector<HTMLSelectElement>("select.fui-select-native-select");
-    if (!found) throw new Error("[Faisceau UI] missing Select `select.fui-select-native-select`");
-    nativeSelect = found;
-    restores.push(captureAttributes(root), captureAttributes(nativeSelect));
-    if (typeof options.multiple === "undefined") multiple = nativeSelect.multiple;
-
-    initialValue = [...(options.value ?? options.defaultValue ?? readSelected(nativeSelect))];
-    if (options.items) {
-      items = normalizeItems(options.items);
-      const known = new Set(items.map((item) => item.value));
-      initialValue = initialValue.filter((value) => known.has(value));
-      restores.push(captureChildNodes(nativeSelect));
-      nativeSelect.replaceChildren(...buildOptions(items, placeholder, multiple, initialValue));
-    } else {
-      items = normalizeItems(readItems(nativeSelect));
-    }
-    // Like Checkbox, unspecified form props are read from the adopted element.
-    options = {
-      ...options,
-      name: options.name ?? (nativeSelect.name || undefined),
-      disabled: options.disabled ?? nativeSelect.disabled,
-      required: options.required ?? nativeSelect.required,
-      form: options.form ?? nativeSelect.getAttribute("form") ?? undefined,
-      autoComplete: options.autoComplete ?? nativeSelect.getAttribute("autocomplete") ?? undefined,
-    };
-  } else {
-    if (options.items === undefined)
-      throw new Error("[Faisceau UI] Select creation requires options.items.");
-    items = normalizeItems(options.items);
-    initialValue = [...(options.value ?? options.defaultValue ?? [])];
-    root = h("div", { class: "fui-select" }) as HTMLDivElement;
-    nativeSelect = buildNativeSelect(items, { ...options, multiple, value: initialValue });
-    root.append(nativeSelect);
-  }
-
-  const label = ensureText(
-    root,
-    { tag: "label", class: "fui-field-label" },
-    (parent, node) => parent.prepend(node),
-    options.label,
-    enhanceMode,
-    restores,
-  );
-  ensureText(
-    root,
-    { tag: "p", class: "fui-field-description" },
-    (parent, node) => parent.append(node),
-    options.description,
-    enhanceMode,
-    restores,
-  );
-
-  // Every other part is always generated fresh, in both modes.
-  const { control, trigger, value: valueText, indicator, clearTrigger } = buildControl(options);
-  insertAfter(root, control, nativeSelect);
-  restores.push(() => control.remove());
-  const { positioner, content, list } = buildPopup(items);
-  insertAfter(root, positioner, control);
-  restores.push(() => positioner.remove());
-
+export function createSelect(props: SelectProps): SelectController {
   const {
-    items: _items,
+    items: inputs,
     label: _label,
     description: _description,
-    placeholder: _placeholder,
     clearable: _clearable,
-    clearLabel: _clearLabel,
-    id: requestedId,
-    value,
-    defaultValue: _defaultValue,
     ...behavior
-  } = options;
+  } = props;
+  const items = normalizeItems(inputs);
+  validateValues(items);
+  return setup(createMarkup(items, props), items, behavior);
+}
+
+export function enhanceSelect(root: HTMLElement, props: EnhanceSelectProps = {}): SelectController {
+  if (!root.classList.contains("fui-select"))
+    throw new Error("[Faisceau UI] Select requires .fui-select.");
+  const native = requireFuiClass<HTMLSelectElement>(root, "fui-select-native-select");
+  if (!(native instanceof HTMLSelectElement))
+    throw new Error("[Faisceau UI] Select requires a native <select>.");
+  const placeholderOption = native.querySelector<HTMLOptionElement>("option[data-placeholder]");
+  const items = normalizeItems(
+    Array.from(native.options)
+      .filter((option) => option !== placeholderOption)
+      .map((option) => ({
+        value: option.value,
+        label: option.label,
+        disabled:
+          option.disabled ||
+          (option.parentElement instanceof HTMLOptGroupElement && option.parentElement.disabled),
+      })),
+  );
+  validateValues(items);
+  const restore = [root, ...root.querySelectorAll("*")].map(captureAttributes);
+  const parent = root.parentNode;
+  const next = root.nextSibling;
+  const markup = createMarkup(items, { ...props, items, label: props.label ?? "" });
+  const generated: Element[] = [];
+  for (const child of Array.from(markup.children)) {
+    if (child.classList.contains("fui-select-native-select")) continue;
+    const isLabel = child.classList.contains("fui-label");
+    const isDescription = child.classList.contains("fui-select-description");
+    const existing = isLabel || isDescription ? root.querySelector(`.${child.className}`) : null;
+    if (existing) {
+      const text = isLabel ? props.label : props.description;
+      if (text !== undefined) {
+        restore.push(captureChildNodes(existing));
+        existing.textContent = text;
+      }
+    } else {
+      if (isLabel) root.prepend(child);
+      else if (child.classList.contains("fui-select-control"))
+        insertAfter(native.parentNode!, child, native);
+      else if (child.classList.contains("fui-select-positioner")) {
+        const control = root.querySelector(".fui-select-control")!;
+        insertAfter(control.parentNode!, child, control);
+      } else root.append(child);
+      generated.push(child);
+    }
+  }
+  return setup(
+    root,
+    items,
+    {
+      name: native.name || undefined,
+      form: native.getAttribute("form") ?? undefined,
+      autoComplete: native.getAttribute("autocomplete") ?? undefined,
+      multiple: native.multiple,
+      required: native.required,
+      disabled: native.disabled,
+      defaultValue: readValue(native),
+      placeholder: placeholderOption?.label,
+      ...props,
+    },
+    () => {
+      generated.forEach((node) => node.remove());
+      restore.forEach((fn) => fn());
+      if (parent && root.parentNode !== parent)
+        parent.insertBefore(root, next?.parentNode === parent ? next : null);
+    },
+  ).start();
+}
+
+function setup(
+  root: HTMLElement,
+  items: FuiItem[],
+  props: EnhanceSelectProps,
+  restore?: () => void,
+): SelectController {
+  if (!root.classList.contains("fui-select"))
+    throw new Error("[Faisceau UI] Select requires .fui-select.");
+  const part = <T extends HTMLElement = HTMLElement>(name: string) =>
+    requireFuiClass<T>(root, `fui-select-${name}`);
+  // Both ownership paths use the same generated control and popup.
+  const native = part<HTMLSelectElement>("native-select");
+  const label = requireFuiClass(root, "fui-label");
+  const control = part("control");
+  const trigger = part<HTMLButtonElement>("trigger");
+  const valueText = part("value-text");
+  const indicator = part("indicator");
+  const positioner = part("positioner");
+  const content = part("content");
+  const list = part("list");
+  const description = root.querySelector<HTMLElement>(".fui-select-description");
+  const clear = root.querySelector<HTMLButtonElement>(".fui-select-clear-trigger");
+  const rows = Array.from(list.querySelectorAll<HTMLElement>(".fui-select-item"));
+  if (rows.length !== items.length)
+    throw new Error(
+      "[Faisceau UI] Select needs one .fui-select-item per native option, in the same order (excluding the empty placeholder).",
+    );
+  const itemParts = rows.map((row) => ({
+    row,
+    text: requireFuiClass(row, "fui-select-item-text"),
+    indicator: requireFuiClass(row, "fui-select-item-indicator"),
+  }));
+  const {
+    id = createId("select"),
+    placeholder = "Select an option",
+    label: _label,
+    description: _description,
+    clearable: _clearable,
+    ...behavior
+  } = props;
+  const hasValue = signal(readValue(native).length > 0);
+  const alignmentActive = signal(false);
+  const alignItemWithTrigger = behavior.alignItemWithTrigger;
+  const alignedPositioning = createAlignedPositioning(
+    { trigger, valueText, content, list },
+    behavior.positioning,
+    (aligned) => alignmentActive.set(aligned),
+  );
+  const shouldAlign = () => !!alignItemWithTrigger && !behavior.multiple && hasValue.get();
   const zag = createZagMachine(
     select.machine as select.Machine<FuiItem>,
-    {
+    () => ({
       ...behavior,
-      multiple,
+      alignItemWithTrigger: false,
+      positioning: shouldAlign() ? alignedPositioning : behavior.positioning,
+      id,
       collection: select.collection({
-        items: [...items],
-        isItemDisabled: (item) => item.disabled ?? false,
-        itemToString: (item) => item.label,
+        items,
         itemToValue: (item) => item.value,
+        itemToString: (item) => item.label,
+        isItemDisabled: (item) => !!item.disabled,
       }),
-      id: requestedId ?? createId("select"),
       getRootNode: () => getLookupRoot(root),
-      ...(value !== undefined ? { value } : { defaultValue: initialValue }),
-    },
+    }),
     select.connect,
   );
 
   zag.bind(root, (api) => api.getRootProps());
-  zag.bind(nativeSelect, (api) => api.getHiddenSelectProps());
-  if (label) zag.bind(label, (api) => api.getLabelProps());
+  zag.bind(label, (api) => api.getLabelProps());
   zag.bind(control, (api) => api.getControlProps());
-  zag.bind(trigger, (api) => api.getTriggerProps());
+  zag.bind(trigger, (api) => ({
+    ...api.getTriggerProps(),
+    "aria-describedby": description ? `${id}:description` : undefined,
+  }));
   zag.bind(valueText, (api) => api.getValueTextProps());
   zag.bind(indicator, (api) => api.getIndicatorProps());
   zag.bind(positioner, (api) => api.getPositionerProps());
-  zag.bind(content, (api) => api.getContentProps());
+  zag.bind(content, (api) => ({
+    ...api.getContentProps(),
+    "data-align-with-trigger": alignmentActive.get() ? "" : undefined,
+  }));
   zag.bind(list, (api) => api.getListProps());
-  if (clearTrigger) zag.bind(clearTrigger, (api) => api.getClearTriggerProps());
-  for (const [index, item] of items.entries()) {
-    const element = list.children[index] as HTMLElement;
-    zag.bind(element, (api) => api.getItemProps({ item }));
-    const text = element.querySelector<HTMLElement>(".fui-select-item-text");
-    if (text) zag.bind(text, (api) => api.getItemTextProps({ item }));
-    const indicator = element.querySelector<HTMLElement>(".fui-select-item-indicator");
-    if (indicator) zag.bind(indicator, (api) => api.getItemIndicatorProps({ item }));
-  }
-
-  // One subscription drives the value text, the placeholder state, and the
-  // native repair. The native select is Zag's hidden select, which syncs
-  // options, emits one bubbling `change` per value change, and follows form
-  // reset. One gap remains: Zag also maps the value onto `select.value`, which
-  // only selects a single option, so re-renders wipe multiple selections.
-  // Repairing the options here never dispatches, so the cycle terminates.
+  if (description) description.id = `${id}:description`;
+  if (clear)
+    zag.bind(clear, (api) => ({
+      ...api.getClearTriggerProps(),
+      disabled: api.disabled || props.readOnly,
+    }));
+  itemParts.forEach(({ row, text, indicator }, index) => {
+    const item = items[index]!;
+    zag.bind(row, (api) => api.getItemProps({ item }));
+    zag.bind(text, (api) => api.getItemTextProps({ item }));
+    zag.bind(indicator, (api) => api.getItemIndicatorProps({ item }));
+  });
+  const stopNativeEvents = bindNativeEvents(
+    native,
+    () => zag.api.get().value,
+    (value) => zag.api.get().setValue(value),
+    () => trigger.focus(),
+  );
+  zag.bind(native, (api) => {
+    // Vanilla maps defaultValue to select.value, which cannot represent multiple
+    // values. Let Zag's native sync and the effect below own option selection.
+    // The native bridge handles both events; Vanilla aliases change to input.
+    const { value: _value, oninput: _onInput, ...attrs } = api.getHiddenSelectProps();
+    return attrs;
+  });
   const stopSync = effect(() => {
     const api = zag.api.get();
-    const empty = api.value.length === 0;
-    valueText.textContent = empty ? placeholder : api.valueAsString;
-    valueText.toggleAttribute("data-placeholder-shown", empty);
-    if (!sameValues(readSelected(nativeSelect), api.value)) applyValue(nativeSelect, api.value);
+    if (!api.open || !api.hasSelectedItems) alignmentActive.set(false);
+    hasValue.set(api.hasSelectedItems);
+    valueText.textContent = api.hasSelectedItems ? api.valueAsString : placeholder;
+    writeValue(native, api.value);
   });
-
   let started = false;
   let destroyed = false;
-
-  const controller: SelectController = {
-    api: zag.api,
+  return {
     root,
+    api: zag.api,
     get started() {
-      return started;
+      return started && !destroyed;
     },
-    mount(target: ParentNode) {
-      if (destroyed) return throwDestroyed();
+    mount(target) {
+      assertAlive();
       target.append(root);
       return this.start();
     },
     start() {
-      if (destroyed) return throwDestroyed();
+      assertAlive();
       if (!started) {
         zag.start();
         started = true;
@@ -197,59 +233,20 @@ function factory(
       destroyed = true;
       const value = zag.api.get().value;
       stopSync();
+      stopNativeEvents();
       zag.destroy();
-
-      if (enhanceMode) {
-        restores.forEach((restore) => restore());
-        applyValue(nativeSelect, value);
-        return;
-      }
-
-      root?.remove();
+      if (restore) {
+        restore();
+        writeValue(native, value);
+      } else root.remove();
     },
   };
-
-  if (enhanceMode) controller.start();
-
-  return controller;
-}
-
-/** Reads items from native options, skipping the explicitly-marked placeholder. */
-function readItems(native: HTMLSelectElement): FuiItemInput[] {
-  return Array.from(native.options)
-    .filter((option) => !option.hasAttribute("data-placeholder"))
-    .map((option) => ({
-      value: option.value,
-      label: option.label || option.text,
-      ...(option.disabled ? { disabled: true as const } : {}),
-    }));
-}
-
-/** Reads the selected values, excluding the explicitly-marked placeholder. */
-function readSelected(native: HTMLSelectElement): string[] {
-  const placeholder = native.querySelector("option[data-placeholder]");
-  return Array.from(native.selectedOptions)
-    .filter((option) => option !== placeholder)
-    .map((option) => option.value);
-}
-
-/** Applies a value to the native select without emitting events. */
-function applyValue(native: HTMLSelectElement, value: readonly string[]): void {
-  const selected = new Set(value);
-  for (const option of native.options) {
-    option.selected = option.hasAttribute("data-placeholder")
-      ? selected.size === 0
-      : selected.has(option.value);
+  function assertAlive() {
+    if (destroyed) throw new Error("[Faisceau UI] Cannot start or mount a destroyed Select.");
   }
 }
 
-/** Order-insensitive value comparison (native order follows the document). */
-function sameValues(left: readonly string[], right: readonly string[]): boolean {
-  if (left.length !== right.length) return false;
-  const rightValues = new Set(right);
-  return left.every((value) => rightValues.has(value));
-}
-
-function throwDestroyed(): never {
-  throw new Error("[Faisceau UI] Cannot start or mount a destroyed Select.");
+function validateValues(items: FuiItem[]): void {
+  if (items.some((item) => item.value === ""))
+    throw new Error("[Faisceau UI] Select reserves the empty value for its placeholder.");
 }

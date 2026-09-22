@@ -1,350 +1,375 @@
+import "../styles/select.scss";
 import { afterEach, describe, expect, it, vi } from "vite-plus/test";
-
-import "../styles/index.scss";
+import { page, userEvent } from "vite-plus/test/browser";
 import { createSelect, enhanceSelect } from "./select.ts";
+import type { SelectController, SelectProps } from "./types.ts";
 
+const items = [
+  { value: "ng", label: "Nigeria" },
+  { value: "jp", label: "Japan", disabled: true },
+  { value: "kr", label: "Korea" },
+  { value: "ke", label: "Kenya" },
+  { value: "uk", label: "United Kingdom" },
+];
+const controllers: SelectController[] = [];
 afterEach(() => {
+  controllers.splice(0).forEach((controller) => controller.destroy());
   document.body.replaceChildren();
 });
+function create(props: Partial<SelectProps> = {}, target: ParentNode = document.body) {
+  const controller = createSelect({ items, label: "Country", ...props });
+  controllers.push(controller);
+  return controller.mount(target);
+}
+function part<T extends HTMLElement = HTMLElement>(controller: SelectController, name: string): T {
+  return controller.root.querySelector<T>(`.fui-select-${name}`)!;
+}
+const trigger = () => page.getByRole("combobox", { name: "Country" });
+const option = (name: string) => page.getByRole("option", { name, exact: true });
 
-describe("Select3", () => {
-  it("applies the field layout without an extra root class", () => {
+describe("Select (Zag v2)", () => {
+  it("starts only when mounted, supports detached trees, and tears down idempotently", () => {
+    const controller = createSelect({ items, label: "Country" });
+    expect(controller.started).toBe(false);
+    expect(controller.root.querySelector("label.fui-label")?.textContent).toBe("Country");
+    expect(controller.root.querySelector("option[data-placeholder]")?.textContent).toBe(
+      "Select an option",
+    );
     const host = document.createElement("div");
-    host.style.width = "600px";
-    document.body.append(host);
-    const controller = createSelect({ items: ["One"], label: "Value" }).mount(host);
-    try {
-      const root = controller.root;
-      const trigger = root.querySelector<HTMLElement>(".fui-select-trigger")!;
-      expect(root.getBoundingClientRect().width).toBeLessThanOrEqual(240);
-      expect(parseFloat(getComputedStyle(root).rowGap)).toBeGreaterThan(0);
-      expect(trigger.getBoundingClientRect().width).toBeCloseTo(
-        root.getBoundingClientRect().width,
-        0,
-      );
-    } finally {
-      controller.destroy();
-    }
+    controller.mount(host).start();
+    expect(controller.started).toBe(true);
+    controller.destroy();
+    controller.destroy();
+    expect(host.childElementCount).toBe(0);
+    expect(controller.started).toBe(false);
+    expect(() => controller.start()).toThrow("destroyed Select");
   });
 
-  it("binds the chevron state and gives the popup an explicit width and layer", async () => {
-    const controller = createSelect({ items: ["One", "Two"], label: "Value" }).mount(document.body);
-    try {
-      const indicator = controller.root.querySelector<HTMLElement>(".fui-select-indicator")!;
-      expect(indicator.getAttribute("data-state")).toBe("closed");
-      controller.api.get().setOpen(true);
-      await vi.waitFor(() => expect(indicator.getAttribute("data-state")).toBe("open"));
-      const content = controller.root.querySelector<HTMLElement>(".fui-select-content")!;
-      const positioner = controller.root.querySelector<HTMLElement>(".fui-select-positioner")!;
-      await vi.waitFor(() => {
-        expect(content.getBoundingClientRect().width).toBeCloseTo(240, 0);
-        expect(Number(getComputedStyle(positioner).zIndex)).toBeGreaterThanOrEqual(50);
-      });
-      controller.api.get().setOpen(false);
-      await vi.waitFor(() => expect(indicator.getAttribute("data-state")).toBe("closed"));
-    } finally {
-      controller.destroy();
-    }
+  it("selects with the pointer, exposes labels and descriptions, and emits input then change once", async () => {
+    const form = document.createElement("form");
+    document.body.append(form);
+    const onValueChange = vi.fn();
+    const controller = create(
+      { name: "country", description: "Where do you live?", onValueChange },
+      form,
+    );
+    const events: string[] = [];
+    form.addEventListener("input", () => events.push("input"));
+    form.addEventListener("change", () => events.push("change"));
+    await page.getByText("Country", { exact: true }).click();
+    await expect.element(trigger()).toHaveFocus();
+    expect(part(controller, "trigger").getAttribute("aria-describedby")).toBe(
+      part(controller, "description").id,
+    );
+    await trigger().click();
+    await expect.element(page.getByRole("listbox", { name: "Country" })).toBeVisible();
+    await expect.element(option("Japan")).toHaveAttribute("aria-disabled", "true");
+    await option("Korea").click();
+    await vi.waitFor(() => expect(events).toEqual(["input", "change"]));
+    expect(new FormData(form).get("country")).toBe("kr");
+    expect(onValueChange).toHaveBeenCalledTimes(1);
+    await expect.element(trigger()).toHaveTextContent("Korea");
+    await expect.element(trigger()).toHaveFocus();
+    expect(controller.api.get().open).toBe(false);
   });
 
-  it("keeps the selected text aligned after the opening animation", async () => {
-    const controller = createSelect({
-      defaultValue: ["two"],
-      items: [
-        { value: "one", label: "One", description: "First option" },
-        { value: "two", label: "Two", description: "Second option" },
-        { value: "three", label: "Three", description: "Third option" },
-      ],
-      label: "Value",
-    }).mount(document.body);
-    controller.root.style.position = "fixed";
-    controller.root.style.top = "150px";
-    controller.root.style.left = "100px";
-    try {
-      controller.api.get().setOpen(true);
-      const content = controller.root.querySelector<HTMLElement>(".fui-select-content")!;
-      await vi.waitFor(() => expect(content.hasAttribute("data-align-with-trigger")).toBe(true));
-      await Promise.all(content.getAnimations().map((animation) => animation.finished));
-      const selected = controller.root
-        .querySelector('.fui-select-item[data-value="two"] .fui-select-item-text')!
-        .getBoundingClientRect();
-      const value = controller.root.querySelector(".fui-select-value")!.getBoundingClientRect();
-      expect(Math.abs(selected.left - value.left)).toBeLessThanOrEqual(1);
-      expect(getComputedStyle(content).transform).toBe("none");
-      // Zag subtracts the scroller's border offset from the aligned height.
-      // Allow that border plus one browser layout unit of rounding.
-      const alignmentTolerance = parseFloat(getComputedStyle(content).borderTopWidth) + 1 / 64;
-      expect(
-        Math.abs(selected.top + selected.height / 2 - value.top - value.height / 2),
-      ).toBeLessThanOrEqual(alignmentTolerance);
-    } finally {
-      controller.destroy();
-    }
-  });
-
-  it("does not reserve a scrollbar for a short list", async () => {
-    const controller = createSelect({ items: ["One", "Two"], label: "Value" }).mount(document.body);
-    try {
-      controller.api.get().setOpen(true);
-      const list = controller.root.querySelector<HTMLElement>(".fui-select-list")!;
-      await vi.waitFor(() => expect(list.clientHeight).toBeGreaterThan(0));
-      expect(list.scrollHeight - list.clientHeight).toBeLessThanOrEqual(1);
-    } finally {
-      controller.destroy();
-    }
-  });
-
-  it.each([true, false])(
-    "keeps a constrained long list scrollable (alignment: %s)",
-    async (alignItemWithTrigger) => {
-      const controller = createSelect({
-        alignItemWithTrigger,
-        defaultValue: ["Item 20"],
-        items: Array.from({ length: 60 }, (_, index) => `Item ${index + 1}`),
-        label: "Value",
-      }).mount(document.body);
-      controller.root.style.position = "fixed";
-      controller.root.style.top = "100px";
-      const content = controller.root.querySelector<HTMLElement>(".fui-select-content")!;
-      // Reproduce a popup whose visible height is constrained independently of its list.
-      content.style.maxBlockSize = "120px";
-      try {
-        controller.api.get().setOpen(true);
-        const list = controller.root.querySelector<HTMLElement>(".fui-select-list")!;
-        await vi.waitFor(() => {
-          expect(document.activeElement).toBe(list);
-          expect(list.clientHeight).toBeGreaterThan(0);
-          expect(list.getBoundingClientRect().bottom).toBeLessThanOrEqual(
-            content.getBoundingClientRect().bottom,
-          );
-          expect(list.scrollHeight).toBeGreaterThan(list.clientHeight);
-          expect(getComputedStyle(list).outlineStyle).toBe("solid");
-        });
-        list.dispatchEvent(
-          new KeyboardEvent("keydown", { bubbles: true, cancelable: true, key: "End" }),
-        );
-        await vi.waitFor(() => {
-          expect(controller.api.get().highlightedValue).toBe("Item 60");
-          const last = list.lastElementChild!.getBoundingClientRect();
-          expect(last.bottom).toBeLessThanOrEqual(list.getBoundingClientRect().bottom + 1);
-        });
-        list.dispatchEvent(
-          new KeyboardEvent("keydown", { bubbles: true, cancelable: true, key: "Enter" }),
-        );
-        await vi.waitFor(() => expect(controller.api.get().value).toEqual(["Item 60"]));
-      } finally {
-        controller.destroy();
-      }
+  it.each(["{Enter}", " ", "{ArrowDown}", "{ArrowUp}"])(
+    "opens with %s and closes with Escape",
+    async (key) => {
+      const controller = create();
+      part(controller, "trigger").focus();
+      await userEvent.keyboard(key);
+      await expect.element(page.getByRole("listbox")).toHaveFocus();
+      await userEvent.keyboard("{Escape}");
+      await expect.element(trigger()).toHaveFocus();
+      expect(controller.api.get().open).toBe(false);
     },
   );
 
-  it("can mount while its target is still detached, as Storybook render requires", () => {
-    const host = document.createElement("div");
-    const controller = createSelect({ items: ["One", "Two"], label: "Detached select" });
-
-    expect(() => controller.mount(host)).not.toThrow();
-    expect(controller.started).toBe(true);
-    controller.destroy();
+  it("skips disabled items, supports Home/End, typeahead and keyboard selection", async () => {
+    const controller = create();
+    part(controller, "trigger").focus();
+    await userEvent.keyboard("{ArrowDown}");
+    await expect.element(page.getByRole("listbox")).toHaveFocus();
+    await userEvent.keyboard("{ArrowDown}");
+    await vi.waitFor(() => expect(controller.api.get().highlightedValue).toBe("kr"));
+    await userEvent.keyboard("{End}");
+    expect(controller.api.get().highlightedValue).toBe("uk");
+    await userEvent.keyboard("{Home}");
+    expect(controller.api.get().highlightedValue).toBe("ng");
+    await userEvent.keyboard("ke");
+    await vi.waitFor(() => expect(controller.api.get().highlightedValue).toBe("ke"));
+    await userEvent.keyboard("{Enter}");
+    await expect.element(trigger()).toHaveTextContent("Kenya");
   });
 
-  it("builds a self-contained tree with a native select, trigger, and items", () => {
-    const controller = createSelect({
-      description: "Pick one",
-      items: ["One", "Two"],
-      label: "Value",
-      placeholder: "Choose",
-    }).mount(document.body);
-
-    expect(controller.root.tagName).toBe("DIV");
-    expect(controller.root.classList.contains("fui-select")).toBe(true);
-    expect(controller.root.querySelector("select.fui-select-native-select")).not.toBeNull();
-    expect(controller.root.querySelector(".fui-select-trigger")).not.toBeNull();
-    expect(controller.root.querySelector(".fui-select-value")?.textContent).toBe("Choose");
-    expect(controller.root.querySelector("label.fui-field-label")?.textContent).toBe("Value");
-    expect(controller.root.querySelector("p.fui-field-description")?.textContent).toBe("Pick one");
-    controller.destroy();
-    expect(controller.root.isConnected).toBe(false);
+  it("supports closed typeahead, looping, clear and deselection", async () => {
+    const controller = create({ loopFocus: true, clearable: true, deselectable: true });
+    part(controller, "trigger").focus();
+    await userEvent.keyboard("uni");
+    await expect.element(trigger()).toHaveTextContent("United Kingdom");
+    const clear = page.getByRole("button", { name: "Clear value" }).element() as HTMLButtonElement;
+    expect(clear.parentElement).toBe(part(controller, "control"));
+    expect(getComputedStyle(clear).backgroundColor).toBe("rgba(0, 0, 0, 0)");
+    clear.click();
+    await expect.element(trigger()).toHaveFocus();
+    await expect.element(trigger()).toHaveTextContent("Select an option");
+    await userEvent.keyboard("{ArrowDown}");
+    await expect.element(page.getByRole("listbox")).toHaveFocus();
+    await userEvent.keyboard("{ArrowUp}");
+    await vi.waitFor(() => expect(controller.api.get().highlightedValue).toBe("uk"));
+    await option("Nigeria").click();
+    await trigger().click();
+    await option("Nigeria").click();
+    expect(controller.api.get().value).toEqual([]);
   });
 
-  it("selects an item and submits its native value", async () => {
-    const onValueChange = vi.fn();
+  it("dismisses outside without selecting the highlighted option", async () => {
+    const controller = create();
+    const outside = document.createElement("button");
+    outside.textContent = "Outside";
+    Object.assign(outside.style, { position: "fixed", right: "0", top: "0" });
+    document.body.append(outside);
+    await trigger().click();
+    await option("Korea").hover();
+    await vi.waitFor(() => expect(controller.api.get().highlightedValue).toBe("kr"));
+    await page.getByRole("button", { name: "Outside" }).click();
+    await vi.waitFor(() => expect(controller.api.get().open).toBe(false));
+    expect(controller.api.get().value).toEqual([]);
+  });
+
+  it("keeps multiple native values through highlight changes and form reset", async () => {
     const form = document.createElement("form");
     document.body.append(form);
-    const controller = createSelect({
-      items: [
-        { value: "fr", label: "France" },
-        { value: "be", label: "Belgique" },
-      ],
-      label: "Pays",
-      name: "country",
-      onValueChange,
-      placeholder: "Choisir",
-    }).mount(form);
-    const nativeSelect = controller.root.querySelector<HTMLSelectElement>("select")!;
-    const trigger = controller.root.querySelector<HTMLButtonElement>(".fui-select-trigger")!;
-
-    trigger.click();
-    await flushMachine();
-    controller.root.querySelector<HTMLElement>('.fui-select-item[data-value="be"]')!.click();
-    await flushMachine();
-
-    expect(controller.api.get().value).toEqual(["be"]);
-    expect(controller.root.querySelector(".fui-select-value")?.textContent).toBe("Belgique");
-    expect(nativeSelect.value).toBe("be");
-    expect(new FormData(form).get("country")).toBe("be");
-    expect(onValueChange).toHaveBeenCalledOnce();
-    controller.destroy();
-  });
-
-  it("emits one native change per visual interaction", async () => {
-    const controller = createSelect({
-      items: ["One", "Two"],
-      label: "Value",
-      name: "value",
-    }).mount(document.body);
-    const nativeSelect = controller.root.querySelector<HTMLSelectElement>("select")!;
-    const nativeChange = vi.fn();
-    nativeSelect.addEventListener("change", nativeChange);
-
-    controller.root.querySelector<HTMLButtonElement>(".fui-select-trigger")!.click();
-    await flushMachine();
-    controller.root.querySelector<HTMLElement>('.fui-select-item[data-value="Two"]')!.click();
-    await flushMachine();
-
-    // The machine syncs the hidden select and emits its own bubbling change.
-    expect(nativeChange).toHaveBeenCalledOnce();
-    controller.destroy();
-  });
-
-  it("selects, deselects, and submits multiple values without closing", async () => {
-    const form = document.createElement("form");
-    document.body.append(form);
-    const controller = createSelect({
-      defaultValue: ["fr"],
-      items: [
-        { value: "fr", label: "France" },
-        { value: "be", label: "Belgique" },
-        { value: "ch", label: "Suisse" },
-      ],
-      label: "Pays",
-      multiple: true,
-      name: "countries",
-    }).mount(form);
-
-    expect(controller.root.querySelector("select")!.multiple).toBe(true);
-
-    controller.root.querySelector<HTMLButtonElement>(".fui-select-trigger")!.click();
-    await flushMachine();
-    controller.root.querySelector<HTMLElement>('.fui-select-item[data-value="be"]')!.click();
-    await flushMachine();
-
+    const controller = create(
+      { multiple: true, name: "countries", defaultValue: ["ng"], closeOnSelect: false },
+      form,
+    );
+    await trigger().click();
+    await option("Korea").click();
+    await option("Kenya").hover();
     expect(controller.api.get().open).toBe(true);
-    expect(controller.api.get().value).toEqual(["fr", "be"]);
-    expect(new FormData(form).getAll("countries")).toEqual(["fr", "be"]);
-
-    controller.root.querySelector<HTMLElement>('.fui-select-item[data-value="fr"]')!.click();
-    await flushMachine();
-    expect(controller.api.get().value).toEqual(["be"]);
-    expect(new FormData(form).getAll("countries")).toEqual(["be"]);
-    controller.destroy();
-  });
-
-  it("follows form reset back to its initial value", async () => {
-    const form = document.createElement("form");
-    document.body.append(form);
-    const controller = createSelect({
-      defaultValue: ["fr"],
-      items: [
-        { value: "fr", label: "France" },
-        { value: "be", label: "Belgique" },
-      ],
-      label: "Pays",
-      name: "country",
-    }).mount(form);
-
-    controller.api.get().setValue(["be"]);
-    await flushMachine();
-    expect(new FormData(form).get("country")).toBe("be");
-
+    expect(new FormData(form).getAll("countries")).toEqual(["ng", "kr"]);
     form.reset();
-    await flushMachine();
-    expect(controller.api.get().value).toEqual(["fr"]);
-    expect(controller.root.querySelector(".fui-select-value")?.textContent).toBe("France");
-    expect(new FormData(form).get("country")).toBe("fr");
-    controller.destroy();
+    await vi.waitFor(() => expect(new FormData(form).getAll("countries")).toEqual(["ng"]));
+    expect(controller.api.get().value).toEqual(["ng"]);
   });
 
-  it("enhances caller markup, starts immediately, then restores it", async () => {
+  it.each(["input", "change"])("accepts native %s without an event echo", async (type) => {
+    const controller = create();
+    const native = part<HTMLSelectElement>(controller, "native-select");
+    const events: string[] = [];
+    controller.root.addEventListener("input", () => events.push("input"));
+    controller.root.addEventListener("change", () => events.push("change"));
+    native.value = "kr";
+    native.dispatchEvent(new Event(type, { bubbles: true }));
+    await expect.element(trigger()).toHaveTextContent("Korea");
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    expect(events).toEqual([type]);
+  });
+
+  it("preserves native validity and external form ownership, forwarding invalid focus", async () => {
+    const form = document.createElement("form");
+    form.id = "country-form";
+    document.body.append(form);
+    const controller = create({ form: form.id, name: "country", required: true });
+    expect(form.reportValidity()).toBe(false);
+    await expect.element(trigger()).toHaveFocus();
+    controller.api.get().setValue(["ke"]);
+    await vi.waitFor(() => expect(form.checkValidity()).toBe(true));
+    expect(new FormData(form).get("country")).toBe("ke");
+    form.reset();
+    await vi.waitFor(() => expect(controller.api.get().value).toEqual([]));
+    expect(form.checkValidity()).toBe(false);
+  });
+
+  it("follows disabled fieldsets and prevents read-only clearing", async () => {
+    const fieldset = document.createElement("fieldset");
+    fieldset.disabled = true;
+    document.body.append(fieldset);
+    const controller = create({}, fieldset);
+    await expect.element(trigger()).toBeDisabled();
+    fieldset.disabled = false;
+    await expect.element(trigger()).toBeEnabled();
+    controller.destroy();
+    const readonly = create({ readOnly: true, clearable: true, defaultValue: ["ng"] });
+    await trigger().click();
+    expect(readonly.api.get().open).toBe(false);
+    await expect.element(page.getByRole("button", { name: "Clear value" })).toBeDisabled();
+  });
+
+  it("keeps a controlled value when the consumer ignores selection", async () => {
+    const onValueChange = vi.fn();
+    const controller = create({ value: ["ng"], onValueChange });
+    await trigger().click();
+    await option("Korea").click();
+    expect(onValueChange).toHaveBeenCalledWith(expect.objectContaining({ value: ["kr"] }));
+    expect(controller.api.get().value).toEqual(["ng"]);
+    await expect.element(trigger()).toHaveTextContent("Nigeria");
+    expect(part<HTMLSelectElement>(controller, "native-select").value).toBe("ng");
+  });
+
+  it("enhances partial markup and restores attributes, content, listeners and placement", async () => {
     const root = document.createElement("div");
-    root.className = "fui-select consumer-root";
-    root.innerHTML = `<label class="fui-field-label">Pays</label><select class="fui-select-native-select" name="country"><option value="" data-placeholder="" hidden>Choisir</option><option value="fr" selected>France</option><option value="be">Belgique</option></select>`;
+    root.className = "fui-select consumer";
+    root.innerHTML =
+      '<label class="fui-label"><em>Country</em></label><select class="fui-select-native-select"><option value="ng" selected>Nigeria</option><option value="kr">Korea</option></select><p class="fui-select-description">Original help</p>';
+    const native = root.querySelector<HTMLSelectElement>("select")!;
+    native.name = "country";
+    native.value = "ng";
     document.body.append(root);
-    const nativeSelect = root.querySelector<HTMLSelectElement>("select")!;
-
-    const controller = enhanceSelect(root, {});
+    const html = root.outerHTML;
+    const nodes = [...root.querySelectorAll("*")];
+    const controller = enhanceSelect(root, { description: "Updated help", clearable: true });
+    controllers.push(controller);
     expect(controller.started).toBe(true);
-    expect(controller.api.get().value).toEqual(["fr"]);
-    expect(root.querySelector(".fui-select-trigger")).not.toBeNull();
-    expect(root.querySelector(".fui-select-value")?.textContent).toBe("France");
-
-    controller.root.querySelector<HTMLButtonElement>(".fui-select-trigger")!.click();
-    await flushMachine();
-    controller.root.querySelector<HTMLElement>('.fui-select-item[data-value="be"]')!.click();
-    await flushMachine();
-    expect(controller.api.get().value).toEqual(["be"]);
-
-    controller.destroy();
-    expect(root.querySelector(".fui-select-trigger")).toBeNull();
-    expect(root.querySelector(".fui-select-positioner")).toBeNull();
-    expect(root.className).toBe("fui-select consumer-root");
-    expect(root.querySelector("label.fui-field-label")?.textContent).toBe("Pays");
-    expect(nativeSelect.name).toBe("country");
-    expect(nativeSelect.value).toBe("be");
-  });
-
-  it("supports keyboard navigation through the list", async () => {
-    const controller = createSelect({
-      defaultValue: ["one"],
-      items: [
-        { value: "one", label: "One" },
-        { value: "two", label: "Two" },
-      ],
-      label: "Value",
-    }).mount(document.body);
-
-    controller.root.querySelector<HTMLButtonElement>(".fui-select-trigger")!.click();
-    await flushMachine();
-
-    const list = controller.root.querySelector<HTMLElement>(".fui-select-list")!;
-    list.dispatchEvent(
-      new KeyboardEvent("keydown", { bubbles: true, cancelable: true, key: "ArrowDown" }),
-    );
-    list.dispatchEvent(
-      new KeyboardEvent("keydown", { bubbles: true, cancelable: true, key: "Enter" }),
-    );
-    await flushMachine();
-
-    expect(controller.api.get().value).toEqual(["two"]);
-    expect(controller.api.get().open).toBe(false);
-    controller.destroy();
-  });
-
-  it("uses Lucide icons and only authors fui-prefixed classes", () => {
-    const controller = createSelect({ items: ["One", "Two"], label: "Value" });
-    expect(controller.root.querySelector('svg[data-fui-icon="chevron-down"]')).not.toBeNull();
-    expect(controller.root.querySelector('svg[data-fui-icon="check"]')).not.toBeNull();
-    const classes = Array.from(controller.root.querySelectorAll("[class]"), (element) => [
-      ...element.classList,
-    ]).flat();
-
     expect(
-      [...controller.root.classList, ...classes].every((name) => name.startsWith("fui-")),
-    ).toBe(true);
+      part(controller, "control").compareDocumentPosition(part(controller, "description")) &
+        Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+    await trigger().click();
+    await option("Korea").click();
     controller.destroy();
+    controller.destroy();
+    expect(root.outerHTML).toBe(html);
+    expect([...root.querySelectorAll("*")]).toEqual(nodes);
+    expect(native.value).toBe("kr");
+    expect(root.parentElement).toBe(document.body);
+    native.value = "ke";
+    native.dispatchEvent(new Event("change", { bubbles: true }));
+    expect(root.querySelector(".fui-select-value-text")).toBeNull();
+    expect(root.querySelector("label")!.innerHTML).toBe("<em>Country</em>");
+  });
+
+  it("accepts a bare native select and rejects invalid markup without mutation", () => {
+    const root = document.createElement("div");
+    root.className = "fui-select";
+    root.innerHTML =
+      '<select class="fui-select-native-select"><option value="ng">Nigeria</option></select>';
+    const html = root.outerHTML;
+    const controller = enhanceSelect(root, { label: "Country" });
+    expect(part(controller, "trigger")).not.toBeNull();
+    controller.destroy();
+    expect(root.outerHTML).toBe(html);
+    root.querySelector("select")!.remove();
+    expect(() => enhanceSelect(root)).toThrow("fui-select-native-select");
+    expect(() => createSelect({ label: "Country", items: [""] })).toThrow("empty value");
+  });
+
+  it("uses a marked native option as the placeholder when enhancing", async () => {
+    const form = document.createElement("form");
+    form.innerHTML =
+      '<div class="fui-select"><label class="fui-label">Mode</label><select class="fui-select-native-select" name="mode" required><option value="" data-placeholder>Choisir un mode</option><option value="simple">Simple</option><option value="expert">Expert</option></select></div>';
+    document.body.append(form);
+    const root = form.firstElementChild as HTMLElement;
+    const native = root.querySelector("select")!;
+    const original = root.outerHTML;
+    const controller = enhanceSelect(root);
+    controllers.push(controller);
+
+    expect(controller.api.get().value).toEqual([]);
+    expect(part(controller, "value-text").textContent).toBe("Choisir un mode");
+    expect(root.querySelectorAll(".fui-select-item")).toHaveLength(2);
+    expect(native.querySelector("option[data-placeholder]")).not.toBeNull();
+    expect(form.checkValidity()).toBe(false);
+
+    await page.getByRole("combobox", { name: "Mode" }).click();
+    await option("Expert").click();
+    expect(new FormData(form).get("mode")).toBe("expert");
+    form.reset();
+    await vi.waitFor(() =>
+      expect(part(controller, "value-text").textContent).toBe("Choisir un mode"),
+    );
+    expect(controller.api.get().value).toEqual([]);
+
+    controller.destroy();
+    expect(root.outerHTML).toBe(original);
+  });
+
+  it("uses standalone styles and aligns the selected text when requested", async () => {
+    const controller = create({ alignItemWithTrigger: true, defaultValue: ["kr"] });
+    Object.assign(controller.root.style, {
+      position: "fixed",
+      top: "180px",
+      left: "40px",
+      width: "240px",
+    });
+    expect(part(controller, "control").getBoundingClientRect().height).toBe(36);
+    await trigger().click();
+    await vi.waitFor(() =>
+      expect(part(controller, "content").hasAttribute("data-align-with-trigger")).toBe(true),
+    );
+    await vi.waitFor(() => {
+      const value = part(controller, "value-text").getBoundingClientRect();
+      const item = controller.root
+        .querySelector('.fui-select-item[data-state="checked"] .fui-select-item-text')!
+        .getBoundingClientRect();
+      expect(Math.abs(value.left - item.left)).toBeLessThan(2);
+      expect(Math.abs(value.top - item.top)).toBeLessThan(2);
+    });
+    const list = part(controller, "list");
+    expect(list.scrollHeight).toBeLessThanOrEqual(list.clientHeight);
+    expect(Number(getComputedStyle(part(controller, "positioner")).zIndex)).toBeGreaterThanOrEqual(
+      50,
+    );
+  });
+
+  it("uses normal anchored positioning when alignment is requested without a value", async () => {
+    const controller = create({ alignItemWithTrigger: true });
+    await trigger().click();
+    await vi.waitFor(() => expect(controller.api.get().open).toBe(true));
+    expect(part(controller, "content").hasAttribute("data-align-with-trigger")).toBe(false);
+    expect(part(controller, "positioner").style.position).toBe("absolute");
+  });
+
+  it("keeps the selected option visible in a long aligned list", async () => {
+    const controller = create({
+      alignItemWithTrigger: true,
+      items: Array.from({ length: 80 }, (_, index) => ({
+        value: String(index),
+        label: `Option ${index + 1}`,
+      })),
+      defaultValue: ["79"],
+    });
+    Object.assign(controller.root.style, {
+      position: "fixed",
+      top: "400px",
+      left: "40px",
+      width: "240px",
+    });
+    await trigger().click();
+    await vi.waitFor(() =>
+      expect(part(controller, "content").hasAttribute("data-align-with-trigger")).toBe(true),
+    );
+    await vi.waitFor(() => {
+      const list = part(controller, "list").getBoundingClientRect();
+      const selected = controller.root
+        .querySelector('.fui-select-item[data-state="checked"]')!
+        .getBoundingClientRect();
+      expect(selected.top).toBeGreaterThanOrEqual(list.top);
+      expect(selected.bottom).toBeLessThanOrEqual(list.bottom);
+    });
+    const value = part(controller, "value-text").getBoundingClientRect();
+    const selectedText = controller.root
+      .querySelector('.fui-select-item[data-state="checked"] .fui-select-item-text')!
+      .getBoundingClientRect();
+    expect(Math.abs(value.top - selectedText.top)).toBeLessThan(2);
+    const content = part(controller, "content").getBoundingClientRect();
+    expect(content.height).toBeLessThanOrEqual(320);
+    expect(content.top).toBeGreaterThanOrEqual(0);
+    expect(content.bottom).toBeLessThanOrEqual(document.documentElement.clientHeight);
+    expect(part(controller, "list").scrollHeight).toBeGreaterThan(
+      part(controller, "list").clientHeight,
+    );
+    await option("Option 80").click();
+    await expect.element(trigger()).toHaveTextContent("Option 80");
+    await trigger().click();
+    await vi.waitFor(() => {
+      const triggerValue = part(controller, "value-text").getBoundingClientRect();
+      const optionText = controller.root
+        .querySelector('.fui-select-item[data-state="checked"] .fui-select-item-text')!
+        .getBoundingClientRect();
+      expect(Math.abs(triggerValue.top - optionText.top)).toBeLessThan(2);
+    });
   });
 });
-
-async function flushMachine(): Promise<void> {
-  await Promise.resolve();
-  await new Promise((resolve) => setTimeout(resolve, 0));
-}

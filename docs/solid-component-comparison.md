@@ -72,22 +72,23 @@ nodes, while Faisceau reconciles attributes on controller-owned or adopted stabl
 Both use `@zag-js/select`, a list collection, the same selection/open/highlight state model, and
 parts for label, control, trigger, value text, positioner, content, list, items, item text, and item
 indicator. Faisceau also offers an optional clear trigger and enables Zag's selected-item alignment
-by default for single selection
+on request for single selection. Alignment runs after the popup height is capped so a selected item
+deep in a long list remains visible
 ([implementation](../packages/faisceau-ui/src/select/select.ts),
 [types](../packages/faisceau-ui/src/select/types.ts)). Ark exposes these as independently composable
 Solid parts, including groups, `HiddenSelect`, context, and provider APIs
 ([Solid source directory](https://github.com/chakra-ui/ark/tree/e988b66714df66ae4c43aea4bc8b1c0c839854ad/packages/solid/src/components/select)).
 
 Faisceau creates its collection and item DOM once. Enhancement derives the collection from exactly
-one existing `<select>` and validates a one-to-one item-node mapping. Ark receives the collection as
+one existing `<select>` and generates the visible control and popup. Ark receives the collection as
 a root prop and leaves JSX iteration to the consumer, so a reactive collection naturally drives
 both machine props and rendered items. Ark's item generic also preserves application item types;
 Faisceau normalizes public inputs to its fixed `{ label, value, description?, disabled? }` model.
 
-Faisceau always retains a real select and its shared native-field bridge synchronizes selections,
+Faisceau always retains a real select and its native bridge synchronizes selections,
 emits native `input` then `change`, handles `form.reset()`, redirects invalid/focus behavior to the
 visible trigger, and restores enhanced attributes while retaining the current value
-([native-select bridge](../packages/faisceau-ui/src/shared/native-select.ts)). Ark's
+([native-select bridge](../packages/faisceau-ui/src/select/native.ts)). Ark's
 [`HiddenSelect`](https://github.com/chakra-ui/ark/blob/e988b66714df66ae4c43aea4bc8b1c0c839854ad/packages/solid/src/components/select/select-hidden-select.tsx)
 is optional composition and renders options from the current collection. Faisceau is therefore
 stronger by default for native form and enhancement behavior; Ark is stronger for dynamic data and

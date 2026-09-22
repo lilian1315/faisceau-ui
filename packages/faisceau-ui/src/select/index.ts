@@ -1,2 +1,2 @@
 export { createSelect, enhanceSelect } from "./select.ts";
-export type { EnhanceSelectProps, SelectApi, SelectController, SelectProps } from "./types.ts";
+export type { SelectProps, EnhanceSelectProps, SelectApi, SelectController } from "./types.ts";

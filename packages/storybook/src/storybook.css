@@ -155,6 +155,14 @@ body {
   touch-action: manipulation;
 }
 
+.fui-dialog-title {
+  margin-top: 0;
+}
+
+.fui-dialog-content {
+  max-height: calc(100vh - 100px);
+}
+
 @media (hover: hover) {
   .fui-story__button:hover {
     background: #5948bd;

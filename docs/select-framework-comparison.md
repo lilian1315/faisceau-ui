@@ -102,13 +102,13 @@ All implementations use Zag's list collection abstraction with item-to-value, it
 
 Ark treats the collection as required root state but leaves visual item rendering to the consumer. Each declarative `Select.Item` receives the actual item object, obtains `getItemProps`, and provides item state to nested `ItemText` and `ItemIndicator` parts. This supports filtering, grouping, virtualization strategies, and arbitrary item markup, while the collection independently supplies the hidden native options.
 
-Faisceau normalizes its public item inputs, creates a collection internally, and renders one `<li>` per normalized item in `createSelect`. Enhancement reads items from the caller's native `<select>`, then generates the visual list. During setup, it maps item nodes back to collection items using `data-value` and deliberately rejects missing, duplicate, extra, or unmatched nodes. This is stricter and easier to validate, but less compositional than Ark: collections and item elements are effectively fixed at setup time.
+Faisceau normalizes its public item inputs, creates a collection internally, and renders one `<li>` per normalized item in `createSelect`. Enhancement requires only a `fui-select` root and native `<select>`, reads the items from the native options, then generates the visual control and list. Collections and item elements remain fixed at setup time, which is simpler but less compositional than Ark.
 
 ### Native form integration
 
 Ark exposes a declarative `Select.HiddenSelect` part. In every adapter it applies `getHiddenSelectProps`, inserts an empty option while no value is selected, and renders an option for every collection item with its computed value, disabled state, and string label: [React](https://github.com/chakra-ui/ark/blob/e988b66714df66ae4c43aea4bc8b1c0c839854ad/packages/react/src/components/select/select-hidden-select.tsx), [Vue](https://github.com/chakra-ui/ark/blob/e988b66714df66ae4c43aea4bc8b1c0c839854ad/packages/vue/src/components/select/select-hidden-select.vue), [Solid](https://github.com/chakra-ui/ark/blob/e988b66714df66ae4c43aea4bc8b1c0c839854ad/packages/solid/src/components/select/select-hidden-select.tsx), [Svelte](https://github.com/chakra-ui/ark/blob/e988b66714df66ae4c43aea4bc8b1c0c839854ad/packages/svelte/src/lib/components/select/select-hidden-select.svelte). Field context supplies `aria-describedby` in React, Vue, and Solid; the inspected Svelte component does not explicitly add Field context's description ID.
 
-Faisceau always retains a native `<select>` in the document. Its shared `createNativeSelectField` adds behavior beyond simply rendering Zag's hidden-select props:
+Faisceau always retains a native `<select>` in the document. Its Select native bridge adds behavior beyond simply rendering Zag's hidden-select props:
 
 - machine changes update selected native options and emit bubbling, composed `input` and `change` exactly once;
 - native `input`/`change` update the machine without echo loops;

@@ -78,8 +78,8 @@ modernes ; le rendu serveur ne fait pas partie de son contrat.
 `createSelect` construit le markup avec `@lilian1315/create-element`. Le contrôleur reste arrêté jusqu'à son montage :
 
 ```ts
-import { createSelect } from "faisceau-ui";
-import "faisceau-ui/styles/index.css";
+import { createSelect } from "faisceau-ui/select";
+import "faisceau-ui/styles/select.css";
 
 const select = createSelect({
   label: "Mode d'affichage",
@@ -102,7 +102,17 @@ select.mount(document.querySelector("#app")!);
 
 Une chaîne peut servir de raccourci d'item ; sa valeur et son libellé seront identiques.
 
-Par défaut, le menu chevauche le contrôle à l'ouverture afin d'aligner le texte de l'option sélectionnée avec la valeur affichée. Si aucun item n'est sélectionné, le menu reprend son positionnement sous le trigger. Utilisez `alignItemWithTrigger: false` pour toujours placer le menu sous le trigger. Ce positionnement est toujours désactivé lorsque `multiple: true`, même si `alignItemWithTrigger: true` est fourni explicitement. L'option fonctionne aussi avec `enhanceSelect`. Comme dans Base UI, l'ancre, le décalage et le placement sont gérés par ce mode spécial ; les autres options de `positioning` restent applicables.
+Les options suivent Zag `2.0.0-next.3` : `multiple`, `defaultValue`, `value`, `onValueChange`,
+`disabled`, `readOnly`, `required`, `deselectable`, `loopFocus` et `alignItemWithTrigger`.
+Avec `alignItemWithTrigger: true`, l'option sélectionnée est alignée après le calcul de la hauteur
+plafonnée du popup, y compris dans une longue liste. Sans sélection, en mode multiple ou lorsque
+l'alignement exact ne tient pas dans la zone visible, Select conserve le positionnement standard
+de Zag et Floating UI. La valeur vide est réservée au placeholder. Les items sont fixes pendant la
+vie du contrôleur.
+
+Références : [machine v2](https://github.com/chakra-ui/zag/tree/v2/packages/machines/select/src),
+[tests e2e d'alignement](https://github.com/chakra-ui/zag/blob/v2/e2e/select-align-with-trigger.e2e.ts) et
+[démo du site](https://github.com/chakra-ui/zag/blob/v2/website/demos/select.tsx).
 
 ## Créer une Combobox
 
@@ -194,7 +204,7 @@ le reset du formulaire.
 ```html
 <form id="settings">
   <div class="fui-select" id="mode-select">
-    <label class="fui-field-label">Mode d'affichage</label>
+    <label class="fui-label">Mode d'affichage</label>
     <select class="fui-select-native-select" name="display-mode" required>
       <option value="" data-placeholder>Choisir un mode</option>
       <option value="simple" selected>Simple</option>
@@ -210,9 +220,13 @@ import { enhanceSelect } from "faisceau-ui";
 const select = enhanceSelect(document.querySelector<HTMLDivElement>("#mode-select")!);
 ```
 
-La valeur initiale vient de l'option `selected`. Le placeholder vient de l'unique option
-`value=""` portant `data-placeholder`. Une option `value=""` sans ce marqueur reste un item
-sélectionnable normal.
+Seuls le conteneur `fui-select` et le `<select class="fui-select-native-select">` sont
+requis. Le label `fui-label` et la description `fui-select-description` sont optionnels ;
+ils peuvent aussi être fournis dans les options. Le contrôle visible et le popup sont générés à
+partir des options natives. La destruction retire les éléments générés, restaure le markup initial
+et conserve la sélection native courante. Une option `data-placeholder` fournit le texte du
+placeholder et ne figure pas dans la liste des choix ; l'option `placeholder` passée à
+`enhanceSelect` peut remplacer ce texte.
 
 ### Combobox existante
 

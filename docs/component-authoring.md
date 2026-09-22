@@ -46,7 +46,10 @@ For `enhance*`:
 - validate required native elements and structural `fui-*` classes with an actionable `[Faisceau UI]`
   error;
 - snapshot caller-owned attributes before adding Zag props;
-- require the complete structural anatomy before mutation; do not generate missing structural nodes;
+- for native form controls, require only the root and native control, adopt optional label and
+  description parts, and generate the visible control and popup (as Select does);
+- for other components, validate their documented minimum anatomy before mutation and generate
+  missing parts only when their enhancement contract calls for it;
 - start after the enhanced tree is assembled;
 - restore attributes, original node position, and caller-owned content in `destroy()`.
 

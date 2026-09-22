@@ -1,141 +1,153 @@
-import { createSelect, enhanceSelect, type SelectProps } from "faisceau-ui";
+import { h } from "@lilian1315/create-element/faisceau";
 import { asDom } from "@lilian1315/create-element/faisceau/jsx-runtime";
 import type { Meta, StoryObj } from "@storybook/html-vite";
-
+import { createSelect, enhanceSelect } from "faisceau-ui/select";
+import type { SelectProps } from "faisceau-ui/select";
 import { createStoryShell, trackController } from "./story.tsx";
-import { h } from "@lilian1315/create-element/faisceau";
-
-type SelectStoryArgs = SelectProps;
 
 const countries = [
-  { value: "fr", label: "France", description: "Europe" },
-  { value: "be", label: "Belgique", description: "Europe" },
-  { value: "ch", label: "Suisse", description: "Europe" },
-  { value: "mc", label: "Monaco", disabled: true },
-  { value: "de", label: "Allemagne", description: "Europe" },
-  { value: "es", label: "Espagne", description: "Europe" },
-  { value: "it", label: "Italie", description: "Europe" },
-  { value: "pt", label: "Portugal", description: "Europe" },
-  { value: "nl", label: "Pays-Bas", description: "Europe" },
-  { value: "lu", label: "Luxembourg", description: "Europe" },
-  { value: "ie", label: "Irlande", description: "Europe" },
-  { value: "at", label: "Autriche", description: "Europe" },
-  { value: "dk", label: "Danemark", description: "Europe" },
-  { value: "se", label: "Suède", description: "Europe" },
-  { value: "no", label: "Norvège", description: "Europe" },
-  { value: "fi", label: "Finlande", description: "Europe" },
-  { value: "is", label: "Islande", description: "Europe" },
-  { value: "gr", label: "Grèce", description: "Europe" },
-  { value: "hr", label: "Croatie", description: "Europe" },
-  { value: "cz", label: "Tchéquie", description: "Europe" },
-  { value: "pl", label: "Pologne", description: "Europe" },
-  { value: "hu", label: "Hongrie", description: "Europe" },
-  { value: "ro", label: "Roumanie", description: "Europe" },
-  { value: "bg", label: "Bulgarie", description: "Europe" },
-  { value: "ee", label: "Estonie", description: "Europe" },
-  { value: "lv", label: "Lettonie", description: "Europe" },
-  { value: "lt", label: "Lituanie", description: "Europe" },
-] as const;
+  { value: "ng", label: "Nigeria" },
+  { value: "jp", label: "Japan" },
+  { value: "kr", label: "Korea", disabled: true },
+  { value: "ke", label: "Kenya" },
+  { value: "uk", label: "United Kingdom" },
+];
+
+const longList = Array.from({ length: 80 }, (_, index) => ({
+  value: String(index),
+  label: `Option ${index + 1}`,
+}));
 
 const meta = {
+  title: "Select/Examples",
+  args: { label: "Country", placeholder: "Choose a country", items: countries, name: "country" },
   argTypes: {
-    alignItemWithTrigger: {
-      control: "boolean",
-      description: "Centre le positionneur sur l’option sélectionnée. Désactivé en mode multiple.",
-    },
-    label: { control: "text", description: "Libellé visible et accessible." },
-    description: { control: "text", description: "Aide associée au champ." },
-    multiple: { control: "boolean", description: "Autorise plusieurs valeurs." },
-    placeholder: { control: "text", description: "Texte affiché sans sélection." },
-    clearable: { control: "boolean", description: "Affiche une action pour vider la sélection." },
-    disabled: { control: "boolean", description: "Empêche toute interaction." },
-    required: { control: "boolean", description: "Active la validation native required." },
+    label: { control: "text" },
+    placeholder: { control: "text" },
+    description: { control: "text" },
+    multiple: { control: "boolean" },
+    disabled: { control: "boolean" },
+    readOnly: { control: "boolean" },
+    invalid: { control: "boolean" },
+    required: { control: "boolean" },
+    clearable: { control: "boolean" },
+    alignItemWithTrigger: { control: "boolean" },
   },
-  parameters: {
-    docs: {
-      description: {
-        component:
-          "Select Zag relié à un véritable select natif. Le clic, FormData, required et reset conservent la sémantique du navigateur.",
-      },
-    },
-  },
-  title: "Select/Anatomie",
-} satisfies Meta<SelectStoryArgs>;
-
-export default meta;
-type Story = StoryObj<SelectStoryArgs>;
-
-export const create: Story = {
-  args: {
-    label: "Pays",
-    description: "Sélectionnez un pays dans une liste fermée.",
-    placeholder: "Choisir un pays",
-  },
-
-  name: "create()",
-
-  render: (args) => {
+  render(args) {
     const story = createStoryShell({
-      description: "La factory génère le select natif, le trigger, le popup et les options.",
-      eyebrow: "createSelect",
-      title: "Construction programmatique",
+      eyebrow: "Select · Zag v2",
+      title: "Choose a country",
+      description: "Use the pointer, arrow keys, or type a country name. Korea is unavailable.",
     });
+    const form = asDom<"form">(
+      <form style={{ display: "grid", gap: "16px", width: "320px", maxWidth: "100%" }} />,
+    );
     const host = h("div");
-    story.canvas.append(host);
-    const controller = createSelect({
-      ...args,
-      defaultValue: args.multiple ? ["fr", "be"] : ["fr"],
-      items: countries,
-      name: args.multiple ? "countries" : "country",
-      onValueChange: ({ value }) => {
-        story.output.textContent = `value = ${value.join(", ") || "(vide)"}`;
-      },
-    }).mount(host);
-    trackController(story.root, controller);
-    story.setSource(`createSelect({
-      label: "${args.label}",
-      name: "country",
-      items: countries,
-      defaultValue: ["fr"]
-    }).mount(target)`);
+    const shortListButton = h("button", { type: "button" }, "Short list");
+    const longListButton = h("button", { type: "button" }, "Long list");
+    const listActions = h(
+      "div",
+      { style: "display: flex; gap: 12px" },
+      shortListButton,
+      longListButton,
+    );
+    form.append(listActions, host);
+    story.canvas.append(form);
+    let controller: ReturnType<typeof createSelect>;
+
+    const renderSelect = (mode: "short" | "long") => {
+      controller?.destroy();
+      const items = mode === "short" ? args.items : longList;
+      controller = createSelect({
+        ...args,
+        items,
+        ...(mode === "long" && args.value === undefined && args.defaultValue === undefined
+          ? { defaultValue: ["40"] }
+          : {}),
+        onValueChange(details) {
+          story.output.textContent = `value = ${JSON.stringify(details.value)}`;
+          args.onValueChange?.(details);
+        },
+      }).mount(host);
+      shortListButton.setAttribute("aria-pressed", String(mode === "short"));
+      longListButton.setAttribute("aria-pressed", String(mode === "long"));
+      story.setSource(
+        `createSelect({\n  label: "Country",\n  name: "country",\n  items: ${mode === "short" ? "countries" : "longList"},\n  multiple: ${!!args.multiple},\n  clearable: ${!!args.clearable}\n}).mount(form)`,
+      );
+    };
+
+    shortListButton.addEventListener("click", () => renderSelect("short"));
+    longListButton.addEventListener("click", () => renderSelect("long"));
+    renderSelect("short");
+    form.append(
+      asDom<"div">(
+        <div style={{ display: "flex", gap: "12px" }}>
+          <button type="submit">Read FormData</button>
+          <button type="reset">Reset</button>
+        </div>,
+      ),
+    );
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      story.output.textContent = JSON.stringify([...new FormData(form)]);
+    });
+    trackController(story.root, { destroy: () => controller.destroy() });
     return story.root;
+  },
+} satisfies Meta<SelectProps>;
+export default meta;
+type Story = StoryObj<SelectProps>;
+
+export const Create: Story = {
+  name: "create()",
+  args: {
+    description: "Your country of residence.",
+    clearable: true,
   },
 };
 
-export const enhance: Story = {
+export const Enhance: Story = {
   name: "enhance()",
-  render: (args) => {
+  render() {
     const story = createStoryShell({
-      description:
-        "Le conteneur et son select suffisent ; le script génère toutes les parts visuelles.",
       eyebrow: "enhanceSelect",
-      title: "Progressive enhancement",
+      title: "Adopt a native select",
+      description:
+        "A root and native select are enough. The visible control and popup are generated; destroy restores the original markup and keeps the current value.",
     });
     const root = asDom<"div">(
-      <div class="fui-select">
-        <label class="fui-field-label">Pays</label>
+      <div class="fui-select" style={{ width: "320px" }}>
+        <label class="fui-label">Country</label>
         <select class="fui-select-native-select" name="country">
-          <option value="fr" selected>
-            France
+          <option value="" data-placeholder>
+            Choose a country
           </option>
-          <option value="be">Belgique</option>
+          <option value="ng">Nigeria</option>
+          <option value="jp">Japan</option>
         </select>
       </div>,
     );
-
     const source = root.outerHTML;
-
     story.canvas.append(root);
     const controller = enhanceSelect(root, {
-      ...args,
-      onValueChange: (details) => {
-        story.output.textContent = `value = ${details.value.join(", ") || "(vide)"}`;
-        args.onValueChange?.(details);
+      onValueChange: ({ value }) => {
+        story.output.textContent = JSON.stringify(value);
       },
     });
-
+    const destroy = h(
+      "button",
+      {
+        type: "button",
+        onclick: () => {
+          controller.destroy();
+          destroy.disabled = true;
+        },
+      },
+      "Destroy enhancement",
+    );
+    story.canvas.append(destroy);
     trackController(story.root, controller);
-    story.setSource(source);
+    story.setSource(`${source}\n\nenhanceSelect(root)`);
     return story.root;
   },
 };

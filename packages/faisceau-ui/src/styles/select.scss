@@ -1,277 +1,221 @@
-// Self-contained Select styles: tokens, shared base, listbox, and select rules.
 @use "./tokens";
 @use "./base";
-@use "./listbox";
-@use "./mixins" as *;
 
 .fui-select {
-  box-sizing: border-box;
   display: grid;
+  gap: 0.5rem;
   inline-size: 100%;
-  max-inline-size: min(var(--fui-control-max-inline-size), 100%);
-  min-inline-size: 0;
-  gap: var(--fui-space-1-5);
+  max-inline-size: 20rem;
   color: var(--fui-color-foreground);
-  font-family: inherit;
+  font: inherit;
   font-size: var(--fui-font-size-control);
   line-height: var(--fui-line-height-control);
+
+  &,
+  * {
+    box-sizing: border-box;
+  }
+  [hidden] {
+    display: none;
+  }
+}
+
+.fui-select .fui-label {
+  font-weight: var(--fui-font-weight-medium);
+}
+.fui-select-description,
+.fui-select-item-description {
+  margin: 0;
+  color: var(--fui-color-muted-foreground);
+  font-size: var(--fui-font-size-caption);
+  text-wrap: pretty;
 }
 
 .fui-select-control {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
+  overflow: hidden;
+  display: flex;
   align-items: stretch;
-  inline-size: 100%;
-  min-inline-size: 0;
-  gap: var(--fui-space-1-5);
-
-  &:has(.fui-select-clear-trigger:not([hidden])) {
-    grid-template-columns: minmax(0, 1fr) auto;
-  }
-
-  &[data-focus] .fui-select-trigger {
-    border-color: var(--fui-color-ring);
-  }
-
-  &[data-invalid] .fui-select-trigger {
-    border-color: var(--fui-color-destructive);
-
-    &:focus-visible {
-      outline-color: var(--fui-color-destructive);
-    }
-  }
-
-  &[data-disabled] {
-    opacity: 0.5;
-
-    .fui-select-trigger,
-    .fui-select-indicator,
-    .fui-select-clear-trigger {
-      cursor: not-allowed;
-    }
-  }
-}
-
-.fui-select-trigger {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center;
-  inline-size: 100%;
   min-inline-size: 0;
   min-block-size: var(--fui-control-height);
-  padding-block: var(--fui-space-1-5);
-  padding-inline: var(--fui-space-3);
-  gap: var(--fui-space-2);
-  color: var(--fui-color-foreground);
-  background: var(--fui-color-surface);
   border: var(--fui-border-width) solid var(--fui-color-border);
   border-radius: var(--fui-radius-md);
+  background: var(--fui-color-surface);
   box-shadow: 0 1px 2px var(--fui-color-control-shadow);
-  cursor: pointer;
-  outline: none;
-  text-align: start;
 
-  &:focus-visible {
-    @include fui-focus-ring;
+  &[data-focus],
+  &:has(.fui-select-trigger:focus-visible),
+  &:has(.fui-select-clear-trigger:focus-visible) {
+    border-color: var(--fui-color-ring);
+    outline: 2px solid var(--fui-color-ring);
+    outline-offset: 2px;
   }
 
   &[data-invalid] {
     border-color: var(--fui-color-destructive);
 
-    &:focus-visible {
+    &[data-focus],
+    &:has(.fui-select-trigger:focus-visible),
+    &:has(.fui-select-clear-trigger:focus-visible) {
       outline-color: var(--fui-color-destructive);
     }
   }
 
+  &[data-disabled] {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+}
+.fui-select-trigger,
+.fui-select-clear-trigger {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-block-size: calc(var(--fui-control-height) - (2 * var(--fui-border-width)));
+  margin: 0;
+  padding-block: var(--fui-space-1-5);
+  padding-inline: var(--fui-space-3);
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+  touch-action: manipulation;
+
+  &:focus-visible {
+    outline: none;
+  }
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
   &[data-readonly] {
     cursor: default;
   }
-
-  &[data-disabled] {
-    cursor: not-allowed;
-  }
-
-  &[data-placeholder-shown] .fui-select-value {
-    color: var(--fui-color-muted-foreground);
-  }
 }
-
-.fui-select-value {
+.fui-select-trigger {
+  flex: 1;
   min-inline-size: 0;
+  border-start-start-radius: calc(var(--fui-radius-md) - var(--fui-border-width));
+  border-end-start-radius: calc(var(--fui-radius-md) - var(--fui-border-width));
+}
+.fui-select-value-text {
+  flex: 1;
   overflow-wrap: anywhere;
-  text-align: start;
-
-  &[data-placeholder-shown] {
-    color: var(--fui-color-muted-foreground);
-  }
 }
-
-.fui-select-indicator {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  inline-size: var(--fui-icon-size);
-  block-size: var(--fui-icon-size);
-  flex: none;
+.fui-select-trigger[data-placeholder-shown] .fui-select-value-text {
   color: var(--fui-color-muted-foreground);
-  pointer-events: none;
-
-  &[data-state="open"] {
-    transform: rotate(180deg);
-  }
-
-  &[data-disabled] {
-    cursor: not-allowed;
-  }
 }
-
 .fui-select-clear-trigger {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
+  flex: none;
   justify-content: center;
   inline-size: var(--fui-control-height);
   min-inline-size: var(--fui-control-height);
-  min-block-size: var(--fui-control-height);
   padding: 0;
+  border-inline-start: var(--fui-border-width) solid var(--fui-color-border);
+  border-start-end-radius: calc(var(--fui-radius-md) - var(--fui-border-width));
+  border-end-end-radius: calc(var(--fui-radius-md) - var(--fui-border-width));
+}
+.fui-select-indicator {
+  display: flex;
   color: var(--fui-color-muted-foreground);
-  background: var(--fui-color-surface);
+}
+.fui-select-indicator[data-state="open"] {
+  rotate: 180deg;
+}
+.fui-select-positioner {
+  --z-index: calc(var(--fui-z-index-popover) + var(--layer-index, 0)) !important;
+  z-index: var(--z-index);
+}
+.fui-select-content {
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  inline-size: var(--reference-width, 20rem);
+  min-inline-size: 12rem;
+  max-inline-size: calc(100vw - 1rem);
+  max-height: min(var(--available-height, 100dvh), var(--fui-listbox-max-block-size));
   border: var(--fui-border-width) solid var(--fui-color-border);
   border-radius: var(--fui-radius-md);
-  box-shadow: 0 1px 2px var(--fui-color-control-shadow);
-  cursor: pointer;
+  background: var(--fui-color-surface-popover);
+  box-shadow: 0 4px 16px var(--fui-color-popover-shadow);
+}
+.fui-select-list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  margin: 0;
+  padding: 0.25rem;
+  list-style: none;
   outline: none;
+}
+.fui-select-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 1rem;
+  align-items: center;
+  column-gap: 0.75rem;
+  min-block-size: 44px;
+  padding: 0.625rem 0.5rem;
+  border-radius: var(--fui-radius-sm);
+  cursor: pointer;
+  user-select: none;
+  overflow-wrap: anywhere;
 
-  &:focus-visible {
-    @include fui-focus-ring;
+  &[data-highlighted] {
+    background: var(--fui-color-accent);
+    color: var(--fui-color-accent-foreground);
+    outline: 1px solid var(--fui-color-ring);
+    outline-offset: -1px;
   }
-
-  &[data-invalid] {
-    border-color: var(--fui-color-destructive);
-
-    &:focus-visible {
-      outline-color: var(--fui-color-destructive);
-    }
-  }
-
   &[data-disabled] {
+    opacity: 0.5;
     cursor: not-allowed;
   }
 }
-
-.fui-select-positioner {
-  max-inline-size: min(var(--fui-control-max-inline-size), calc(100vw - (2 * var(--fui-space-2))));
+.fui-select-item-indicator {
+  grid-column: 2;
+  grid-row: 1;
 }
-
-.fui-select-content {
-  display: flex;
-  flex-direction: column;
-  inline-size: min(var(--fui-control-max-inline-size), calc(100vw - (2 * var(--fui-space-2))));
-  max-block-size: min(
-    var(--fui-listbox-max-block-size),
-    var(--available-height, calc(100dvh - (2 * var(--fui-space-2))))
-  );
-  block-size: auto !important;
-}
-
-.fui-select-list {
-  flex: 1 1 auto;
-  min-block-size: 0;
-  max-block-size: none;
-  grid-auto-rows: max-content;
-
-  &:focus-visible {
-    @include fui-focus-ring;
-    outline-offset: calc(-1 * var(--fui-focus-ring-width));
-  }
+.fui-select-item-description {
+  grid-column: 1;
 }
 
 @media (hover: hover) {
-  .fui-select-trigger:not([data-disabled]):not([data-readonly]):not(:disabled):hover,
-  .fui-select-clear-trigger:not([data-disabled]):not(:disabled):hover {
+  .fui-select-trigger:not(:disabled):not([data-readonly]):hover,
+  .fui-select-clear-trigger:not(:disabled):hover {
     background: var(--fui-color-muted);
   }
 }
-
 @media (prefers-reduced-motion: no-preference) {
-  .fui-select-content[data-state="open"] {
-    // Zag measures the selected text during opening; transforms skew alignment.
-    animation-name: fui-select-in;
+  .fui-select-trigger,
+  .fui-select-clear-trigger {
+    transition:
+      background-color 100ms,
+      border-color 100ms;
+  }
+}
+@media (any-pointer: coarse) {
+  .fui-select-control {
+    min-block-size: var(--fui-control-height-coarse);
   }
 
   .fui-select-trigger,
   .fui-select-clear-trigger {
-    transition-property: color, background-color, border-color, box-shadow;
-    transition-duration: var(--fui-duration-fast);
-    transition-timing-function: var(--fui-easing-standard);
-  }
-
-  .fui-select-indicator {
-    transition-property: color, transform;
-    transition-duration: var(--fui-duration-fast);
-    transition-timing-function: var(--fui-easing-standard);
-  }
-}
-
-@keyframes fui-select-in {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
-  }
-}
-
-@media (any-pointer: coarse) {
-  .fui-select-trigger {
-    min-block-size: var(--fui-control-height-coarse);
+    min-block-size: calc(var(--fui-control-height-coarse) - (2 * var(--fui-border-width)));
   }
 
   .fui-select-clear-trigger {
     inline-size: var(--fui-control-height-coarse);
     min-inline-size: var(--fui-control-height-coarse);
-    min-block-size: var(--fui-control-height-coarse);
   }
 }
-
 @media (forced-colors: active) {
-  .fui-select-list:focus-visible {
+  .fui-select-item[data-highlighted] {
     outline-color: Highlight;
   }
-
-  .fui-select-trigger,
-  .fui-select-clear-trigger {
-    color: ButtonText;
-    background: ButtonFace;
-    border-color: ButtonText;
-    box-shadow: none;
-
-    &:focus-visible {
-      outline-color: Highlight;
-    }
-  }
-
-  .fui-select-control[data-invalid] .fui-select-trigger,
-  .fui-select-trigger[data-invalid],
-  .fui-select-clear-trigger[data-invalid] {
-    border-width: 2px;
-    border-color: CanvasText;
-  }
-
-  .fui-select-control[data-disabled] {
-    opacity: 1;
-
-    .fui-select-trigger,
-    .fui-select-indicator,
-    .fui-select-clear-trigger {
-      color: GrayText;
-    }
-  }
-
-  .fui-select-trigger[data-disabled],
-  .fui-select-indicator[data-disabled],
-  .fui-select-clear-trigger[data-disabled] {
+  .fui-select-item[data-disabled] {
     color: GrayText;
+    opacity: 1;
   }
 }

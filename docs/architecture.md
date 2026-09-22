@@ -115,18 +115,21 @@ same invariant; component files retain only their Zag-specific mapping.
 
 ## Implemented components
 
-| Component   | Zag primitive         | Existing markup                                  | Native form | Notable behavior                                                                                   |
-| ----------- | --------------------- | ------------------------------------------------ | ----------- | -------------------------------------------------------------------------------------------------- |
-| Select      | `@zag-js/select`      | One native `<select>`                            | Yes         | Multiple mode; selected-item alignment by default                                                  |
-| Combobox    | `@zag-js/combobox`    | One native `<select>`                            | Yes         | Filtering, removable multiple-value tags                                                           |
-| Checkbox    | `@zag-js/checkbox`    | One checkbox input                               | Yes         | Checked and indeterminate states                                                                   |
-| Collapsible | `@zag-js/collapsible` | Complete trigger, indicator, and content anatomy | No          | Native button semantics; optional collapsed dimensions                                             |
-| Tooltip     | `@zag-js/tooltip`     | Existing trigger/title                           | No          | Restores the native `title` on teardown                                                            |
-| Dialog      | `@zag-js/dialog`      | Content part, external `triggerSelector`         | No          | Generated backdrop, positioner, close control; triggers bound by selector, never owned             |
-| Drawer      | `@zag-js/drawer`      | Content part, external `triggerSelector`         | No          | Logical swipe direction, snap points, grabber, swipe area; triggers bound by selector, never owned |
-| Toast       | `@zag-js/toast`       | Existing empty region                            | No          | Group service, child machines, public toast store                                                  |
+| Component   | Zag primitive         | Existing markup                                        | Native form | Notable behavior                                                                                   |
+| ----------- | --------------------- | ------------------------------------------------------ | ----------- | -------------------------------------------------------------------------------------------------- |
+| Select      | `@zag-js/select`      | Root and native `<select>`; optional label/description | Yes         | Generated control/popup; opt-in selected-item alignment after capped-height positioning            |
+| Combobox    | `@zag-js/combobox`    | One native `<select>`                                  | Yes         | Filtering, removable multiple-value tags                                                           |
+| Checkbox    | `@zag-js/checkbox`    | One checkbox input                                     | Yes         | Checked and indeterminate states                                                                   |
+| Collapsible | `@zag-js/collapsible` | Complete trigger, indicator, and content anatomy       | No          | Native button semantics; optional collapsed dimensions                                             |
+| Tooltip     | `@zag-js/tooltip`     | Existing trigger/title                                 | No          | Restores the native `title` on teardown                                                            |
+| Dialog      | `@zag-js/dialog`      | Content part, external `triggerSelector`               | No          | Generated backdrop, positioner, close control; triggers bound by selector, never owned             |
+| Drawer      | `@zag-js/drawer`      | Content part, external `triggerSelector`               | No          | Logical swipe direction, snap points, grabber, swipe area; triggers bound by selector, never owned |
+| Toast       | `@zag-js/toast`       | Existing empty region                                  | No          | Group service, child machines, public toast store                                                  |
 
-Select enables Zag's native selected-item alignment by default. Multiple mode disables it.
+Select can align the selected item with its trigger in single-value mode. It applies alignment
+after Floating UI has positioned the height-capped popup, so long lists keep the selected item
+visible. Multiple mode, an empty selection, or insufficient viewport space uses normal anchored
+positioning.
 
 ## Testing and publication boundaries
 

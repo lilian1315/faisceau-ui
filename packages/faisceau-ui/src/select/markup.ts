@@ -1,134 +1,71 @@
 import { h } from "@lilian1315/create-element";
+import { createCheckIcon, createChevronDownIcon, createClearIcon } from "../shared/icons.ts";
+import type { FuiItem } from "../shared/items.ts";
+import type { SelectProps } from "./types.ts";
 
-import { createCheckIcon, createChevronDownIcon, createClearIcon } from "../shared/index.js";
-import type { FuiItem } from "../shared/index.js";
-
-export interface SelectControl {
-  readonly control: HTMLElement;
-  readonly trigger: HTMLButtonElement;
-  readonly value: HTMLElement;
-  readonly indicator: HTMLElement;
-  readonly clearTrigger: HTMLButtonElement | null;
-}
-
-export interface SelectPopup {
-  readonly positioner: HTMLElement;
-  readonly content: HTMLElement;
-  readonly list: HTMLElement;
-}
-
-/** Builds the visible trigger row: value text, chevron, and an optional clear button. */
-export function buildControl(options: { clearable?: boolean; clearLabel?: string }): SelectControl {
-  const value = h("span", { class: "fui-select-value" });
-  const indicator = h("span", { class: "fui-select-indicator" }, createChevronDownIcon());
-  const trigger = h(
-    "button",
-    { class: "fui-select-trigger", type: "button" },
-    value,
-    indicator,
-  ) as HTMLButtonElement;
-
-  const clearTrigger = options.clearable ? buildClearTrigger(options.clearLabel) : null;
-
+export function createMarkup(items: FuiItem[], props: SelectProps): HTMLDivElement {
+  const selected = props.value ?? props.defaultValue ?? [];
+  const native = h("select", { class: "fui-select-native-select", multiple: props.multiple });
+  if (!props.multiple)
+    native.append(
+      h(
+        "option",
+        { value: "", hidden: true, "data-placeholder": "" },
+        props.placeholder ?? "Select an option",
+      ),
+    );
+  for (const item of items) {
+    native.append(h("option", { value: item.value, disabled: item.disabled }, item.label));
+  }
+  for (const option of native.options) {
+    option.defaultSelected = selected.includes(option.value);
+    option.selected = option.defaultSelected;
+  }
   const control = h(
     "div",
     { class: "fui-select-control" },
-    clearTrigger ? [trigger, clearTrigger] : [trigger],
+    h(
+      "button",
+      { class: "fui-select-trigger", type: "button" },
+      h("span", { class: "fui-select-value-text" }),
+      h("span", { class: "fui-select-indicator" }, createChevronDownIcon()),
+    ),
   );
-  return { control, trigger, value, indicator, clearTrigger };
-}
-
-/** Builds the standalone clear button appended next to the trigger. */
-function buildClearTrigger(clearLabel?: string): HTMLButtonElement {
-  return h(
-    "button",
-    {
-      "aria-label": clearLabel ?? "Clear selection",
-      class: "fui-select-clear-trigger",
-      type: "button",
-    },
-    createClearIcon(),
-  ) as HTMLButtonElement;
-}
-
-/** Builds the popup shell; items are rendered separately with {@link buildItem}. */
-export function buildPopup(items: readonly FuiItem[]): SelectPopup {
-  const list = h("ul", { class: "fui-select-list" }, items.map(buildItem));
-  const content = h("div", { class: "fui-select-content" }, list);
-  const positioner = h("div", { class: "fui-select-positioner" }, content);
-  return { positioner, content, list };
-}
-
-/** Builds one popup row for an item. */
-function buildItem(item: FuiItem): HTMLLIElement {
-  const text = h("span", { class: "fui-select-item-text" }, item.label);
-  const children: Node[] = [text];
-
-  if (item.description) {
-    children.push(h("span", { class: "fui-select-item-description" }, item.description));
-  }
-
-  children.push(h("span", { class: "fui-select-item-indicator" }, createCheckIcon()));
-
-  return h(
-    "li",
-    {
-      class: "fui-select-item",
-      data: { disabled: item.disabled, value: item.value },
-    },
-    children,
+  if (props.clearable)
+    control.append(
+      h("button", { class: "fui-select-clear-trigger", type: "button" }, createClearIcon()),
+    );
+  const root = h(
+    "div",
+    { class: "fui-select" },
+    h("label", { class: "fui-label" }, props.label),
+    native,
+    control,
+    h(
+      "div",
+      { class: "fui-select-positioner" },
+      h(
+        "div",
+        { class: "fui-select-content", hidden: true },
+        h(
+          "ul",
+          { class: "fui-select-list" },
+          items.map((item) =>
+            h(
+              "li",
+              { class: "fui-select-item" },
+              h("span", { class: "fui-select-item-text" }, item.label),
+              h("span", { class: "fui-select-item-indicator" }, createCheckIcon()),
+              item.description
+                ? h("span", { class: "fui-select-item-description" }, item.description)
+                : null,
+            ),
+          ),
+        ),
+      ),
+    ),
   );
-}
-
-/** Builds the native select Zag keeps in sync as the submitted control. */
-export function buildNativeSelect(
-  items: readonly FuiItem[],
-  options: { multiple?: boolean; name?: string; placeholder?: string; value?: readonly string[] },
-): HTMLSelectElement {
-  const native = h("select", {
-    class: "fui-select-native-select",
-    multiple: options.multiple,
-    name: options.name,
-  }) as HTMLSelectElement;
-  native.replaceChildren(
-    ...buildOptions(items, options.placeholder, options.multiple, options.value ?? []),
-  );
-  return native;
-}
-
-/** Builds native options, marking the placeholder and the selected values. */
-export function buildOptions(
-  items: readonly FuiItem[],
-  placeholder: string | undefined,
-  multiple: boolean | undefined,
-  value: readonly string[],
-): HTMLOptionElement[] {
-  const selected = new Set(value);
-  const options: HTMLOptionElement[] = [];
-
-  if (!multiple) {
-    const placeholderOption = h(
-      "option",
-      { data: { placeholder: "" }, value: "" },
-      placeholder ?? "Select an option",
-    ) as HTMLOptionElement;
-    placeholderOption.hidden = true;
-    placeholderOption.selected = selected.size === 0;
-    // `defaultSelected` drives `form.reset()`; keep it aligned with the initial value.
-    placeholderOption.defaultSelected = placeholderOption.selected;
-    options.push(placeholderOption);
-  }
-
-  for (const item of items) {
-    const option = h(
-      "option",
-      { disabled: item.disabled, value: item.value },
-      item.label,
-    ) as HTMLOptionElement;
-    option.selected = selected.has(item.value);
-    // `defaultSelected` drives `form.reset()`; keep it aligned with the initial value.
-    option.defaultSelected = option.selected;
-    options.push(option);
-  }
-  return options;
+  if (props.description)
+    root.append(h("p", { class: "fui-select-description" }, props.description));
+  return root;
 }

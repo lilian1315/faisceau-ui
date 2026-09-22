@@ -13,7 +13,10 @@ import { createCollapsible as createCollapsibleFromSubpath } from "faisceau-ui/c
 import { createCombobox as createComboboxFromSubpath } from "faisceau-ui/combobox";
 import { createDialog as createDialogFromSubpath } from "faisceau-ui/dialog";
 import { createDrawer as createDrawerFromSubpath } from "faisceau-ui/drawer";
-import { enhanceSelect as enhanceSelectFromSubpath } from "faisceau-ui/select";
+import {
+  createSelect as createSelectFromSubpath,
+  enhanceSelect as enhanceSelectFromSubpath,
+} from "faisceau-ui/select";
 import { createToaster as createToasterFromSubpath } from "faisceau-ui/toast";
 import { createTooltip as createTooltipFromSubpath } from "faisceau-ui/tooltip";
 import { createZagMachine, normalizeProps } from "faisceau-zag";
@@ -28,6 +31,22 @@ afterEach(() => {
 });
 
 describe("published package contract", () => {
+  it("ships Select through root and subpath exports with standalone styling", async () => {
+    expect(createSelectFromSubpath).toBe(createSelect);
+    expect(typeof enhanceSelectFromSubpath).toBe("function");
+    const controller = createSelect({ items, label: "Country" }).mount(document.body);
+    try {
+      const trigger = controller.root.querySelector<HTMLButtonElement>(".fui-select-trigger")!;
+      expect(getComputedStyle(trigger).display).toBe("flex");
+      trigger.click();
+      await flushMachine();
+      controller.root.querySelector<HTMLElement>('.fui-select-item[data-value="be"]')!.click();
+      await flushMachine();
+      expect(controller.api.get().value).toEqual(["be"]);
+    } finally {
+      controller.destroy();
+    }
+  });
   it("resolves every public entry and runs a styled Select interaction in Chrome", async () => {
     const combobox = createComboboxFromSubpath({ items, label: "Pays" });
     expect(combobox.root).toBeInstanceOf(HTMLElement);
@@ -58,9 +77,10 @@ describe("published package contract", () => {
       placeholder: "Choisir",
     }).mount(form);
     const trigger = requirePart<HTMLButtonElement>(controller.root, "trigger");
+    const control = requirePart<HTMLElement>(controller.root, "control");
 
-    expect(getComputedStyle(trigger).display).toBe("grid");
-    expect(getComputedStyle(trigger).borderStyle).toBe("solid");
+    expect(getComputedStyle(trigger).display).toBe("flex");
+    expect(getComputedStyle(control).borderStyle).toBe("solid");
 
     trigger.click();
     await flushMachine();

@@ -14,9 +14,10 @@ describe("published per-component styles", () => {
     // stylesheet must carry its tokens, shared base, and component rules.
     const select = createSelect({ items: ["One", "Two"], label: "Pays" }).mount(document.body);
     const trigger = select.root.querySelector<HTMLButtonElement>(".fui-select-trigger");
+    const selectControl = select.root.querySelector<HTMLElement>(".fui-select-control");
     expect(trigger).toBeInstanceOf(HTMLElement);
-    expect(getComputedStyle(trigger!).display).toBe("grid");
-    expect(getComputedStyle(trigger!).borderStyle).toBe("solid");
+    expect(getComputedStyle(trigger!).display).toBe("flex");
+    expect(getComputedStyle(selectControl!).borderStyle).toBe("solid");
     select.destroy();
 
     const checkbox = createCheckbox({ label: "Terms" }).mount(document.body);
