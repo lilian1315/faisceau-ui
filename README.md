@@ -354,7 +354,7 @@ Les couleurs, rayons, dimensions et durées sont exposés sous forme de variable
 ```css
 .my-form {
   --fui-color-ring: oklch(0.62 0.19 255);
-  --fui-radius-md: 0.75rem;
+  --fui-radius-md: 12px;
 }
 ```
 

@@ -3,9 +3,9 @@
 
 .fui-select {
   display: grid;
-  gap: 0.5rem;
+  gap: 8px;
   inline-size: 100%;
-  max-inline-size: 20rem;
+  max-inline-size: 320px;
   color: var(--fui-color-foreground);
   font: inherit;
   font-size: var(--fui-font-size-control);
@@ -69,7 +69,7 @@
 .fui-select-clear-trigger {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 12px;
   min-block-size: calc(var(--fui-control-height) - (2 * var(--fui-border-width)));
   margin: 0;
   padding-block: var(--fui-space-1-5);
@@ -131,9 +131,9 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  inline-size: var(--reference-width, 20rem);
-  min-inline-size: 12rem;
-  max-inline-size: calc(100vw - 1rem);
+  inline-size: var(--reference-width, 320px);
+  min-inline-size: 192px;
+  max-inline-size: calc(100vw - 16px);
   max-height: min(var(--available-height, 100dvh), var(--fui-listbox-max-block-size));
   border: var(--fui-border-width) solid var(--fui-color-border);
   border-radius: var(--fui-radius-md);
@@ -146,17 +146,17 @@
   overflow-y: auto;
   overscroll-behavior: contain;
   margin: 0;
-  padding: 0.25rem;
+  padding: 4px;
   list-style: none;
   outline: none;
 }
 .fui-select-item {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 1rem;
+  grid-template-columns: minmax(0, 1fr) 16px;
   align-items: center;
-  column-gap: 0.75rem;
+  column-gap: 12px;
   min-block-size: 44px;
-  padding: 0.625rem 0.5rem;
+  padding: 10px 8px;
   border-radius: var(--fui-radius-sm);
   cursor: pointer;
   user-select: none;

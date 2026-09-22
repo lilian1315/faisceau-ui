@@ -36,8 +36,8 @@
   display: grid;
   line-height: 0;
   place-items: center;
-  inline-size: 1rem;
-  block-size: 1rem;
+  inline-size: 16px;
+  block-size: 16px;
   overflow: hidden;
   border: var(--fui-border-width) solid var(--fui-color-border);
   border-radius: var(--fui-radius-sm);
@@ -62,8 +62,8 @@
 
 .fui-checkbox-indicator .fui-icon {
   display: none;
-  inline-size: 0.75rem;
-  block-size: 0.75rem;
+  inline-size: 12px;
+  block-size: 12px;
 }
 
 .fui-checkbox-indicator[data-state="checked"] .fui-icon--check,

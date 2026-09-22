@@ -30,7 +30,7 @@
 .fui-drawer-content {
   @include fui-overlay-content;
   block-size: 100%;
-  inline-size: min(26rem, 90vw);
+  inline-size: min(416px, 90vw);
   border-radius: 0;
   overflow: hidden;
   transform: translate3d(var(--drawer-translate-x, 0), var(--drawer-translate-y, 0), 0);
@@ -54,7 +54,7 @@
   z-index: 2;
   display: grid;
   flex: none;
-  min-block-size: 2.75rem;
+  min-block-size: 44px;
   margin: calc(var(--fui-space-6) * -1) calc(var(--fui-space-6) * -1) 0;
   padding-inline: var(--fui-space-6);
   background: var(--fui-color-surface-popover);
@@ -68,8 +68,8 @@
 }
 
 .fui-drawer-grabber-indicator {
-  inline-size: 2.5rem;
-  block-size: 0.25rem;
+  inline-size: 40px;
+  block-size: 4px;
   border-radius: 999px;
   background: var(--fui-color-muted-foreground);
 }
@@ -79,7 +79,7 @@
   z-index: 59;
   inset-block: 0;
   inset-inline-end: 0;
-  inline-size: 1.5rem;
+  inline-size: 24px;
   touch-action: none;
 
   .fui-drawer[data-side="left"] & {
@@ -90,7 +90,7 @@
   .fui-drawer[data-side="bottom"] & {
     inset-inline: 0;
     inline-size: auto;
-    block-size: 1.5rem;
+    block-size: 24px;
   }
 
   .fui-drawer[data-side="top"] & {
@@ -104,14 +104,14 @@
 
 .fui-drawer-title {
   margin: 0;
-  padding-inline-end: 2.5rem;
-  font-size: 1.125rem;
+  padding-inline-end: 40px;
+  font-size: 18px;
 }
 
 .fui-drawer-header {
   @include fui-overlay-header;
   // Sticks just below the grabber (grabber block size minus content padding).
-  inset-block-start: calc(2.75rem - var(--fui-space-6));
+  inset-block-start: calc(44px - var(--fui-space-6));
   flex: none;
   margin-block-start: 0;
   padding-block-start: 0;

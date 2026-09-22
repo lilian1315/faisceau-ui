@@ -28,11 +28,11 @@ body {
 .fui-story {
   box-sizing: border-box;
   display: grid;
-  gap: 1.5rem;
-  width: min(42rem, calc(100vw - 2rem));
+  gap: 24px;
+  width: min(672px, calc(100vw - 32px));
   max-inline-size: 100%;
   min-inline-size: 0;
-  padding: clamp(0.75rem, 3vw, 1.5rem);
+  padding: clamp(12px, 3vw, 24px);
   color: var(--fui-color-foreground);
   overflow-wrap: anywhere;
 }
@@ -43,12 +43,12 @@ body {
 
 .fui-story__header {
   display: grid;
-  gap: 0.4rem;
+  gap: 6px;
 }
 
 .fui-story__eyebrow {
   color: var(--fui-color-muted-foreground);
-  font-size: 0.75rem;
+  font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -61,7 +61,7 @@ body {
 
 .fui-story__title {
   color: var(--fui-color-foreground);
-  font-size: 1.35rem;
+  font-size: 22px;
   line-height: 1.2;
   text-wrap: balance;
 }
@@ -73,10 +73,10 @@ body {
 }
 
 .fui-story__canvas {
-  min-height: 8rem;
-  padding: clamp(0.75rem, 3vw, 1.5rem);
+  min-height: 128px;
+  padding: clamp(12px, 3vw, 24px);
   border: 1px solid color-mix(in srgb, currentColor 12%, transparent);
-  border-radius: 1rem;
+  border-radius: 16px;
   background: var(--fui-color-surface);
   box-shadow:
     0 1px 2px rgb(0 0 0 / 5%),
@@ -90,21 +90,21 @@ body {
 
 .fui-story__inspect {
   display: grid;
-  gap: 0.75rem;
+  gap: 12px;
 }
 
 .fui-story__inspect details {
   border: 1px solid color-mix(in srgb, currentColor 12%, transparent);
-  border-radius: 0.75rem;
+  border-radius: 12px;
   background: var(--fui-color-surface);
 }
 
 .fui-story__inspect summary {
-  min-height: 2.75rem;
+  min-height: 44px;
   box-sizing: border-box;
   cursor: pointer;
-  padding: 0.75rem 1rem;
-  font-size: 0.85rem;
+  padding: 12px 16px;
+  font-size: 14px;
   font-weight: 650;
   line-height: var(--fui-line-height-copy);
 }
@@ -113,7 +113,7 @@ body {
 .fui-story__output {
   overflow: auto;
   margin: 0;
-  padding: 1rem;
+  padding: 16px;
   border-top: 1px solid color-mix(in srgb, currentColor 10%, transparent);
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   font-size: var(--fui-font-size-caption);
@@ -123,9 +123,9 @@ body {
 }
 
 .fui-story__output {
-  min-height: 1.3rem;
+  min-height: 21px;
   border: 0;
-  border-radius: 0.75rem;
+  border-radius: 12px;
   background: var(--fui-color-muted);
   font-variant-numeric: tabular-nums;
 }
@@ -134,18 +134,18 @@ body {
 .fui-story__actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.75rem;
+  gap: 12px;
 }
 
 .fui-story__actions {
-  margin-block-start: 1rem;
+  margin-block-start: 16px;
 }
 
 .fui-story__button {
-  min-height: 2.75rem;
-  padding: 0.65rem 1rem;
+  min-height: 44px;
+  padding: 10px 16px;
   border: 0;
-  border-radius: 0.65rem;
+  border-radius: 10px;
   background: #6d5bd0;
   color: white;
   cursor: pointer;

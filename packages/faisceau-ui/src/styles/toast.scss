@@ -11,7 +11,7 @@
   position: fixed;
   z-index: 70;
   display: flex;
-  inline-size: min(24rem, calc(100vw - 2rem));
+  inline-size: min(384px, calc(100vw - 32px));
   flex-direction: column;
   gap: var(--fui-space-3);
   pointer-events: none;
@@ -20,10 +20,10 @@
 .fui-toast {
   position: relative;
   display: flex;
-  min-block-size: 4.5rem;
+  min-block-size: 72px;
   align-items: center;
   gap: var(--fui-space-3);
-  padding: var(--fui-space-3) 3.5rem var(--fui-space-3) var(--fui-space-4);
+  padding: var(--fui-space-3) 56px var(--fui-space-3) var(--fui-space-4);
   border: var(--fui-border-width) solid var(--fui-color-border);
   border-radius: var(--fui-radius-md);
   background: var(--fui-color-surface-popover);

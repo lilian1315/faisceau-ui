@@ -4,7 +4,7 @@
 @use "./mixins" as *;
 
 .fui-collapsible {
-  inline-size: min(100%, 32rem);
+  inline-size: min(100%, 512px);
   border: var(--fui-border-width) solid var(--fui-color-border);
   border-radius: var(--fui-radius-md);
   background: var(--fui-color-surface);

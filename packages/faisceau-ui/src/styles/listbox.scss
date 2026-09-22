@@ -16,7 +16,7 @@
 .fui-select-content,
 .fui-combobox-content {
   inline-size: 100%;
-  min-inline-size: min(8rem, calc(100vw - (2 * var(--fui-space-2))));
+  min-inline-size: min(128px, calc(100vw - (2 * var(--fui-space-2))));
   max-inline-size: 100%;
   overflow: hidden;
   color: var(--fui-color-foreground);
@@ -41,19 +41,19 @@
   }
 
   &[data-side="bottom"] {
-    --fui-listbox-enter-y: -0.125rem;
+    --fui-listbox-enter-y: -2px;
   }
 
   &[data-side="top"] {
-    --fui-listbox-enter-y: 0.125rem;
+    --fui-listbox-enter-y: 2px;
   }
 
   &[data-side="left"] {
-    --fui-listbox-enter-x: 0.125rem;
+    --fui-listbox-enter-x: 2px;
   }
 
   &[data-side="right"] {
-    --fui-listbox-enter-x: -0.125rem;
+    --fui-listbox-enter-x: -2px;
   }
 }
 
