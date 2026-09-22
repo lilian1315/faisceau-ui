@@ -1,5 +1,4 @@
 import { h } from "@lilian1315/create-element";
-import { createXIcon } from "../shared/index.js";
 
 export type OverlayVariant = "dialog" | "drawer";
 
@@ -33,7 +32,7 @@ export function createOverlayView(options: {
     class: `fui-${options.variant}-close`,
     type: "button",
   });
-  close.append(createXIcon());
+  close.append(h("span", { class: "fui-icon fui-icon--x", "aria-hidden": true }));
   const header = h("div", { class: `fui-${options.variant}-header` }, title, description, close);
   const bodyContent = h("div", { class: `fui-${options.variant}-body-content` }, options.content);
   const body = h("div", { class: `fui-${options.variant}-body` }, bodyContent);

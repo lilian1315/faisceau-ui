@@ -5,7 +5,6 @@ import { createZagMachine } from "faisceau-zag";
 
 import type { ComboboxController, ComboboxProps, EnhanceComboboxProps } from "./types.ts";
 import {
-  createClearIcon,
   createId,
   getLookupRoot,
   normalizeItems,
@@ -508,7 +507,7 @@ function renderSelectedTags(
         disabled,
         type: "button",
       },
-      createClearIcon(),
+      h("span", { class: "fui-icon fui-icon--x", "aria-hidden": true }),
     );
     removeTrigger.addEventListener("click", () => remove(item.value));
 

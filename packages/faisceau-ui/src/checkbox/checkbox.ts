@@ -2,7 +2,7 @@ import { h } from "@lilian1315/create-element";
 import * as checkbox from "@zag-js/checkbox";
 import { createZagMachine } from "faisceau-zag";
 import type { CheckboxController, CheckboxProps } from "./types";
-import { createCheckIcon, createId, createMinusIcon, getLookupRoot } from "../shared";
+import { createId, getLookupRoot } from "../shared";
 import { captureAttributes, ensureText, insertAfter } from "../shared/dom";
 
 export function createCheckbox(options?: CheckboxProps): CheckboxController {
@@ -37,8 +37,8 @@ function factory(root?: HTMLLabelElement, options?: CheckboxProps): CheckboxCont
   let indicator = h(
     "span",
     { class: "fui-checkbox-indicator" },
-    createCheckIcon(),
-    createMinusIcon(),
+    h("span", { class: "fui-icon fui-icon--check", "aria-hidden": true }),
+    h("span", { class: "fui-icon fui-icon--minus", "aria-hidden": true }),
   );
   let control = h("span", { class: "fui-checkbox-control" }, indicator);
 

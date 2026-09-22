@@ -20,12 +20,3 @@ export { bindScrollShadows } from "./scroll-shadow.ts";
 
 /** External trigger-selector bindings for overlay components. */
 export { createTriggerBinding, type TriggerBinding } from "./triggers.ts";
-
-/** Lucide icons rendered through @lilian1315/create-element. */
-export {
-  createCheckIcon,
-  createChevronDownIcon,
-  createClearIcon,
-  createMinusIcon,
-  createXIcon,
-} from "./icons.ts";

@@ -88,7 +88,7 @@ back to `ownerDocument` for this Storybook and test case.
   ambient `*.css` declaration.
 - Controls favor 44 px touch targets, explicit focus-visible rings, restrained property-specific
   transitions, and `scale: 0.96` press feedback.
-- Icons come from Lucide and are created through shared helpers with `currentColor`.
+- Icons are Lucide SVGs vendored under `src/icons/` and rendered as `currentColor` CSS masks.
 
 ## Native form protocol
 

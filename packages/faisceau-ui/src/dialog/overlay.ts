@@ -8,7 +8,6 @@ import {
   captureAttributes,
   createId,
   createTriggerBinding,
-  createXIcon,
   getLookupRoot,
   requireFuiClass,
 } from "../shared/index.js";
@@ -340,7 +339,7 @@ function createClose(variant: OverlayVariant, label = "Fermer"): HTMLButtonEleme
     class: `fui-${variant}-close`,
     type: "button",
   });
-  close.append(createXIcon());
+  close.append(h("span", { class: "fui-icon fui-icon--x", "aria-hidden": true }));
   return close;
 }
 

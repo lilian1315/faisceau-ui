@@ -7,7 +7,6 @@ import {
   captureAttributes,
   createKeyedReconciler,
   createId,
-  createXIcon,
   getLookupRoot,
 } from "../shared/index.js";
 import type { ToasterController, ToasterOptions, ToastOptions } from "./types.ts";
@@ -118,7 +117,7 @@ function createToastItem(
     class: "fui-toast-close",
     type: "button",
   });
-  close.append(createXIcon());
+  close.append(h("span", { class: "fui-icon fui-icon--x", "aria-hidden": true }));
   let action = data.action
     ? h("button", { class: "fui-toast-action", type: "button" }, data.action.label)
     : null;

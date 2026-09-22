@@ -167,9 +167,6 @@ catalogs:
     '@lilian1315/create-element':
       specifier: 0.14.1
       version: 0.14.1
-    '@lucide/icons':
-      specifier: 1.47.0
-      version: 1.47.0
     '@types/node':
       specifier: ^24
       version: 24.13.6
@@ -278,9 +275,6 @@ importers:
       '@lilian1315/create-element':
         specifier: 'catalog:'
         version: 0.14.1(faisceau@0.3.2)
-      '@lucide/icons':
-        specifier: 'catalog:'
-        version: 1.47.0
       '@zag-js/checkbox':
         specifier: 'catalog:'
         version: 2.0.0-next.3
@@ -680,9 +674,6 @@ packages:
 
   '@lilian1315/elements-writable-properties-types@0.1.12':
     resolution: {integrity: sha512-vwJR6IfHqj0nkG8GcM+/ZPq9jF+pnpQBhESI3KpcG0bGT9+gMqDdpuF4B58fGB4XEa04x6SLRiOqCzFLgP7aNw==}
-
-  '@lucide/icons@1.47.0':
-    resolution: {integrity: sha512-Ci+6G1KOJ71Tk2Dx8wxPOWUevfVYfcZec9r7xDucecg/iZ55Y9/KTlW1UgJ3ZULUVfddVNsKaYXR9yNZ9r6n4Q==}
 
   '@mdx-js/react@3.1.1':
     resolution: {integrity: sha512-f++rKLQgUVYDAtECQ6fn/is15GkEH9+nZPM3MS0RcxVqoTfawHvDlSCH7JbMhAM6uJ32v3eXLvLmLvjGu7PTQw==}
@@ -2848,8 +2839,6 @@ snapshots:
       faisceau: 0.3.2
 
   '@lilian1315/elements-writable-properties-types@0.1.12': {}
-
-  '@lucide/icons@1.47.0': {}
 
   '@mdx-js/react@3.1.1(@types/react@19.3.0)(react@19.3.0)':
     dependencies:

@@ -153,7 +153,7 @@ describe("Combobox", () => {
       '.fui-combobox-tag-remove[data-value="paris"]',
     )!;
     expect(parisRemove.getAttribute("aria-label")).toBe("Remove Paris");
-    expect(parisRemove.querySelector('svg[data-fui-icon="x"]')).not.toBeNull();
+    expect(parisRemove.querySelector(".fui-icon--x")).not.toBeNull();
 
     controller.root.querySelector<HTMLButtonElement>(".fui-combobox-trigger")!.click();
     await flushMachine();
@@ -388,10 +388,10 @@ describe("Combobox", () => {
     controller.destroy();
   });
 
-  it("uses Lucide icons and only authors fui-prefixed classes", () => {
+  it("uses mask icons and only authors fui-prefixed classes", () => {
     const controller = createCombobox({ items: ["One", "Two"], label: "Value" });
-    expect(controller.root.querySelector('svg[data-fui-icon="chevron-down"]')).not.toBeNull();
-    expect(controller.root.querySelector('svg[data-fui-icon="check"]')).not.toBeNull();
+    expect(controller.root.querySelector(".fui-icon--chevron-down")).not.toBeNull();
+    expect(controller.root.querySelector(".fui-icon--check")).not.toBeNull();
     const classes = Array.from(controller.root.querySelectorAll("[class]"), (element) => [
       ...element.classList,
     ]).flat();

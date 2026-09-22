@@ -1,6 +1,5 @@
 import { h } from "@lilian1315/create-element";
 
-import { createCheckIcon, createChevronDownIcon, createClearIcon } from "../shared/index.js";
 import type { FuiItem } from "../shared/index.js";
 
 export interface ComboboxControl {
@@ -42,12 +41,12 @@ export function buildControl(options: {
       hidden: true,
       type: "button",
     },
-    createClearIcon(),
+    h("span", { class: "fui-icon fui-icon--x", "aria-hidden": true }),
   ) as HTMLButtonElement;
   const trigger = h(
     "button",
     { class: "fui-combobox-trigger", type: "button" },
-    createChevronDownIcon(),
+    h("span", { class: "fui-icon fui-icon--chevron-down", "aria-hidden": true }),
   ) as HTMLButtonElement;
   const control = h("div", { class: "fui-combobox-control" }, field, clearTrigger, trigger);
   return { control, field, selection, input, clearTrigger, trigger };
@@ -71,7 +70,13 @@ export function buildItem(item: FuiItem): HTMLLIElement {
     children.push(h("span", { class: "fui-combobox-item-description" }, item.description));
   }
 
-  children.push(h("span", { class: "fui-combobox-item-indicator" }, createCheckIcon()));
+  children.push(
+    h(
+      "span",
+      { class: "fui-combobox-item-indicator" },
+      h("span", { class: "fui-icon fui-icon--check", "aria-hidden": true }),
+    ),
+  );
 
   return h(
     "li",

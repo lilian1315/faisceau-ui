@@ -7,7 +7,6 @@ import {
   captureAttributes,
   createId,
   createTriggerBinding,
-  createXIcon,
   getLookupRoot,
   requireFuiClass,
 } from "../shared/index.js";
@@ -388,7 +387,7 @@ function createClose(label = "Fermer"): HTMLButtonElement {
     class: "fui-drawer-close",
     type: "button",
   });
-  close.append(createXIcon());
+  close.append(h("span", { class: "fui-icon fui-icon--x", "aria-hidden": true }));
   return close;
 }
 

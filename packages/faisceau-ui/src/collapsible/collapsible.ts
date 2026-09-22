@@ -2,13 +2,7 @@ import { h } from "@lilian1315/create-element";
 import * as collapsible from "@zag-js/collapsible";
 import { createZagMachine } from "faisceau-zag";
 
-import {
-  captureAttributes,
-  createChevronDownIcon,
-  createId,
-  getLookupRoot,
-  requireFuiClass,
-} from "../shared/index.ts";
+import { captureAttributes, createId, getLookupRoot, requireFuiClass } from "../shared/index.ts";
 import type {
   CollapsibleController,
   CollapsibleOptions,
@@ -24,7 +18,11 @@ interface CollapsibleParts {
 export function createCollapsible(options: CollapsibleOptions): CollapsibleController {
   const root = h("div", { class: "fui-collapsible" });
   if (options.className) root.classList.add(...options.className.split(/\s+/).filter(Boolean));
-  const indicator = h("span", { class: "fui-collapsible-indicator" }, createChevronDownIcon());
+  const indicator = h(
+    "span",
+    { class: "fui-collapsible-indicator" },
+    h("span", { class: "fui-icon fui-icon--chevron-down", "aria-hidden": true }),
+  );
   const trigger = h(
     "button",
     { class: "fui-collapsible-trigger", type: "button" },

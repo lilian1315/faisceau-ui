@@ -9,6 +9,7 @@
   },
   "files": [
     "dist",
+    "src/icons",
     "src/styles"
   ],
   "type": "module",
@@ -82,14 +83,13 @@
     "access": "public"
   },
   "scripts": {
-    "build:styles": "sass src/styles:dist/styles --no-source-map --style=expanded && node scripts/build-css-dts.mjs",
+    "build:styles": "sass src/styles:dist/styles --no-source-map --style=expanded && rm -rf dist/icons && cp -r src/icons dist/icons && node scripts/build-css-dts.mjs",
     "build": "vpr build:styles && vp pack",
     "dev": "vp pack --watch",
     "test": "vp test"
   },
   "dependencies": {
     "@lilian1315/create-element": "catalog:",
-    "@lucide/icons": "catalog:",
     "@zag-js/checkbox": "catalog:",
     "@zag-js/collapsible": "catalog:",
     "@zag-js/combobox": "catalog:",

@@ -1,5 +1,4 @@
 import { h } from "@lilian1315/create-element";
-import { createCheckIcon, createChevronDownIcon, createClearIcon } from "../shared/icons.ts";
 import type { FuiItem } from "../shared/items.ts";
 import type { SelectProps } from "./types.ts";
 
@@ -28,12 +27,20 @@ export function createMarkup(items: FuiItem[], props: SelectProps): HTMLDivEleme
       "button",
       { class: "fui-select-trigger", type: "button" },
       h("span", { class: "fui-select-value-text" }),
-      h("span", { class: "fui-select-indicator" }, createChevronDownIcon()),
+      h(
+        "span",
+        { class: "fui-select-indicator" },
+        h("span", { class: "fui-icon fui-icon--chevron-down", "aria-hidden": true }),
+      ),
     ),
   );
   if (props.clearable)
     control.append(
-      h("button", { class: "fui-select-clear-trigger", type: "button" }, createClearIcon()),
+      h(
+        "button",
+        { class: "fui-select-clear-trigger", type: "button" },
+        h("span", { class: "fui-icon fui-icon--x", "aria-hidden": true }),
+      ),
     );
   const root = h(
     "div",
@@ -55,7 +62,11 @@ export function createMarkup(items: FuiItem[], props: SelectProps): HTMLDivEleme
               "li",
               { class: "fui-select-item" },
               h("span", { class: "fui-select-item-text" }, item.label),
-              h("span", { class: "fui-select-item-indicator" }, createCheckIcon()),
+              h(
+                "span",
+                { class: "fui-select-item-indicator" },
+                h("span", { class: "fui-icon fui-icon--check", "aria-hidden": true }),
+              ),
               item.description
                 ? h("span", { class: "fui-select-item-description" }, item.description)
                 : null,
