@@ -37,7 +37,7 @@ function createLucideIcon(iconData: LucideIconData, modifierClass: string): SVGS
   const height = "size" in iconData ? iconData.size : iconData.height;
   setSvgAttributes(icon, {
     "aria-hidden": "true",
-    "data-fui-icon": iconData.name,
+    "data-fui-icon": iconData.name!,
     fill: "none",
     focusable: "false",
     height: "16",
