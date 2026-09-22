@@ -179,19 +179,18 @@ describe("createZagMachine", () => {
 
   it("updates user props from Faisceau dependencies", () => {
     const showTitle = signal(true);
+    const getProps = vi.fn(() => ({ id: "fruit", showTitle: showTitle.get() }));
     const trigger = document.createElement("button");
-    const controller = createZagMachine(
-      createTestMachine(),
-      () => ({ id: "fruit", showTitle: showTitle.get() }),
-      connectTestMachine,
-    );
+    const controller = createZagMachine(createTestMachine(), getProps, connectTestMachine);
 
     controller.bind(trigger, (api) => api.getTriggerProps());
     controller.start();
     expect(trigger.title).toBe("Available choices");
+    expect(getProps).toHaveBeenCalledTimes(2);
 
     showTitle.set(false);
     expect(trigger.hasAttribute("title")).toBe(false);
+    expect(getProps).toHaveBeenCalledTimes(3);
     controller.destroy();
   });
 

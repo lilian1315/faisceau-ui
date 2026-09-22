@@ -76,7 +76,10 @@ export function createZagMachine<TSchema extends MachineSchema, TApi>(
 ): ZagMachineController<ZagMachineProps<TSchema>, TApi, TSchema> {
   type TProps = ZagMachineProps<TSchema>;
 
-  const service = new VanillaMachine(machine, props);
+  // Resolve getters at the adapter boundary. Passing the getter to Zag makes
+  // every internal prop read evaluate the complete user prop source again.
+  const initialProps = typeof props === "function" ? props() : props;
+  const service = new VanillaMachine(machine, initialProps);
   const apiSignal = signal(connect(service.service, normalizeProps));
   const api: ZagConnected<TApi> = {
     get: () => apiSignal.get(),
@@ -117,13 +120,13 @@ export function createZagMachine<TSchema extends MachineSchema, TApi>(
 
     let firstRun = true;
     stopPropsSync = effect(() => {
-      source();
+      const nextProps = source();
       if (firstRun && !applyImmediately) {
         firstRun = false;
         return;
       }
       firstRun = false;
-      service.updateProps(source as never);
+      service.updateProps(nextProps as never);
     });
   };
 
