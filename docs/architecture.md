@@ -41,9 +41,10 @@ The UI package owns component markup, enhancement, form behavior, CSS, icons, an
 It depends on the adapter and uses a dedicated Zag package for each component when available.
 
 Each public component has a root export and a package subpath in both registries. The npm package
-also ships styles separately through `faisceau-ui/styles/index.css`; importing JavaScript does not
-implicitly inject CSS. JSR exposes the TypeScript modules only because its package exports do not
-support CSS module targets.
+ships the styles alongside the JavaScript: each component entry imports its SCSS, which the build
+compiles to `dist/styles/*.css` and re-imports from the emitted JS, so importing a component
+implicitly loads its CSS. JSR exposes the TypeScript sources (including their `.scss` imports),
+so JSR consumers need a Sass-capable toolchain.
 
 ### Private packages
 
@@ -75,17 +76,16 @@ back to `ownerDocument` for this Storybook and test case.
 - Library-owned classes are single `fui-*` tokens; enhancement validates them before mutation.
 - Consumer classes are additive and are restored by enhanced controllers.
 - CSS is authored in Sass without `@layer` or `:where`, so selectors carry their natural
-  specificity and cascade in `@use` order. `src/styles/` holds one public stylesheet per
-  component plus the `index.scss` bundle; the directory compiles to `dist/styles/*.css` during
-  the package build. `faisceau-ui/styles/index.css` resolves to the compiled bundle while
-  `faisceau-ui/styles/<component>.css` (and the matching `.scss` sources) expose the same
-  styles per component. `tokens.scss` defines semantic `--fui-*` variables; component sheets
-  `@use` it together with the shared `base.scss`. Each component stylesheet is self-contained;
-  shared multi-selector blocks live as mixins in the internal `_mixins.scss` partial so
-  per-component files stay scoped. Import the `index` bundle when styling several components
-  to avoid duplicating the token/base prelude. Every CSS subpath carries a `types` condition
-  pointing at a generated sibling `<name>.css.d.ts`, so the imports typecheck without an
-  ambient `*.css` declaration.
+  specificity and cascade in import order. `src/styles/` holds one fragment stylesheet per
+  component plus the shared `base.scss`; `listbox.scss` carries the popup-list anatomy shared
+  with Combobox, while Select owns its own list anatomy in `select.scss` and must not import
+  `listbox.scss` (the two definitions conflict). Each component entry imports `base.scss` and
+  its fragment directly from TypeScript; the package build compiles them to `dist/styles/*.css`
+  and preserves the imports in the emitted JS (tsdown unbundle + `css.inject`), so no selector
+  has two owners. `_tokens.scss` defines semantic `--fui-*` variables; shared multi-selector
+  blocks live as mixins in the internal `_mixins.scss` partial so per-component files stay
+  scoped. Icons are copied to `dist/icons/` and referenced from CSS through relative
+  `../icons/*.svg` URLs.
 - Controls favor 44 px touch targets, explicit focus-visible rings, restrained property-specific
   transitions, and `scale: 0.96` press feedback.
 - Icons are Lucide SVGs vendored under `src/icons/` and rendered as `currentColor` CSS masks.
@@ -145,8 +145,9 @@ JSR manifest.
 ## Publication model
 
 Each public library has two manifests. `package.json` describes the built ESM package published to
-npm, while `jsr.json` exposes the TypeScript source published to JSR. CSS remains npm-only. The
-manifest versions move together.
+npm, while `jsr.json` exposes the TypeScript source published to JSR. The compiled CSS ships
+inside the npm `dist/` and is auto-imported from the built JS; JSR ships the sources, SCSS
+included. The manifest versions move together.
 The root `deno.json` supplies JSR and npm dependency mappings for the Deno workspace and is generated
 from the package manifests plus `pnpm-workspace.yaml`.
 

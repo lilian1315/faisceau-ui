@@ -25,22 +25,18 @@ vérifie leurs types et exécute une interaction réelle dans Chrome.
 pnpm add faisceau-ui
 ```
 
-Importer une fois la feuille de styles globale depuis le point d'entrée de l'application :
+Importer un composant suffit, sa feuille de styles est incluse automatiquement
+avec le JavaScript (chaque entrée importe son SCSS, compilé vers `dist/styles/`
+pendant le build) :
 
 ```ts
-import "faisceau-ui/styles/index.css";
+import { createSelect } from "faisceau-ui/select";
 ```
 
-Les sources Sass vivent dans `src/styles/` et sont compilées vers `dist/styles/`
-pendant le build. Les consommateurs équipés de Sass peuvent importer directement
-`faisceau-ui/styles/index.scss`.
-
-Chaque composant peut aussi importer sa propre feuille de styles, autonome
-(jetons, base partagée et règles du composant), par exemple
-`faisceau-ui/styles/select.css`. Avec plusieurs composants, préférez le paquet
-global `faisceau-ui/styles/index.css` pour éviter les doublons. Chaque entrée CSS
-est accompagnée de sa déclaration de types, inutile donc de déclarer un module
-`*.css` pour les importer depuis TypeScript.
+Les sources Sass vivent dans `src/styles/` : un fragment par composant, la base
+partagée (`base.scss`), la liste partagée de la Combobox (`listbox.scss`) et les
+partiels internes (`_tokens.scss`, `_mixins.scss`). Les consommateurs équipés de
+Sass peuvent aussi reprendre ces sources pour construire une variante.
 
 Chaque composant est également disponible depuis son sous-chemin, par exemple
 `faisceau-ui/select`, `faisceau-ui/collapsible`, `faisceau-ui/dialog` ou
@@ -60,13 +56,13 @@ deno add jsr:@lilian1315/faisceau-zag
 deno add npm:faisceau-ui
 ```
 
-JSR distribue les modules TypeScript, mais n'accepte pas une feuille CSS comme point d'entrée. Dans
-une application Deno qui utilise un bundler prenant en charge le CSS, importez donc l'API depuis JSR
-et la feuille de styles depuis le package npm :
+JSR distribue les modules TypeScript sources (y compris leurs imports `.scss`).
+Dans une application Deno, utilisez donc un bundler prenant en charge Sass, ou
+consommez le package npm dont le CSS est déjà compilé et importé
+automatiquement :
 
 ```ts
 import { createSelect } from "@lilian1315/faisceau-ui";
-import "faisceau-ui/styles/index.css";
 ```
 
 Le pont suit l'adapter Vanilla officiel et déclare ses runtimes en peer dependencies. Cette
@@ -79,7 +75,6 @@ modernes ; le rendu serveur ne fait pas partie de son contrat.
 
 ```ts
 import { createSelect } from "faisceau-ui/select";
-import "faisceau-ui/styles/select.css";
 
 const select = createSelect({
   label: "Mode d'affichage",

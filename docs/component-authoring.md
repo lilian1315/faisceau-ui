@@ -69,12 +69,13 @@ behaviors.
 
 ## 5. Add appearance and stories
 
-- Add a self-contained component stylesheet under `src/styles/` (for example
-  `dialog.scss`): `@use` tokens, base, then the component's shared dependencies in index
-  order, followed by the component rules. Forward it from `styles/index.scss` in cascade
-  order, expose both the `.css` and `.scss` files in `package.json` exports, and rebuild so
-  `dist/styles/` picks it up. Shared multi-component blocks belong in `_mixins.scss` so
-  per-component files stay scoped.
+- Add a stylesheet fragment under `src/styles/` (for example `dialog.scss`) with only the
+  component rules, keeping `@use "./mixins" as *` for shared blocks. Import `base.scss` and
+  the fragment from the component `<component>.ts` entry so the build compiles and injects
+  the CSS alongside the JS. `listbox.scss` is Combobox-only; Select owns its own list anatomy
+  and must not import it. Shared multi-component blocks belong in `_mixins.scss` and tokens
+  in the `_tokens.scss` partial so per-component files stay scoped and no selector has two
+  owners.
 - Use semantic `--fui-*` tokens, structural borders, visible focus states, and minimum 40–44 px hit
   areas.
 - Specify transitioned properties explicitly; routine interactions stay at or below 150 ms.
@@ -87,8 +88,8 @@ behaviors.
 Update all of these surfaces together:
 
 1. `packages/faisceau-ui/src/index.ts`
-2. `packages/faisceau-ui/package.json` exports and dependencies
-3. `packages/faisceau-ui/jsr.json` code exports (CSS is npm-only)
+2. `packages/faisceau-ui/package.json` exports and dependencies (JS subpaths; no per-component CSS exports)
+3. `packages/faisceau-ui/jsr.json` code exports (sources include their `.scss` imports)
 4. `packages/faisceau-ui/vite.config.ts` pack entries
 5. `packages/published-smoke/published-smoke.test.ts` runtime imports
 6. `packages/published-smoke/published-smoke.test-d.ts` declaration imports
