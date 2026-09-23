@@ -1,4 +1,4 @@
-name: Publish package to npm and JSR
+name: Publish package to npm
 
 on:
   push:
@@ -49,12 +49,6 @@ jobs:
           esac
 
           npm_version=$(node -p "require('./$directory/package.json').version")
-          jsr_version=$(node -p "require('./$directory/jsr.json').version")
-
-          if [ "$npm_version" != "$jsr_version" ]; then
-            echo "error: $directory/package.json and jsr.json declare different versions" >&2
-            exit 1
-          fi
 
           if [ "$GITHUB_EVENT_NAME" != "workflow_dispatch" ] && [ "$tag_version" != "$npm_version" ]; then
             echo "error: tag version $tag_version does not match $package version $npm_version" >&2
@@ -70,10 +64,6 @@ jobs:
 
       - name: Validate workspace
         run: vp run ready
-
-      - name: Publish to JSR
-        working-directory: ${{ steps.target.outputs.directory }}
-        run: vpx jsr publish
 
       - name: Publish to npm
         run: >-

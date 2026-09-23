@@ -89,11 +89,10 @@ Update all of these surfaces together:
 
 1. `packages/faisceau-ui/src/index.ts`
 2. `packages/faisceau-ui/package.json` exports and dependencies (JS subpaths; no per-component CSS exports)
-3. `packages/faisceau-ui/jsr.json` code exports (sources include their `.scss` imports)
-4. `packages/faisceau-ui/vite.config.ts` pack entries
-5. `packages/published-smoke/published-smoke.test.ts` runtime imports
-6. `packages/published-smoke/published-smoke.test-d.ts` declaration imports
-7. the user-facing README
+3. `packages/faisceau-ui/vite.config.ts` pack entries
+4. `packages/published-smoke/published-smoke.test.ts` runtime imports
+5. `packages/published-smoke/published-smoke.test-d.ts` declaration imports
+6. the user-facing README
 
 When a new declaration subpath is referenced before it has been built, refresh package artifacts
 with `vp run -r build` before running the complete validation.
@@ -123,5 +122,5 @@ configuration rather than passing typecheck flags on the command line.
 5. Inspect `git diff` for unrelated changes and stale exports.
 
 The component is ready for handoff only when the full command succeeds, the built public entry is
-verified by `published-smoke`, the npm and JSR manifests pass their build-time checks, and
+verified by `published-smoke`, the npm manifest passes Publint, and
 create/enhance teardown ownership is covered by tests.

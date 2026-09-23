@@ -17,7 +17,7 @@ until real application usage provides evidence for a smaller stable FUI API.
 
 ### `faisceau-zag`
 
-The adapter uses the package name `faisceau-zag` on npm and `@lilian1315/faisceau-zag` on JSR.
+The adapter uses the package name `faisceau-zag` on npm.
 
 The framework adapter owns the seam between Zag, Faisceau, and DOM props:
 
@@ -34,17 +34,15 @@ for Zag parent/child compositions such as Toast, not as an alternative DOM-bindi
 
 ### `faisceau-ui`
 
-The component library uses the package name `faisceau-ui` on npm and `@lilian1315/faisceau-ui` on
-JSR.
+The component library uses the package name `faisceau-ui` on npm.
 
 The UI package owns component markup, enhancement, form behavior, CSS, icons, and accessible labels.
 It depends on the adapter and uses a dedicated Zag package for each component when available.
 
-Each public component has a root export and a package subpath in both registries. The npm package
+Each public component has a root export and a package subpath. The npm package
 ships the styles alongside the JavaScript: each component entry imports its SCSS, which the build
 compiles to `dist/styles/*.css` and re-imports from the emitted JS, so importing a component
-implicitly loads its CSS. JSR exposes the TypeScript sources (including their `.scss` imports),
-so JSR consumers need a Sass-capable toolchain.
+implicitly loads its CSS.
 
 ### Private packages
 
@@ -139,19 +137,16 @@ Type tests live in `*.test-d.ts` and are enabled in package configuration.
 
 Source tests do not prove the package is publishable. Any public entry change must also update and
 pass `published-smoke`, which imports the generated ESM/declaration subpaths as a consumer would.
-Package builds separately run Publint against the npm manifest and compare its code exports with the
-JSR manifest.
+Package builds separately run Publint against the npm manifest.
 
 ## Publication model
 
-Each public library has two manifests. `package.json` describes the built ESM package published to
-npm, while `jsr.json` exposes the TypeScript source published to JSR. The compiled CSS ships
-inside the npm `dist/` and is auto-imported from the built JS; JSR ships the sources, SCSS
-included. The manifest versions move together.
-The root `deno.json` supplies JSR and npm dependency mappings for the Deno workspace and is generated
-from the package manifests plus `pnpm-workspace.yaml`.
+Each public library has a single manifest. `package.json` describes the built ESM package published
+to npm; the compiled CSS ships inside the npm `dist/` and is auto-imported from the built JS.
+JSR publication is disabled: component modules import their `.scss`, which JSR does not support
+as entry points.
 
 The GitHub Actions workflow publishes one package at a time. A tag named `faisceau-ui@<version>` or
 `faisceau-zag@<version>` selects the package; a manual run requires the same choice explicitly. The
-workflow rejects mismatched tag, npm-manifest, and JSR-manifest versions, runs the complete `ready`
-gate, then publishes to JSR and npm with OIDC.
+workflow rejects mismatched tag and npm-manifest versions, runs the complete `ready`
+gate, then publishes to npm with OIDC.

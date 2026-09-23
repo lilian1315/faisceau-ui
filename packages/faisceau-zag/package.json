@@ -34,7 +34,6 @@
     "@zag-js/tooltip": "catalog:",
     "@zag-js/vanilla": "catalog:",
     "faisceau": "catalog:",
-    "jsr-exports-lint": "catalog:",
     "playwright": "catalog:",
     "publint": "catalog:",
     "typescript": "catalog:",

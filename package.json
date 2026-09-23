@@ -5,8 +5,8 @@
   "scripts": {
     "ready": "vpr -r build && vp check && vpr -r test",
     "prepare": "vp config",
-    "release:zag": "vp exec -F faisceau-zag bumpp --all -x 'node ../../scripts/generate-deno-config.ts' -c 'release faisceau-zag@' -t faisceau-zag@",
-    "release:ui": "vp exec -F faisceau-ui bumpp --all -x 'node ../../scripts/generate-deno-config.ts' -c 'release faisceau-ui@' -t faisceau-ui@"
+    "release:zag": "vp exec -F faisceau-zag bumpp --all -c 'release faisceau-zag@' -t faisceau-zag@",
+    "release:ui": "vp exec -F faisceau-ui bumpp --all -c 'release faisceau-ui@' -t faisceau-ui@"
   },
   "devDependencies": {
     "@vitest/browser-playwright": "catalog:",
@@ -14,8 +14,7 @@
     "playwright": "catalog:",
     "vite": "catalog:",
     "vite-plus": "catalog:",
-    "vitest": "catalog:",
-    "yaml": "catalog:"
+    "vitest": "catalog:"
   },
   "devEngines": {
     "packageManager": {

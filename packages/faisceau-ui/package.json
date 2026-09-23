@@ -55,7 +55,6 @@
   },
   "devDependencies": {
     "@vitest/browser-playwright": "catalog:",
-    "jsr-exports-lint": "catalog:",
     "playwright": "catalog:",
     "publint": "catalog:",
     "sass-embedded": "catalog:",

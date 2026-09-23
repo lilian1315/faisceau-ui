@@ -1,10 +1,8 @@
 import { playwright } from "vite-plus/test/browser-playwright";
 import { defineConfig } from "vite-plus";
 import { fileURLToPath } from "node:url";
-import { lintJsrExports } from "jsr-exports-lint/tsdown";
 
 const adapterSource = fileURLToPath(new URL("../faisceau-zag/src/index.ts", import.meta.url));
-const jsrManifest = new URL("./jsr.json", import.meta.url);
 
 export default defineConfig({
   pack: {
@@ -29,9 +27,6 @@ export default defineConfig({
     format: ["esm"],
     sourcemap: true,
     publint: true,
-    hooks: {
-      "build:done": lintJsrExports(jsrManifest as unknown as string),
-    },
   },
   test: {
     alias: [{ find: /^faisceau-zag$/, replacement: adapterSource }],

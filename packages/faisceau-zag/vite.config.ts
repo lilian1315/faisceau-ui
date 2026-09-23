@@ -1,8 +1,5 @@
 import { playwright } from "vite-plus/test/browser-playwright";
 import { defineConfig } from "vite-plus";
-import { lintJsrExports } from "jsr-exports-lint/tsdown";
-
-const jsrManifest = new URL("./jsr.json", import.meta.url);
 
 export default defineConfig({
   pack: {
@@ -12,9 +9,6 @@ export default defineConfig({
     sourcemap: true,
     exports: true,
     publint: true,
-    hooks: {
-      "build:done": lintJsrExports(jsrManifest as unknown as string),
-    },
   },
   test: {
     browser: {

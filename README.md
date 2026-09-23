@@ -7,13 +7,12 @@ Toast. Chaque composant peut construire son propre DOM ou adopter un markup HTML
 
 ## Architecture
 
-Le monorepo contient deux bibliothèques destinées à être publiées sous un nom non scopé sur npm et
-sous le scope `@lilian1315` sur JSR :
+Le monorepo contient deux bibliothèques publiées sous un nom non scopé sur npm :
 
-- `faisceau-zag` sur npm, `@lilian1315/faisceau-zag` sur JSR : pont générique entre une machine
+- `faisceau-zag` : pont générique entre une machine
   Zag, les valeurs réactives Faisceau et des éléments DOM. Il gère le cycle de vie, les mises à
   jour et l'application réactive des props Zag.
-- `faisceau-ui` sur npm, `@lilian1315/faisceau-ui` sur JSR : composants, markup et styles. Il
+- `faisceau-ui` sur npm : composants, markup et styles. Il
   utilise le pont précédent et une machine Zag dédiée pour chaque composant lorsqu'elle existe.
 
 Le package privé `published-smoke` importe les sorties construites par leurs points d'entrée publics,
@@ -48,22 +47,9 @@ Pour utiliser directement le pont de bas niveau :
 pnpm add faisceau-zag @zag-js/vanilla faisceau
 ```
 
-Après publication, les mêmes bibliothèques pourront être ajoutées depuis JSR avec Deno :
-
-```bash
-deno add jsr:@lilian1315/faisceau-ui
-deno add jsr:@lilian1315/faisceau-zag
-deno add npm:faisceau-ui
-```
-
-JSR distribue les modules TypeScript sources (y compris leurs imports `.scss`).
-Dans une application Deno, utilisez donc un bundler prenant en charge Sass, ou
-consommez le package npm dont le CSS est déjà compilé et importé
-automatiquement :
-
-```ts
-import { createSelect } from "@lilian1315/faisceau-ui";
-```
+La publication vers JSR est désactivée : les modules des composants importent
+leurs `.scss`, que JSR ne sait pas traiter comme points d'entrée. Seul npm est
+publié, avec le CSS compilé et importé automatiquement.
 
 Le pont suit l'adapter Vanilla officiel et déclare ses runtimes en peer dependencies. Cette
 version utilise Zag `2.0.0-next.3` et Faisceau 0.3.x. Le projet cible uniquement les navigateurs
@@ -407,7 +393,6 @@ vp run dev
 ```
 
 Les scripts `build` des bibliothèques utilisent `vp pack`, la commande Vite+ destinée aux packages
-publiables. Chaque build vérifie le manifeste npm avec Publint et la correspondance entre les exports
-npm et JSR. Le workflow de publication accepte les tags `faisceau-ui@<version>` et
-`faisceau-zag@<version>` après avoir vérifié que `package.json`, `jsr.json` et le tag déclarent la
-même version.
+publiables. Chaque build vérifie le manifeste npm avec Publint. Le workflow de publication accepte
+les tags `faisceau-ui@<version>` et `faisceau-zag@<version>` après avoir vérifié que `package.json`
+et le tag déclarent la même version.

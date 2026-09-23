@@ -212,9 +212,6 @@ catalogs:
     faisceau:
       specifier: 0.3.2
       version: 0.3.2
-    jsr-exports-lint:
-      specifier: ^0.4.2
-      version: 0.4.2
     playwright:
       specifier: ^1.63.0
       version: 1.63.0
@@ -236,9 +233,6 @@ catalogs:
     vitest:
       specifier: 4.1.11
       version: 4.1.11
-    yaml:
-      specifier: ^2.9.1
-      version: 2.9.1
 
 overrides:
   vite@*: npm:@voidzero-dev/vite-plus-core@0.3.3
@@ -266,9 +260,6 @@ importers:
       vitest:
         specifier: 'catalog:'
         version: 4.1.11(@types/node@24.13.6)(@vitest/browser-playwright@4.1.11)(@vitest/browser-preview@4.1.11)(@voidzero-dev/vite-plus-core@0.3.3(@types/node@24.13.6)(esbuild@0.28.2)(jiti@2.7.0)(publint@0.3.24)(sass-embedded@1.104.1)(sass@1.104.1)(typescript@7.0.2)(yaml@2.9.1))
-      yaml:
-        specifier: 'catalog:'
-        version: 2.9.1
 
   packages/faisceau-ui:
     dependencies:
@@ -312,9 +303,6 @@ importers:
       '@vitest/browser-playwright':
         specifier: 'catalog:'
         version: 4.1.11(@voidzero-dev/vite-plus-core@0.3.3(@types/node@24.13.6)(esbuild@0.28.2)(jiti@2.7.0)(publint@0.3.24)(sass-embedded@1.104.1)(sass@1.104.1)(typescript@7.0.2)(yaml@2.9.1))(playwright@1.63.0)(vitest@4.1.11)
-      jsr-exports-lint:
-        specifier: 'catalog:'
-        version: 0.4.2
       playwright:
         specifier: 'catalog:'
         version: 1.63.0
@@ -352,9 +340,6 @@ importers:
       faisceau:
         specifier: 'catalog:'
         version: 0.3.2
-      jsr-exports-lint:
-        specifier: 'catalog:'
-        version: 0.4.2
       playwright:
         specifier: 'catalog:'
         version: 1.63.0
@@ -2082,18 +2067,6 @@ packages:
 
   jsonc-parser@3.3.1:
     resolution: {integrity: sha512-HUgH65KyejrUFPvHFPbqOY0rsFip3Bo5wb4ngvdi1EpCYWUQDC5V+Y7mZws+DLkr4M//zQJoanu1SP+87Dv1oQ==}
-
-  jsr-exports-lint@0.4.2:
-    resolution: {integrity: sha512-CyMLNmmq1PKOPr2VtcwvDZF67jkkOq+DVhPdAi/kzr5N1HGZ/iNqSJq2z3eG000BANzi8EKkLOLZqGijm+2VwQ==}
-    engines: {node: '>= 20'}
-    peerDependencies:
-      tsdown: '>=0.9.6'
-      unbuild: '>=1.0.0'
-    peerDependenciesMeta:
-      tsdown:
-        optional: true
-      unbuild:
-        optional: true
 
   lightningcss-android-arm64@1.33.0:
     resolution: {integrity: sha512-gEpRTalKdosp4Bb8qWtc2iOgE5SeIHlpS1up9bFq2wAyYhl1UdTObYiHe98zEM9SQvSoqQZ1IQD0JNpg3Ml5pg==}
@@ -3915,10 +3888,6 @@ snapshots:
   js-tokens@4.0.0: {}
 
   jsonc-parser@3.3.1: {}
-
-  jsr-exports-lint@0.4.2:
-    dependencies:
-      picocolors: 1.1.1
 
   lightningcss-android-arm64@1.33.0:
     optional: true
