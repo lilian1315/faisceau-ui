@@ -1,3 +1,5 @@
+import "../styles/base.scss";
+import "../styles/checkbox.scss";
 import { h } from "@lilian1315/create-element";
 import * as checkbox from "@zag-js/checkbox";
 import { createZagMachine } from "faisceau-zag";

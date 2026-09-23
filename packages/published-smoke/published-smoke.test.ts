@@ -1,5 +1,3 @@
-import "faisceau-ui/styles/index.css";
-
 import { afterEach, describe, expect, it } from "vite-plus/test";
 import {
   createCheckbox,

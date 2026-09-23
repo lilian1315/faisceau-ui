@@ -1,6 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vite-plus/test";
 
-import "../styles/index.scss";
 import { createCombobox, enhanceCombobox } from "./combobox.ts";
 
 afterEach(() => {

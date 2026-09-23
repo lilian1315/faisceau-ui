@@ -1,6 +1,3 @@
-// Self-contained Tooltip styles: tokens, shared base, and tooltip rules.
-@use "./tokens";
-@use "./base";
 @use "./mixins" as *;
 
 .fui-tooltip {

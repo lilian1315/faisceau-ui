@@ -8,13 +8,12 @@ const jsrManifest = new URL("./jsr.json", import.meta.url);
 
 export default defineConfig({
   pack: {
-    // Disabled so the Sass-compiled `dist/styles/*.css` stylesheets (built before
-    // `vp pack` runs) survive the bundle step and publint check.
-    clean: false,
+    platform: "browser",
+    exports: true,
+    unbundle: true,
+    css: { inject: true },
     deps: { resolveDepSubpath: true },
-    dts: {
-      tsconfig: "tsconfig.build.json",
-    },
+    dts: { tsconfig: "tsconfig.build.json" },
     entry: [
       "src/index.ts",
       "src/checkbox/index.ts",
@@ -26,6 +25,7 @@ export default defineConfig({
       "src/drawer/index.ts",
       "src/toast/index.ts",
     ],
+    copy: ["src/icons"],
     format: ["esm"],
     sourcemap: true,
     publint: true,

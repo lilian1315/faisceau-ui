@@ -15,6 +15,7 @@ storybook-static
 *.local
 architecture-review-*.html
 .pnpm-store
+__screenshots__
 
 # dotenv environment variable files
 .env

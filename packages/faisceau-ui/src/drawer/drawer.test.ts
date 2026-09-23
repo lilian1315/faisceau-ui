@@ -1,6 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vite-plus/test";
 
-import "../styles/index.scss";
 import { createDrawer, enhanceDrawer } from "./drawer.ts";
 
 afterEach(() => document.body.replaceChildren());

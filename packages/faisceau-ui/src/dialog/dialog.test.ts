@@ -1,6 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vite-plus/test";
 
-import "../styles/index.scss";
 import { createDialog, enhanceDialog } from "./dialog.ts";
 
 afterEach(() => document.body.replaceChildren());

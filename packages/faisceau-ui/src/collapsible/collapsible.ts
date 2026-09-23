@@ -1,3 +1,5 @@
+import "../styles/base.scss";
+import "../styles/collapsible.scss";
 import { h } from "@lilian1315/create-element";
 import * as collapsible from "@zag-js/collapsible";
 import { createZagMachine } from "faisceau-zag";

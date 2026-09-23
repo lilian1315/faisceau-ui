@@ -18,73 +18,24 @@
     "**/*.scss"
   ],
   "exports": {
-    ".": "./dist/index.mjs",
-    "./checkbox": "./dist/checkbox/index.mjs",
-    "./collapsible": "./dist/collapsible/index.mjs",
-    "./combobox": "./dist/combobox/index.mjs",
-    "./dialog": "./dist/dialog/index.mjs",
-    "./drawer": "./dist/drawer/index.mjs",
-    "./select": "./dist/select/index.mjs",
-    "./toast": "./dist/toast/index.mjs",
-    "./tooltip": "./dist/tooltip/index.mjs",
+    ".": "./dist/index.js",
+    "./checkbox": "./dist/checkbox/index.js",
+    "./collapsible": "./dist/collapsible/index.js",
+    "./combobox": "./dist/combobox/index.js",
+    "./dialog": "./dist/dialog/index.js",
+    "./drawer": "./dist/drawer/index.js",
+    "./select": "./dist/select/index.js",
+    "./toast": "./dist/toast/index.js",
+    "./tooltip": "./dist/tooltip/index.js",
     "./package.json": "./package.json",
-    "./styles/index.css": {
-      "types": "./dist/styles/index.css.d.ts",
-      "default": "./dist/styles/index.css"
-    },
-    "./styles/index.scss": "./src/styles/index.scss",
-    "./styles/checkbox.css": {
-      "types": "./dist/styles/checkbox.css.d.ts",
-      "default": "./dist/styles/checkbox.css"
-    },
-    "./styles/checkbox.scss": "./src/styles/checkbox.scss",
-    "./styles/collapsible.css": {
-      "types": "./dist/styles/collapsible.css.d.ts",
-      "default": "./dist/styles/collapsible.css"
-    },
-    "./styles/collapsible.scss": "./src/styles/collapsible.scss",
-    "./styles/combobox.css": {
-      "types": "./dist/styles/combobox.css.d.ts",
-      "default": "./dist/styles/combobox.css"
-    },
-    "./styles/combobox.scss": "./src/styles/combobox.scss",
-    "./styles/dialog.css": {
-      "types": "./dist/styles/dialog.css.d.ts",
-      "default": "./dist/styles/dialog.css"
-    },
-    "./styles/dialog.scss": "./src/styles/dialog.scss",
-    "./styles/drawer.css": {
-      "types": "./dist/styles/drawer.css.d.ts",
-      "default": "./dist/styles/drawer.css"
-    },
-    "./styles/drawer.scss": "./src/styles/drawer.scss",
-    "./styles/select.css": {
-      "types": "./dist/styles/select.css.d.ts",
-      "default": "./dist/styles/select.css"
-    },
-    "./styles/select.scss": "./src/styles/select.scss",
-    "./styles/toast.css": {
-      "types": "./dist/styles/toast.css.d.ts",
-      "default": "./dist/styles/toast.css"
-    },
-    "./styles/toast.scss": "./src/styles/toast.scss",
-    "./styles/tokens.css": {
-      "types": "./dist/styles/tokens.css.d.ts",
-      "default": "./dist/styles/tokens.css"
-    },
-    "./styles/tokens.scss": "./src/styles/tokens.scss",
-    "./styles/tooltip.css": {
-      "types": "./dist/styles/tooltip.css.d.ts",
-      "default": "./dist/styles/tooltip.css"
-    },
-    "./styles/tooltip.scss": "./src/styles/tooltip.scss"
+    "./styles/base.css": "./dist/styles/base.css"
   },
   "publishConfig": {
     "access": "public"
   },
   "scripts": {
     "build:styles": "sass src/styles:dist/styles --no-source-map --style=expanded && rm -rf dist/icons && cp -r src/icons dist/icons && node scripts/build-css-dts.mjs",
-    "build": "vpr build:styles && vp pack",
+    "build": "vp pack",
     "dev": "vp pack --watch",
     "test": "vp test"
   },

@@ -1,3 +1,6 @@
+import "../styles/base.scss";
+import "../styles/listbox.scss";
+import "../styles/combobox.scss";
 import { h } from "@lilian1315/create-element";
 import * as combobox from "@zag-js/combobox";
 import { effect } from "faisceau";

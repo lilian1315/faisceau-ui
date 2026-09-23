@@ -1,4 +1,3 @@
-import "../styles/select.scss";
 import { afterEach, describe, expect, it, vi } from "vite-plus/test";
 import { page, userEvent } from "vite-plus/test/browser";
 import { createSelect, enhanceSelect } from "./select.ts";

@@ -1,7 +1,4 @@
 // Self-contained Combobox styles: tokens, shared base, listbox, and combobox rules.
-@use "./tokens";
-@use "./base";
-@use "./listbox";
 @use "./mixins" as *;
 
 .fui-combobox-control {

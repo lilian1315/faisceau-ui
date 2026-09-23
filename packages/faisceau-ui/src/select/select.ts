@@ -1,3 +1,5 @@
+import "../styles/base.scss";
+import "../styles/select.scss";
 import * as select from "@zag-js/select";
 import { effect, signal } from "faisceau";
 import { createZagMachine } from "faisceau-zag";

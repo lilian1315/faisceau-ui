@@ -1,9 +1,6 @@
-// Shared listbox anatomy for select and combobox, with tokens and base.
-@use "./tokens";
-@use "./base";
+// Combobox listbox anatomy, consumed with base (imported separately via JS entries).
 @use "./mixins" as *;
 
-.fui-select-positioner,
 .fui-combobox-positioner {
   // Zag writes --z-index inline on the positioner. Keep the application base
   // elevation in CSS while allowing its layer index to participate.
@@ -13,7 +10,6 @@
   max-inline-size: min(var(--fui-control-max-inline-size), calc(100vw - (2 * var(--fui-space-2))));
 }
 
-.fui-select-content,
 .fui-combobox-content {
   inline-size: 100%;
   min-inline-size: min(128px, calc(100vw - (2 * var(--fui-space-2))));
@@ -57,7 +53,6 @@
   }
 }
 
-.fui-select-list,
 .fui-combobox-list {
   display: grid;
   max-block-size: min(
@@ -75,7 +70,6 @@
   overscroll-behavior: contain;
 }
 
-.fui-select-item,
 .fui-combobox-item {
   position: relative;
   display: grid;
@@ -130,7 +124,6 @@
   }
 }
 
-.fui-select-item-text,
 .fui-combobox-item-text {
   grid-column: 1;
   min-inline-size: 0;
@@ -139,7 +132,6 @@
   text-align: start;
 }
 
-.fui-select-item-description,
 .fui-combobox-item-description {
   grid-column: 1;
   min-inline-size: 0;
@@ -153,7 +145,6 @@
   text-wrap: pretty;
 }
 
-.fui-select-item-indicator,
 .fui-combobox-item-indicator {
   position: absolute;
   inset-block-start: 50%;
@@ -178,19 +169,16 @@
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .fui-select-content[data-state="open"],
   .fui-combobox-content[data-state="open"] {
     animation: fui-listbox-in var(--fui-duration-fast) var(--fui-easing-standard);
   }
 
-  .fui-select-item,
   .fui-combobox-item {
     transition-property: color, background-color;
     transition-duration: var(--fui-duration-fast);
     transition-timing-function: var(--fui-easing-standard);
   }
 
-  .fui-select-item-indicator,
   .fui-combobox-item-indicator {
     transition-property: opacity;
     transition-duration: var(--fui-duration-fast);
@@ -199,14 +187,12 @@
 }
 
 @media (any-pointer: coarse) {
-  .fui-select-item,
   .fui-combobox-item {
     min-block-size: var(--fui-control-height-coarse);
   }
 }
 
 @media (forced-colors: active) {
-  .fui-select-content,
   .fui-combobox-content {
     color: CanvasText;
     background: Canvas;
@@ -218,7 +204,6 @@
     }
   }
 
-  .fui-select-item,
   .fui-combobox-item {
     &:focus-visible {
       outline-color: Highlight;
@@ -229,7 +214,6 @@
       background: Highlight;
       forced-color-adjust: none;
 
-      .fui-select-item-description,
       .fui-combobox-item-description {
         color: HighlightText;
       }
@@ -239,7 +223,6 @@
       color: GrayText;
       opacity: 1;
 
-      .fui-select-item-description,
       .fui-combobox-item-description {
         color: GrayText;
       }

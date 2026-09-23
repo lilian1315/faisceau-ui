@@ -1,3 +1,5 @@
+import "../styles/base.scss";
+import "../styles/tooltip.scss";
 import { h } from "@lilian1315/create-element";
 import { createZagMachine } from "faisceau-zag";
 import * as tooltip from "@zag-js/tooltip";
