@@ -6,7 +6,7 @@
     system-ui,
     -apple-system,
     BlinkMacSystemFont,
-    "Segoe UI",
+    'Segoe UI',
     sans-serif;
   -webkit-font-smoothing: antialiased;
 }
@@ -17,11 +17,11 @@ body {
   background: var(--fui-color-background);
 }
 
-[data-fui-theme="dark"] {
+[data-fui-theme='dark'] {
   color-scheme: dark;
 }
 
-[data-fui-theme="light"] {
+[data-fui-theme='light'] {
   color-scheme: light;
 }
 

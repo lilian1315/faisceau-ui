@@ -4,78 +4,78 @@ packages:
 catalogMode: prefer
 
 catalog:
-  "@lilian1315/create-element": 0.14.1
-  "@zag-js/checkbox": 2.0.0-next.3
-  "@zag-js/collapsible": 2.0.0-next.3
-  "@zag-js/combobox": 2.0.0-next.3
-  "@zag-js/core": 2.0.0-next.3
-  "@zag-js/select": 2.0.0-next.3
-  "@zag-js/tooltip": 2.0.0-next.3
-  "@zag-js/vanilla": 2.0.0-next.3
-  "@types/node": ^24
+  '@lilian1315/create-element': 0.14.1
+  '@zag-js/checkbox': 2.0.0-next.3
+  '@zag-js/collapsible': 2.0.0-next.3
+  '@zag-js/combobox': 2.0.0-next.3
+  '@zag-js/core': 2.0.0-next.3
+  '@zag-js/select': 2.0.0-next.3
+  '@zag-js/tooltip': 2.0.0-next.3
+  '@zag-js/vanilla': 2.0.0-next.3
+  '@types/node': ^24
   faisceau: 0.3.2
   typescript: ^7.0.2
   vite: npm:@voidzero-dev/vite-plus-core@0.3.3
   vite-plus: 0.3.3
-  "@vitest/browser-playwright": 4.1.11
+  '@vitest/browser-playwright': 4.1.11
   playwright: ^1.63.0
   vitest: 4.1.11
-  "@zag-js/dialog": 2.0.0-next.3
-  "@zag-js/dom-query": 2.0.0-next.3
-  "@zag-js/toast": 2.0.0-next.3
-  "@zag-js/drawer": 2.0.0-next.3
+  '@zag-js/dialog': 2.0.0-next.3
+  '@zag-js/dom-query': 2.0.0-next.3
+  '@zag-js/toast': 2.0.0-next.3
+  '@zag-js/drawer': 2.0.0-next.3
   publint: ^0.3.24
   bumpp: ^12.3.0
   sass-embedded: ^1.104.1
 overrides:
-  vite@*: "catalog:"
-  vitest@*: "catalog:"
+  vite@*: 'catalog:'
+  vitest@*: 'catalog:'
 peerDependencyRules:
   allowAny:
     - vite
     - vitest
   allowedVersions:
-    vite: "*"
-    vite-plus: "*"
-    vitest: "*"
+    vite: '*'
+    vite-plus: '*'
+    vitest: '*'
 minimumReleaseAgeExclude:
-  - "@lilian1315/create-element@0.12.1 || 0.13.1 || 0.14.0 || 0.14.1"
-  - "@lilian1315/elements-writable-properties-types@0.1.3 || 0.1.12"
-  - "@zag-js/anatomy@2.0.0-next.3"
-  - "@zag-js/aria-hidden@2.0.0-next.3"
-  - "@zag-js/checkbox@2.0.0-next.3"
-  - "@zag-js/collapsible@2.0.0-next.3"
-  - "@zag-js/collection@2.0.0-next.3"
-  - "@zag-js/combobox@2.0.0-next.3"
-  - "@zag-js/core@2.0.0-next.3"
-  - "@zag-js/dialog@2.0.0-next.3"
-  - "@zag-js/dismissable@2.0.0-next.3"
-  - "@zag-js/dom-query@2.0.0-next.3"
-  - "@zag-js/drawer@2.0.0-next.3"
-  - "@zag-js/focus-trap@2.0.0-next.3"
-  - "@zag-js/focus-visible@2.0.0-next.3"
-  - "@zag-js/interact-outside@2.0.0-next.3"
-  - "@zag-js/live-region@2.0.0-next.3"
-  - "@zag-js/popper@2.0.0-next.3"
-  - "@zag-js/remove-scroll@2.0.0-next.3"
-  - "@zag-js/safe-area@2.0.0-next.3"
-  - "@zag-js/select@2.0.0-next.3"
-  - "@zag-js/store@2.0.0-next.3"
-  - "@zag-js/toast@2.0.0-next.3"
-  - "@zag-js/tooltip@2.0.0-next.3"
-  - "@zag-js/types@2.0.0-next.3"
-  - "@zag-js/utils@2.0.0-next.3"
-  - "@zag-js/vanilla@2.0.0-next.3"
-  - "@voidzero-dev/vite-plus-core@0.3.2"
-  - "@voidzero-dev/vite-plus-darwin-arm64@0.3.2"
-  - "@voidzero-dev/vite-plus-darwin-x64@0.3.2"
-  - "@voidzero-dev/vite-plus-linux-arm64-gnu@0.3.2"
-  - "@voidzero-dev/vite-plus-linux-arm64-musl@0.3.2"
-  - "@voidzero-dev/vite-plus-linux-x64-gnu@0.3.2"
-  - "@voidzero-dev/vite-plus-linux-x64-musl@0.3.2"
-  - "@voidzero-dev/vite-plus-win32-arm64-msvc@0.3.2"
-  - "@voidzero-dev/vite-plus-win32-x64-msvc@0.3.2"
+  - '@lilian1315/create-element@0.12.1 || 0.13.1 || 0.14.0 || 0.14.1'
+  - '@lilian1315/elements-writable-properties-types@0.1.3 || 0.1.12'
+  - '@zag-js/anatomy@2.0.0-next.3'
+  - '@zag-js/aria-hidden@2.0.0-next.3'
+  - '@zag-js/checkbox@2.0.0-next.3'
+  - '@zag-js/collapsible@2.0.0-next.3'
+  - '@zag-js/collection@2.0.0-next.3'
+  - '@zag-js/combobox@2.0.0-next.3'
+  - '@zag-js/core@2.0.0-next.3'
+  - '@zag-js/dialog@2.0.0-next.3'
+  - '@zag-js/dismissable@2.0.0-next.3'
+  - '@zag-js/dom-query@2.0.0-next.3'
+  - '@zag-js/drawer@2.0.0-next.3'
+  - '@zag-js/focus-trap@2.0.0-next.3'
+  - '@zag-js/focus-visible@2.0.0-next.3'
+  - '@zag-js/interact-outside@2.0.0-next.3'
+  - '@zag-js/live-region@2.0.0-next.3'
+  - '@zag-js/popper@2.0.0-next.3'
+  - '@zag-js/remove-scroll@2.0.0-next.3'
+  - '@zag-js/safe-area@2.0.0-next.3'
+  - '@zag-js/select@2.0.0-next.3'
+  - '@zag-js/store@2.0.0-next.3'
+  - '@zag-js/toast@2.0.0-next.3'
+  - '@zag-js/tooltip@2.0.0-next.3'
+  - '@zag-js/types@2.0.0-next.3'
+  - '@zag-js/utils@2.0.0-next.3'
+  - '@zag-js/vanilla@2.0.0-next.3'
+  - '@voidzero-dev/vite-plus-core@0.3.2'
+  - '@voidzero-dev/vite-plus-darwin-arm64@0.3.2'
+  - '@voidzero-dev/vite-plus-darwin-x64@0.3.2'
+  - '@voidzero-dev/vite-plus-linux-arm64-gnu@0.3.2'
+  - '@voidzero-dev/vite-plus-linux-arm64-musl@0.3.2'
+  - '@voidzero-dev/vite-plus-linux-x64-gnu@0.3.2'
+  - '@voidzero-dev/vite-plus-linux-x64-musl@0.3.2'
+  - '@voidzero-dev/vite-plus-win32-arm64-msvc@0.3.2'
+  - '@voidzero-dev/vite-plus-win32-x64-msvc@0.3.2'
   - vite-plus@0.3.2
 allowBuilds:
-  "@parcel/watcher": false
+  '@parcel/watcher': false
   esbuild: true

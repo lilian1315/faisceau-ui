@@ -1,28 +1,28 @@
-import type { Preview } from "@storybook/html-vite";
+import type { Preview } from '@storybook/html-vite'
 
-import "../src/storybook.css";
+import '../src/storybook.css'
 
 const preview: Preview = {
   parameters: {
-    a11y: { test: "error" },
+    a11y: { test: 'error' },
     controls: { expanded: true },
-    layout: "centered",
+    layout: 'centered',
     options: {
       storySort: {
         order: [
-          "Introduction",
-          "Checkbox",
-          "Collapsible",
-          "Select",
-          "Combobox",
-          "Tooltip",
-          "Dialog",
-          "Drawer",
-          "Toast",
+          'Introduction',
+          'Checkbox',
+          'Collapsible',
+          'Select',
+          'Combobox',
+          'Tooltip',
+          'Dialog',
+          'Drawer',
+          'Toast',
         ],
       },
     },
   },
-};
+}
 
-export default preview;
+export default preview

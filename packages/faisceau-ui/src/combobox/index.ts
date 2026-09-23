@@ -1,4 +1,4 @@
-export { createCombobox, enhanceCombobox } from "./combobox.ts";
+export { createCombobox, enhanceCombobox } from './combobox.ts'
 export type {
   ComboboxApi,
   ComboboxController,
@@ -6,4 +6,4 @@ export type {
   ComboboxProps,
   EnhanceComboboxOptions,
   EnhanceComboboxProps,
-} from "./types.ts";
+} from './types.ts'

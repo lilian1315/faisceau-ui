@@ -1,5 +1,5 @@
 // Combobox listbox anatomy, consumed with base (imported separately via JS entries).
-@use "./mixins" as *;
+@use './mixins' as *;
 
 .fui-combobox-positioner {
   // Zag writes --z-index inline on the positioner. Keep the application base
@@ -28,7 +28,7 @@
   transform-origin: var(--transform-origin, center);
   overscroll-behavior: contain;
 
-  &[data-state="closed"] {
+  &[data-state='closed'] {
     pointer-events: none;
   }
 
@@ -36,19 +36,19 @@
     @include fui-focus-ring;
   }
 
-  &[data-side="bottom"] {
+  &[data-side='bottom'] {
     --fui-listbox-enter-y: -2px;
   }
 
-  &[data-side="top"] {
+  &[data-side='top'] {
     --fui-listbox-enter-y: 2px;
   }
 
-  &[data-side="left"] {
+  &[data-side='left'] {
     --fui-listbox-enter-x: 2px;
   }
 
-  &[data-side="right"] {
+  &[data-side='right'] {
     --fui-listbox-enter-x: -2px;
   }
 }
@@ -94,7 +94,7 @@
     inline-size: 2px;
     border-radius: 999px;
     background: currentColor;
-    content: "";
+    content: '';
     opacity: 0;
     pointer-events: none;
   }
@@ -108,7 +108,7 @@
     }
   }
 
-  &[data-state="checked"] {
+  &[data-state='checked'] {
     font-weight: var(--fui-font-weight-medium);
   }
 
@@ -159,17 +159,17 @@
   pointer-events: none;
   transform: translateY(-50%);
 
-  &[data-state="checked"] {
+  &[data-state='checked'] {
     opacity: 1;
   }
 
-  &[data-state="unchecked"] {
+  &[data-state='unchecked'] {
     opacity: 0;
   }
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .fui-combobox-content[data-state="open"] {
+  .fui-combobox-content[data-state='open'] {
     animation: fui-listbox-in var(--fui-duration-fast) var(--fui-easing-standard);
   }
 

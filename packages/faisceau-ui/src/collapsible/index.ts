@@ -1,4 +1,4 @@
-export { createCollapsible, enhanceCollapsible } from "./collapsible.ts";
+export { createCollapsible, enhanceCollapsible } from './collapsible.ts'
 export type {
   CollapsibleApi,
   CollapsibleController,
@@ -6,4 +6,4 @@ export type {
   CollapsibleOptions,
   CollapsibleViewOptions,
   EnhanceCollapsibleOptions,
-} from "./types.ts";
+} from './types.ts'

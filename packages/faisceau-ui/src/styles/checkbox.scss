@@ -1,4 +1,4 @@
-@use "./mixins" as *;
+@use './mixins' as *;
 
 .fui-checkbox {
   display: grid;
@@ -46,8 +46,8 @@
     border-color var(--fui-duration-fast) var(--fui-easing-standard),
     box-shadow var(--fui-duration-fast) var(--fui-easing-standard);
 
-  &[data-state="checked"],
-  &[data-state="indeterminate"] {
+  &[data-state='checked'],
+  &[data-state='indeterminate'] {
     border-color: var(--fui-color-foreground);
     background: var(--fui-color-foreground);
   }
@@ -63,13 +63,13 @@
   block-size: 12px;
 }
 
-.fui-checkbox-indicator[data-state="checked"] .fui-icon--check,
-.fui-checkbox-indicator[data-state="indeterminate"] .fui-icon--minus {
+.fui-checkbox-indicator[data-state='checked'] .fui-icon--check,
+.fui-checkbox-indicator[data-state='indeterminate'] .fui-icon--minus {
   display: block;
 }
 
 @media (forced-colors: active) {
-  .fui-checkbox-control[data-state="checked"] {
+  .fui-checkbox-control[data-state='checked'] {
     background: Highlight;
     color: HighlightText;
   }

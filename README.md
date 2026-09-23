@@ -29,7 +29,7 @@ avec le JavaScript (chaque entrée importe son SCSS, compilé vers `dist/styles/
 pendant le build) :
 
 ```ts
-import { createSelect } from "faisceau-ui/select";
+import { createSelect } from 'faisceau-ui/select'
 ```
 
 Les sources Sass vivent dans `src/styles/` : un fragment par composant, la base
@@ -60,25 +60,25 @@ modernes ; le rendu serveur ne fait pas partie de son contrat.
 `createSelect` construit le markup avec `@lilian1315/create-element`. Le contrôleur reste arrêté jusqu'à son montage :
 
 ```ts
-import { createSelect } from "faisceau-ui/select";
+import { createSelect } from 'faisceau-ui/select'
 
 const select = createSelect({
   label: "Mode d'affichage",
-  placeholder: "Choisir un mode",
+  placeholder: 'Choisir un mode',
   clearable: true,
-  name: "display-mode",
+  name: 'display-mode',
   items: [
-    { value: "simple", label: "Simple" },
+    { value: 'simple', label: 'Simple' },
     {
-      value: "expert",
-      label: "Expert",
-      description: "Affiche tous les réglages",
+      value: 'expert',
+      label: 'Expert',
+      description: 'Affiche tous les réglages',
     },
-    { value: "legacy", label: "Historique", disabled: true },
+    { value: 'legacy', label: 'Historique', disabled: true },
   ],
-});
+})
 
-select.mount(document.querySelector("#app")!);
+select.mount(document.querySelector('#app')!)
 ```
 
 Une chaîne peut servir de raccourci d'item ; sa valeur et son libellé seront identiques.
@@ -100,20 +100,20 @@ Références : [machine v2](https://github.com/chakra-ui/zag/tree/v2/packages/ma
 La Combobox filtre par défaut les libellés sans tenir compte de la casse. Une fonction `filter` permet de remplacer ce comportement.
 
 ```ts
-import { createCombobox } from "faisceau-ui";
+import { createCombobox } from 'faisceau-ui'
 
 const combobox = createCombobox({
-  label: "Commande",
-  placeholder: "Rechercher une commande",
-  emptyLabel: "Aucun résultat",
+  label: 'Commande',
+  placeholder: 'Rechercher une commande',
+  emptyLabel: 'Aucun résultat',
   items: [
-    { value: "build", label: "Build" },
-    { value: "test", label: "Test" },
-    { value: "deploy", label: "Déployer", disabled: true },
+    { value: 'build', label: 'Build' },
+    { value: 'test', label: 'Test' },
+    { value: 'deploy', label: 'Déployer', disabled: true },
   ],
-});
+})
 
-combobox.mount(document.querySelector("#app")!);
+combobox.mount(document.querySelector('#app')!)
 ```
 
 ## Sélection multiple
@@ -122,28 +122,28 @@ Les deux composants acceptent `multiple: true`. Un Select affiche les libellés 
 
 ```ts
 createSelect({
-  label: "Pays",
-  name: "countries",
+  label: 'Pays',
+  name: 'countries',
   multiple: true,
-  defaultValue: ["fr", "be"],
+  defaultValue: ['fr', 'be'],
   items: [
-    { value: "fr", label: "France" },
-    { value: "be", label: "Belgique" },
-    { value: "ch", label: "Suisse" },
+    { value: 'fr', label: 'France' },
+    { value: 'be', label: 'Belgique' },
+    { value: 'ch', label: 'Suisse' },
   ],
-}).mount(document.querySelector("#countries")!);
+}).mount(document.querySelector('#countries')!)
 
 createCombobox({
-  label: "Villes",
-  name: "cities",
+  label: 'Villes',
+  name: 'cities',
   multiple: true,
   getRemoveLabel: (item) => `Retirer ${item.label}`,
   items: [
-    { value: "paris", label: "Paris" },
-    { value: "lyon", label: "Lyon" },
-    { value: "lille", label: "Lille" },
+    { value: 'paris', label: 'Paris' },
+    { value: 'lyon', label: 'Lyon' },
+    { value: 'lille', label: 'Lille' },
   ],
-}).mount(document.querySelector("#cities")!);
+}).mount(document.querySelector('#cities')!)
 ```
 
 En mode enhance, l'attribut HTML natif suffit : `<select multiple>`. Les options portant `selected` deviennent les valeurs initiales. Pour récupérer toutes les valeurs d'un formulaire, utilisez `new FormData(form).getAll(name)`.
@@ -155,22 +155,22 @@ Select et Combobox gardent un véritable `<select>` dans le document. Le contrô
 Une sélection effectuée depuis l'interface visuelle émet les événements natifs bouillonnants `input`, puis `change`, sur ce `<select>`. Les listeners déjà attachés à un markup amélioré continuent donc de fonctionner. Si la validation native échoue, le focus est transféré vers le trigger du Select ou le champ de la Combobox.
 
 ```ts
-const form = document.querySelector<HTMLFormElement>("#profile")!;
+const form = document.querySelector<HTMLFormElement>('#profile')!
 
 createCombobox({
-  label: "Ville",
-  name: "city",
+  label: 'Ville',
+  name: 'city',
   required: true,
   items: [
-    { value: "paris", label: "Paris" },
-    { value: "lyon", label: "Lyon" },
+    { value: 'paris', label: 'Paris' },
+    { value: 'lyon', label: 'Lyon' },
   ],
-}).mount(form);
+}).mount(form)
 
-form.addEventListener("submit", (event) => {
-  event.preventDefault();
-  console.log(new FormData(form).get("city"));
-});
+form.addEventListener('submit', (event) => {
+  event.preventDefault()
+  console.log(new FormData(form).get('city'))
+})
 ```
 
 ## Améliorer un markup existant
@@ -196,9 +196,9 @@ le reset du formulaire.
 ```
 
 ```ts
-import { enhanceSelect } from "faisceau-ui";
+import { enhanceSelect } from 'faisceau-ui'
 
-const select = enhanceSelect(document.querySelector<HTMLDivElement>("#mode-select")!);
+const select = enhanceSelect(document.querySelector<HTMLDivElement>('#mode-select')!)
 ```
 
 Seuls le conteneur `fui-select` et le `<select class="fui-select-native-select">` sont
@@ -223,11 +223,11 @@ placeholder et ne figure pas dans la liste des choix ; l'option `placeholder` pa
 ```
 
 ```ts
-import { enhanceCombobox } from "faisceau-ui";
+import { enhanceCombobox } from 'faisceau-ui'
 
-const combobox = enhanceCombobox(document.querySelector<HTMLDivElement>("#command-combobox")!, {
-  emptyLabel: "Aucun résultat",
-});
+const combobox = enhanceCombobox(document.querySelector<HTMLDivElement>('#command-combobox')!, {
+  emptyLabel: 'Aucun résultat',
+})
 ```
 
 La saisie, le trigger, la liste filtrable et l'état vide sont générés ; seuls le conteneur
@@ -240,14 +240,14 @@ portant `data-placeholder` est réservée au placeholder.
 `createCheckbox` construit un contrôle relié à un véritable `input[type="checkbox"]`, compatible avec `FormData`, `required` et le reset natif :
 
 ```ts
-import { createCheckbox } from "faisceau-ui";
+import { createCheckbox } from 'faisceau-ui'
 
 createCheckbox({
-  label: "Accepter les conditions",
-  name: "terms",
+  label: 'Accepter les conditions',
+  name: 'terms',
   required: true,
-  value: "accepted",
-}).mount(document.querySelector("#terms")!);
+  value: 'accepted',
+}).mount(document.querySelector('#terms')!)
 ```
 
 Pour l'enhancement, le label, l'input natif et le contrôle visuel suffisent :
@@ -260,9 +260,9 @@ Pour l'enhancement, le label, l'input natif et le contrôle visuel suffisent :
 ```
 
 ```ts
-import { enhanceCheckbox } from "faisceau-ui";
+import { enhanceCheckbox } from 'faisceau-ui'
 
-enhanceCheckbox(document.querySelector<HTMLLabelElement>("#newsletter")!, {});
+enhanceCheckbox(document.querySelector<HTMLLabelElement>('#newsletter')!, {})
 ```
 
 ## Collapsible
@@ -272,13 +272,13 @@ existante composée de `.fui-collapsible-trigger`, `.fui-collapsible-trigger-tex
 `.fui-collapsible-indicator` et `.fui-collapsible-content`.
 
 ```ts
-import { createCollapsible } from "faisceau-ui";
+import { createCollapsible } from 'faisceau-ui'
 
 createCollapsible({
-  trigger: "Réglages avancés",
-  content: "Options rarement utilisées",
+  trigger: 'Réglages avancés',
+  content: 'Options rarement utilisées',
   defaultOpen: false,
-}).mount(document.body);
+}).mount(document.body)
 ```
 
 ## Tooltip
@@ -286,10 +286,10 @@ createCollapsible({
 `createTooltip` génère un bouton et son infobulle accessible. `enhanceTooltip` peut utiliser le `title` d'un trigger existant ; l'attribut est temporairement retiré pour éviter la double infobulle puis restauré par `destroy()`.
 
 ```ts
-import { createTooltip, enhanceTooltip } from "faisceau-ui";
+import { createTooltip, enhanceTooltip } from 'faisceau-ui'
 
-createTooltip({ content: "Créer un document", trigger: "Créer" }).mount(document.body);
-enhanceTooltip(document.querySelector<HTMLElement>("[title]")!);
+createTooltip({ content: 'Créer un document', trigger: 'Créer' }).mount(document.body)
+enhanceTooltip(document.querySelector<HTMLElement>('[title]')!)
 ```
 
 ## Dialog, Drawer et Toast
@@ -302,24 +302,24 @@ dont tous les éléments correspondants ouvrent le panneau. Drawer utilise sa ma
 il expose directement `swipeDirection`, les snap points, le grabber et une zone de swipe optionnelle.
 
 ```ts
-import { createDialog, createDrawer, createToaster } from "faisceau-ui";
+import { createDialog, createDrawer, createToaster } from 'faisceau-ui'
 
 createDialog({
-  triggerSelector: "#ouvrir-profil",
-  title: "Profil",
-  content: "Contenu",
-}).mount(document.body);
+  triggerSelector: '#ouvrir-profil',
+  title: 'Profil',
+  content: 'Contenu',
+}).mount(document.body)
 createDrawer({
-  triggerSelector: "#ouvrir-filtres",
-  title: "Filtres",
-  content: "Contenu",
-  swipeDirection: "end",
+  triggerSelector: '#ouvrir-filtres',
+  title: 'Filtres',
+  content: 'Contenu',
+  swipeDirection: 'end',
   snapPoints: [0.5, 1],
   swipeArea: true,
-}).mount(document.body);
+}).mount(document.body)
 
-const toaster = createToaster({ placement: "bottom-end" }).mount(document.body);
-toaster.store.success({ title: "Enregistré", description: "Les changements sont conservés." });
+const toaster = createToaster({ placement: 'bottom-end' }).mount(document.body)
+toaster.store.success({ title: 'Enregistré', description: 'Les changements sont conservés.' })
 ```
 
 ## Thèmes et personnalisation
@@ -358,13 +358,13 @@ Le contrôleur Toast suit le même cycle de vie, mais expose `store` à la place
 créer, mettre à jour et fermer plusieurs notifications.
 
 ```ts
-const select = createSelect({ label: "Mode", items: ["Simple", "Expert"] });
+const select = createSelect({ label: 'Mode', items: ['Simple', 'Expert'] })
 
-document.body.append(select.root);
-select.start();
+document.body.append(select.root)
+select.start()
 
-console.log(select.api.get().value);
-select.destroy();
+console.log(select.api.get().value)
+select.destroy()
 ```
 
 ## Développement

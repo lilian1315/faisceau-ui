@@ -3,8 +3,8 @@ name: Publish package to npm
 on:
   push:
     tags:
-      - "faisceau-ui@*.*.*"
-      - "faisceau-zag@*.*.*"
+      - 'faisceau-ui@*.*.*'
+      - 'faisceau-zag@*.*.*'
   workflow_dispatch:
     inputs:
       package:

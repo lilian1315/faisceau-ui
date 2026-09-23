@@ -1,98 +1,98 @@
-import { createCheckbox, enhanceCheckbox, type CheckboxProps } from "faisceau-ui";
-import { asDom } from "@lilian1315/create-element/faisceau/jsx-runtime";
-import type { Meta, StoryObj } from "@storybook/html-vite";
+import { createCheckbox, enhanceCheckbox, type CheckboxProps } from 'faisceau-ui'
+import { asDom } from '@lilian1315/create-element/faisceau/jsx-runtime'
+import type { Meta, StoryObj } from '@storybook/html-vite'
 
-import { createStoryShell, trackController } from "./story.tsx";
-import { h } from "@lilian1315/create-element/faisceau";
+import { createStoryShell, trackController } from './story.tsx'
+import { h } from '@lilian1315/create-element/faisceau'
 
-type CheckboxStoryArgs = CheckboxProps;
+type CheckboxStoryArgs = CheckboxProps
 
 const meta = {
   argTypes: {
-    label: { control: "text", description: "Libellé visible et accessible." },
-    description: { control: "text", description: "Aide associée au champ." },
-    defaultChecked: { control: "boolean", description: "État initial du contrôle natif." },
-    disabled: { control: "boolean", description: "Empêche toute interaction." },
-    invalid: { control: "boolean", description: "Expose l’état invalide." },
+    label: { control: 'text', description: 'Libellé visible et accessible.' },
+    description: { control: 'text', description: 'Aide associée au champ.' },
+    defaultChecked: { control: 'boolean', description: 'État initial du contrôle natif.' },
+    disabled: { control: 'boolean', description: 'Empêche toute interaction.' },
+    invalid: { control: 'boolean', description: 'Expose l’état invalide.' },
     readOnly: {
-      control: "boolean",
-      description: "Affiche la valeur sans permettre sa modification.",
+      control: 'boolean',
+      description: 'Affiche la valeur sans permettre sa modification.',
     },
-    required: { control: "boolean", description: "Active la validation native required." },
+    required: { control: 'boolean', description: 'Active la validation native required.' },
   },
   parameters: {
     docs: {
       description: {
         component:
-          "Checkbox Zag reliée à un véritable input natif. Le clic, FormData, required et reset conservent la sémantique du navigateur.",
+          'Checkbox Zag reliée à un véritable input natif. Le clic, FormData, required et reset conservent la sémantique du navigateur.',
       },
     },
   },
-  title: "Checkbox/Anatomie",
-} satisfies Meta<CheckboxStoryArgs>;
+  title: 'Checkbox/Anatomie',
+} satisfies Meta<CheckboxStoryArgs>
 
-export default meta;
-type Story = StoryObj<CheckboxStoryArgs>;
+export default meta
+type Story = StoryObj<CheckboxStoryArgs>
 
 export const create: Story = {
   args: {
-    label: "Recevoir les nouveautés",
-    description: "Vous pourrez modifier ce choix plus tard.",
-    defaultChecked: "indeterminate",
+    label: 'Recevoir les nouveautés',
+    description: 'Vous pourrez modifier ce choix plus tard.',
+    defaultChecked: 'indeterminate',
   },
 
-  name: "create()",
+  name: 'create()',
 
   render: (args) => {
     const story = createStoryShell({
       description:
-        "La factory génère l’input natif, le contrôle visuel, l’indicateur et les messages.",
-      eyebrow: "createCheckbox",
-      title: "Construction programmatique",
-    });
-    const host = h("div");
-    story.canvas.append(host);
+        'La factory génère l’input natif, le contrôle visuel, l’indicateur et les messages.',
+      eyebrow: 'createCheckbox',
+      title: 'Construction programmatique',
+    })
+    const host = h('div')
+    story.canvas.append(host)
     const controller = createCheckbox({
       ...args,
       onCheckedChange: ({ checked }) => {
-        story.output.textContent = `checked = ${String(checked)}`;
+        story.output.textContent = `checked = ${String(checked)}`
       },
-    }).mount(host);
-    trackController(story.root, controller);
+    }).mount(host)
+    trackController(story.root, controller)
     story.setSource(`createCheckbox({
       label: "${args.label}",
       name: "newsletter",
       value: "yes",
       defaultChecked: ${args.defaultChecked},
       required: ${args.required}
-    }).mount(target)`);
-    return story.root;
+    }).mount(target)`)
+    return story.root
   },
-};
+}
 
 export const enhance: Story = {
-  name: "enhance()",
+  name: 'enhance()',
   render: (args) => {
     const story = createStoryShell({
       description:
-        "Le conteneur et son input suffisent ; le script génère toutes les parts visuelles.",
-      eyebrow: "enhanceCheckbox",
-      title: "Progressive enhancement",
-    });
-    const root = asDom<"label">(
+        'Le conteneur et son input suffisent ; le script génère toutes les parts visuelles.',
+      eyebrow: 'enhanceCheckbox',
+      title: 'Progressive enhancement',
+    })
+    const root = asDom<'label'>(
       <label class="fui-checkbox">
         <input type="checkbox" class="fui-checkbox-input" checked />
         <span class="fui-field-label">Recevoir les nouveautés</span>
       </label>,
-    );
+    )
 
-    const source = root.outerHTML;
+    const source = root.outerHTML
 
-    story.canvas.append(root);
-    const controller = enhanceCheckbox(root, args);
+    story.canvas.append(root)
+    const controller = enhanceCheckbox(root, args)
 
-    trackController(story.root, controller);
-    story.setSource(source);
-    return story.root;
+    trackController(story.root, controller)
+    story.setSource(source)
+    return story.root
   },
-};
+}

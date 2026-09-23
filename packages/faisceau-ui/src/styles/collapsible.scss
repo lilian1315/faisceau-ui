@@ -1,4 +1,4 @@
-@use "./mixins" as *;
+@use './mixins' as *;
 
 .fui-collapsible {
   inline-size: min(100%, 512px);
@@ -52,7 +52,7 @@
   place-items: center;
   @include fui-control-transition(rotate);
 
-  &[data-state="open"] {
+  &[data-state='open'] {
     rotate: 180deg;
   }
 }

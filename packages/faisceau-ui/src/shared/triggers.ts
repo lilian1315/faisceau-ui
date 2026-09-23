@@ -1,23 +1,23 @@
-import type { ZagDomProps } from "faisceau-zag";
+import type { ZagDomProps } from 'faisceau-zag'
 
-import { captureAttributes } from "./dom.ts";
-import { createId } from "./id.ts";
+import { captureAttributes } from './dom.ts'
+import { createId } from './id.ts'
 
 interface BindableZag<TApi> {
   bind<TElement extends Element>(
     element: TElement,
     getter: (api: TApi) => ZagDomProps | null | undefined,
-  ): () => void;
+  ): () => void
 }
 
 /** Manages external trigger bindings resolved from a selector string. */
 export interface TriggerBinding {
   /** Replaces the selector and rebinds every matching element. */
-  setSelector(selector: string | undefined): void;
+  setSelector(selector: string | undefined): void
   /** Re-resolves the current selector, picking up triggers added after start. */
-  refresh(): void;
+  refresh(): void
   /** Removes Zag props from bound triggers and restores their attributes. */
-  destroy(): void;
+  destroy(): void
 }
 
 /**
@@ -32,24 +32,24 @@ export interface TriggerBinding {
 export function createTriggerBinding<TApi>(
   zag: BindableZag<TApi>,
   options: {
-    component: string;
-    getScope: () => Document | ShadowRoot;
-    getTriggerProps: (api: TApi, triggerValue: string) => ZagDomProps | null | undefined;
+    component: string
+    getScope: () => Document | ShadowRoot
+    getTriggerProps: (api: TApi, triggerValue: string) => ZagDomProps | null | undefined
   },
 ): TriggerBinding {
-  let selector: string | undefined;
-  const bound = new Map<Element, { dispose: () => void; restore: () => void }>();
-  let observer: MutationObserver | null = null;
-  let observedScope: Document | ShadowRoot | null = null;
+  let selector: string | undefined
+  const bound = new Map<Element, { dispose: () => void; restore: () => void }>()
+  let observer: MutationObserver | null = null
+  let observedScope: Document | ShadowRoot | null = null
 
   function query(): Element[] {
-    if (!selector) return [];
+    if (!selector) return []
     try {
-      return Array.from(options.getScope().querySelectorAll(selector));
+      return Array.from(options.getScope().querySelectorAll(selector))
     } catch {
       throw new Error(
         `[Faisceau UI] ${options.component} triggerSelector is not a valid selector: "${selector}".`,
-      );
+      )
     }
   }
 
@@ -61,83 +61,83 @@ export function createTriggerBinding<TApi>(
     // newcomers are bound and only detached elements are released.
     for (const [element, entry] of bound) {
       if (!element.isConnected) {
-        entry.dispose();
-        entry.restore();
-        bound.delete(element);
+        entry.dispose()
+        entry.restore()
+        bound.delete(element)
       }
     }
     for (const element of query()) {
       if (!bound.has(element)) {
-        const restore = captureAttributes(element);
-        const value = ensureTriggerId(element);
-        const dispose = zag.bind(element, (api) => options.getTriggerProps(api, value));
-        bound.set(element, { dispose, restore });
+        const restore = captureAttributes(element)
+        const value = ensureTriggerId(element)
+        const dispose = zag.bind(element, (api) => options.getTriggerProps(api, value))
+        bound.set(element, { dispose, restore })
       }
     }
   }
 
   function ensureTriggerId(element: Element): string {
-    const taken = new Set<string>();
+    const taken = new Set<string>()
     for (const boundElement of bound.keys()) {
-      if (boundElement !== element && boundElement.id) taken.add(boundElement.id);
+      if (boundElement !== element && boundElement.id) taken.add(boundElement.id)
     }
-    if (element.id && !taken.has(element.id)) return element.id;
-    let next = "";
+    if (element.id && !taken.has(element.id)) return element.id
+    let next = ''
     do {
-      next = createId("trigger");
-    } while (taken.has(next));
-    element.id = next;
-    return next;
+      next = createId('trigger')
+    } while (taken.has(next))
+    element.id = next
+    return next
   }
 
   function ensureObserved(): void {
-    if (!selector) return;
-    const scope = options.getScope();
-    if (observer && observedScope === scope) return;
-    observer?.disconnect();
-    observedScope = scope;
-    const node: Node | null = scope instanceof Document ? scope.documentElement : scope;
+    if (!selector) return
+    const scope = options.getScope()
+    if (observer && observedScope === scope) return
+    observer?.disconnect()
+    observedScope = scope
+    const node: Node | null = scope instanceof Document ? scope.documentElement : scope
     if (!node) {
-      observer = null;
-      return;
+      observer = null
+      return
     }
     observer = new MutationObserver(() => {
       // The lookup root can move (detached tree mounted into a document),
       // so re-target the observer before reconciling.
-      ensureObserved();
-      reconcile();
-    });
-    observer.observe(node, { childList: true, subtree: true });
+      ensureObserved()
+      reconcile()
+    })
+    observer.observe(node, { childList: true, subtree: true })
   }
 
   function cleanup(): void {
-    observer?.disconnect();
-    observer = null;
-    observedScope = null;
+    observer?.disconnect()
+    observer = null
+    observedScope = null
     for (const entry of bound.values()) {
-      entry.dispose();
-      entry.restore();
+      entry.dispose()
+      entry.restore()
     }
-    bound.clear();
+    bound.clear()
   }
 
   return {
     setSelector(next) {
-      cleanup();
-      selector = next;
-      if (!next) return;
+      cleanup()
+      selector = next
+      if (!next) return
       // Validate eagerly so typos throw synchronously instead of in the observer.
-      reconcile();
-      ensureObserved();
+      reconcile()
+      ensureObserved()
     },
     refresh() {
-      if (!selector) return;
-      ensureObserved();
-      reconcile();
+      if (!selector) return
+      ensureObserved()
+      reconcile()
     },
     destroy() {
-      cleanup();
-      selector = undefined;
+      cleanup()
+      selector = undefined
     },
-  };
+  }
 }

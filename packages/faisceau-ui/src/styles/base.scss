@@ -1,5 +1,5 @@
 // Shared foundation: design tokens, component anatomy, icon, and utility rules.
-@use "./tokens";
+@use './tokens';
 
 .fui-field-label,
 .fui-select-control,
@@ -99,23 +99,23 @@
 }
 
 .fui-icon--check {
-  mask-image: url("../icons/check.svg");
-  -webkit-mask-image: url("../icons/check.svg");
+  mask-image: url('../icons/check.svg');
+  -webkit-mask-image: url('../icons/check.svg');
 }
 
 .fui-icon--chevron-down {
-  mask-image: url("../icons/chevron-down.svg");
-  -webkit-mask-image: url("../icons/chevron-down.svg");
+  mask-image: url('../icons/chevron-down.svg');
+  -webkit-mask-image: url('../icons/chevron-down.svg');
 }
 
 .fui-icon--minus {
-  mask-image: url("../icons/minus.svg");
-  -webkit-mask-image: url("../icons/minus.svg");
+  mask-image: url('../icons/minus.svg');
+  -webkit-mask-image: url('../icons/minus.svg');
 }
 
 .fui-icon--x {
-  mask-image: url("../icons/x.svg");
-  -webkit-mask-image: url("../icons/x.svg");
+  mask-image: url('../icons/x.svg');
+  -webkit-mask-image: url('../icons/x.svg');
 }
 
 .fui-field-description,

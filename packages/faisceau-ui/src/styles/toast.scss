@@ -1,4 +1,4 @@
-@use "./mixins" as *;
+@use './mixins' as *;
 
 .fui-toast-action {
   @include fui-trigger-button;
@@ -28,7 +28,7 @@
   box-shadow: 0 12px 32px var(--fui-color-popover-shadow);
   pointer-events: auto;
 
-  &[data-type="error"] {
+  &[data-type='error'] {
     border-color: var(--fui-color-destructive);
   }
 }

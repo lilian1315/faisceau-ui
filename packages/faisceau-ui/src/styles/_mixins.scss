@@ -135,7 +135,7 @@
 @mixin fui-scroll-edge-shadows {
   &::before,
   &::after {
-    content: "";
+    content: '';
     position: sticky;
     z-index: 1;
     display: block;

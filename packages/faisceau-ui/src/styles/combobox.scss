@@ -1,5 +1,5 @@
 // Self-contained Combobox styles: tokens, shared base, listbox, and combobox rules.
-@use "./mixins" as *;
+@use './mixins' as *;
 
 .fui-combobox-control {
   display: grid;
@@ -193,7 +193,7 @@
   }
 }
 
-.fui-combobox-trigger[data-state="open"] .fui-icon {
+.fui-combobox-trigger[data-state='open'] .fui-icon {
   transform: rotate(180deg);
 }
 

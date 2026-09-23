@@ -1,22 +1,22 @@
-import type * as collapsible from "@zag-js/collapsible";
+import type * as collapsible from '@zag-js/collapsible'
 
-import type { FuiController } from "../types.ts";
+import type { FuiController } from '../types.ts'
 
-export type CollapsibleMachineOptions = Omit<collapsible.Props, "getRootNode" | "id" | "ids">;
+export type CollapsibleMachineOptions = Omit<collapsible.Props, 'getRootNode' | 'id' | 'ids'>
 
 export interface CollapsibleViewOptions {
   /** Stable machine id. A `fui-*` id is generated when omitted. */
-  id?: string;
+  id?: string
   /** Visible text of the disclosure trigger. */
-  trigger: string;
+  trigger: string
   /** Content revealed by the disclosure. */
-  content: string;
+  content: string
   /** Extra caller-owned class added to the root. */
-  className?: string;
+  className?: string
 }
 
-export type CollapsibleOptions = CollapsibleMachineOptions & CollapsibleViewOptions;
-export type EnhanceCollapsibleOptions = CollapsibleMachineOptions & Partial<CollapsibleViewOptions>;
+export type CollapsibleOptions = CollapsibleMachineOptions & CollapsibleViewOptions
+export type EnhanceCollapsibleOptions = CollapsibleMachineOptions & Partial<CollapsibleViewOptions>
 
-export type CollapsibleApi = collapsible.Api;
-export type CollapsibleController = FuiController<CollapsibleApi>;
+export type CollapsibleApi = collapsible.Api
+export type CollapsibleController = FuiController<CollapsibleApi>

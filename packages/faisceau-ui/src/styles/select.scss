@@ -117,7 +117,7 @@
   display: flex;
   color: var(--fui-color-muted-foreground);
 }
-.fui-select-indicator[data-state="open"] {
+.fui-select-indicator[data-state='open'] {
   rotate: 180deg;
 }
 .fui-select-positioner {
