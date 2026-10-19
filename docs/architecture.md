@@ -143,8 +143,6 @@ Package builds separately run Publint against the npm manifest.
 
 Each public library has a single manifest. `package.json` describes the built ESM package published
 to npm; the compiled CSS ships inside the npm `dist/` and is auto-imported from the built JS.
-JSR publication is disabled: component modules import their `.scss`, which JSR does not support
-as entry points.
 
 The GitHub Actions workflow publishes one package at a time. A tag named `faisceau-ui@<version>` or
 `faisceau-zag@<version>` selects the package; a manual run requires the same choice explicitly. The
