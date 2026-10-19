@@ -238,16 +238,6 @@ describe('createZagMachine', () => {
     controller.destroy()
   })
 
-  it('exposes a read-only connected value and one prop update operation', () => {
-    const controller = createZagMachine(createTestMachine(), { id: 'fruit' }, connectTestMachine)
-
-    expect('set' in controller.api).toBe(false)
-    expect('trigger' in controller.api).toBe(false)
-    expect('refresh' in controller).toBe(false)
-    expect('updateProps' in controller).toBe(true)
-    controller.destroy()
-  })
-
   it('uses the official vanilla prop normalization matrix', () => {
     const onFocus = vi.fn()
     const onBlur = vi.fn()

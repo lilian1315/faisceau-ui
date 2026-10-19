@@ -165,8 +165,8 @@ settings:
 catalogs:
   default:
     '@lilian1315/create-element':
-      specifier: 0.14.1
-      version: 0.14.1
+      specifier: 0.16.0
+      version: 0.16.0
     '@types/node':
       specifier: ^24
       version: 24.13.6
@@ -210,8 +210,8 @@ catalogs:
       specifier: ^12.3.0
       version: 12.3.0
     faisceau:
-      specifier: 0.3.2
-      version: 0.3.2
+      specifier: 0.4.2
+      version: 0.4.2
     playwright:
       specifier: ^1.63.0
       version: 1.63.0
@@ -265,7 +265,7 @@ importers:
     dependencies:
       '@lilian1315/create-element':
         specifier: 'catalog:'
-        version: 0.14.1(faisceau@0.3.2)
+        version: 0.16.0(alien-signals@3.2.1)(faisceau@0.4.2)
       '@zag-js/checkbox':
         specifier: 'catalog:'
         version: 2.0.0-next.3
@@ -295,7 +295,7 @@ importers:
         version: 2.0.0-next.3
       faisceau:
         specifier: 'catalog:'
-        version: 0.3.2
+        version: 0.4.2
       faisceau-zag:
         specifier: workspace:*
         version: link:../faisceau-zag
@@ -339,7 +339,7 @@ importers:
         version: 2.0.0-next.3
       faisceau:
         specifier: 'catalog:'
-        version: 0.3.2
+        version: 0.4.2
       playwright:
         specifier: 'catalog:'
         version: 1.63.0
@@ -388,10 +388,10 @@ importers:
     dependencies:
       '@lilian1315/create-element':
         specifier: 'catalog:'
-        version: 0.14.1(faisceau@0.3.2)
+        version: 0.16.0(alien-signals@3.2.1)(faisceau@0.4.2)
       faisceau:
         specifier: 'catalog:'
-        version: 0.3.2
+        version: 0.4.2
       faisceau-ui:
         specifier: workspace:*
         version: link:../faisceau-ui
@@ -637,14 +637,14 @@ packages:
   '@jridgewell/trace-mapping@0.3.31':
     resolution: {integrity: sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw==}
 
-  '@lilian1315/create-element@0.14.1':
-    resolution: {integrity: sha512-wEu7iCPptmw728pf8G7FD3isw84z1bYcZVrCbpT3sE3svSOkfb3Qf/v0NLrasSmwsQhHyhEnbimYNkyNU1wECQ==}
+  '@lilian1315/create-element@0.16.0':
+    resolution: {integrity: sha512-jnnO6i8X4A/ECPROW6jn1lB6Tzd2dIHVfXFfBNYr5lCDEDc1zGmtgQkPsXAQqGaTyWQ6Osy3O4lWaHLP4sQjFg==}
     peerDependencies:
-      '@preact/signals-core': 1.13.0
-      '@vue/reactivity': 3.5.28
-      alien-deepsignals: 0.3.1
-      alien-signals: 3.1.2
-      faisceau: 0.3.2
+      '@preact/signals-core': ^1.14.4
+      '@vue/reactivity': ^3.5.44
+      alien-deepsignals: ^0.3.1
+      alien-signals: ^3.2.1
+      faisceau: ^0.3.2
     peerDependenciesMeta:
       '@preact/signals-core':
         optional: true
@@ -657,8 +657,8 @@ packages:
       faisceau:
         optional: true
 
-  '@lilian1315/elements-writable-properties-types@0.1.12':
-    resolution: {integrity: sha512-vwJR6IfHqj0nkG8GcM+/ZPq9jF+pnpQBhESI3KpcG0bGT9+gMqDdpuF4B58fGB4XEa04x6SLRiOqCzFLgP7aNw==}
+  '@lilian1315/elements-writable-properties-types@0.2.0':
+    resolution: {integrity: sha512-+wEUhoAx/DjfA42sweVr5XFDPmB0h817EqiWukUbZl1n3mcpEjxHtomoTswFfFBUyjVIWzw7slcH7k23JKtESg==}
 
   '@mdx-js/react@3.1.1':
     resolution: {integrity: sha512-f++rKLQgUVYDAtECQ6fn/is15GkEH9+nZPM3MS0RcxVqoTfawHvDlSCH7JbMhAM6uJ32v3eXLvLmLvjGu7PTQw==}
@@ -1950,8 +1950,8 @@ packages:
     resolution: {integrity: sha512-KfYbmpRm0VbLjEvVa9yGwCi9GI34xvi7A/HXYWQO65CSD2u3MczUJSuwXKFIxlGsgBQizV9q5J9NHj4VG0n+pA==}
     engines: {node: '>=12.0.0'}
 
-  faisceau@0.3.2:
-    resolution: {integrity: sha512-zLWNhjhDDfKpZ3bEZ1MHSXXifsDpo2tssxfmItrNEjARdn9NLPP9AptOB+n0Jwta8E9CYwmvgnYajhCpPXRLcQ==}
+  faisceau@0.4.2:
+    resolution: {integrity: sha512-r2zs+15Zr+Ek8fUwOuPKyY4y0G1+aY3KnmcWZmuoyL3LT+eACexVT/Y+bc7D0wMVTfsNyLe+RLF0tbEljv7fpQ==}
 
   fdir@6.5.0:
     resolution: {integrity: sha512-tIbYtZbucOs0BRGqPJkshJUYdL+SDH7dVM8gjy+ERp3WAUjLEFJE+02kanyHtwjWOnwrKYBiwAmM0p4kLJAnXg==}
@@ -2769,13 +2769,14 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.6.0
 
-  '@lilian1315/create-element@0.14.1(faisceau@0.3.2)':
+  '@lilian1315/create-element@0.16.0(alien-signals@3.2.1)(faisceau@0.4.2)':
     dependencies:
-      '@lilian1315/elements-writable-properties-types': 0.1.12
+      '@lilian1315/elements-writable-properties-types': 0.2.0
     optionalDependencies:
-      faisceau: 0.3.2
+      alien-signals: 3.2.1
+      faisceau: 0.4.2
 
-  '@lilian1315/elements-writable-properties-types@0.1.12': {}
+  '@lilian1315/elements-writable-properties-types@0.2.0': {}
 
   '@mdx-js/react@3.1.1(@types/react@19.3.0)(react@19.3.0)':
     dependencies:
@@ -3771,7 +3772,7 @@ snapshots:
 
   expect-type@1.4.0: {}
 
-  faisceau@0.3.2:
+  faisceau@0.4.2:
     dependencies:
       alien-signals: 3.2.1
 

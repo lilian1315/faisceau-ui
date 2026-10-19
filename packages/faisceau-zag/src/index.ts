@@ -1,6 +1,6 @@
 import type { InputProps, Machine, MachineSchema, Service } from '@zag-js/core'
 import { normalizeProps, spreadProps, VanillaMachine, type Attrs } from '@zag-js/vanilla'
-import { effect, signal } from 'faisceau'
+import { effect, signal, trigger } from 'faisceau'
 
 /** A value or a Faisceau-tracked getter accepted by Zag's vanilla machine. */
 export type MaybeGetter<T> = T | (() => T)
@@ -81,10 +81,7 @@ export function createZagMachine<TSchema extends MachineSchema, TApi>(
   const initialProps = typeof props === 'function' ? props() : props
   const service = new VanillaMachine(machine, initialProps)
   const apiSignal = signal(connect(service.service, normalizeProps))
-  const api: ZagConnected<TApi> = {
-    get: () => apiSignal.get(),
-    peek: () => apiSignal.peek(),
-  }
+  const api: ZagConnected<TApi> = apiSignal
   const bindings = new Set<() => void>()
   const scope = `faisceau-zag-${++controllerId}`
 
@@ -100,7 +97,7 @@ export function createZagMachine<TSchema extends MachineSchema, TApi>(
     // Most Zag connectors return a fresh object. Trigger explicitly as a
     // fallback for custom connectors that retain their API object.
     if (Object.is(previousApi, nextApi)) {
-      apiSignal.trigger()
+      trigger(apiSignal)
     } else {
       apiSignal.set(nextApi)
     }

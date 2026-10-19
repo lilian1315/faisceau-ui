@@ -1,7 +1,8 @@
 import { createDialog, enhanceDialog } from 'faisceau-ui'
 import type { Meta, StoryObj } from '@storybook/html-vite'
 
-import { asDom, createStoryShell, trackController } from './story.tsx'
+import { build } from '@lilian1315/create-element/faisceau/virtual/dom'
+import { createStoryShell, trackController } from './story.tsx'
 
 const meta = { title: 'Dialog/Anatomie' } satisfies Meta
 export default meta
@@ -15,12 +16,12 @@ export const create: Story = {
       description:
         'Backdrop, positioner, contenu titré et bouton de fermeture sont reliés à Zag Dialog. Les triggers restent externes et sont désignés par triggerSelector. Le corps de la boîte défile indépendamment du header, avec des ombres de bordure apparaissant quand le contenu dépasse les bords.',
     })
-    const trigger = asDom<HTMLButtonElement>(
+    const trigger = build<'button'>(
       <button class="fui-story__button" id="story-dialog-trigger" type="button">
         Modifier le profil
       </button>,
     )
-    const host = asDom<HTMLDivElement>(<div />)
+    const host = build<'div'>(<div />)
     story.canvas.append(trigger, host)
     const controller = createDialog({
       triggerSelector: '#story-dialog-trigger',
@@ -49,12 +50,12 @@ export const enhance: Story = {
       description:
         'Le script conserve le contenu, puis génère les éléments structurels manquants. Un bouton externe ouvre le dialogue via triggerSelector.',
     })
-    const trigger = asDom<HTMLButtonElement>(
+    const trigger = build<'button'>(
       <button class="fui-story__button" id="story-dialog-enhance-trigger" type="button">
         Supprimer
       </button>,
     )
-    const root = asDom<HTMLDivElement>(
+    const root = build<'div'>(
       <div class="fui-dialog">
         <section class="fui-dialog-content">
           <h2 class="fui-dialog-title">Supprimer le document ?</h2>

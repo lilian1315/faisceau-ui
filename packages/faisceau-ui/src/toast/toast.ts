@@ -1,6 +1,6 @@
 import '../styles/base.scss'
 import '../styles/toast.scss'
-import { h } from '@lilian1315/create-element'
+import { createElement as h } from '@lilian1315/create-element'
 import { createZagMachine } from 'faisceau-zag'
 import * as toast from '@zag-js/toast'
 
@@ -111,25 +111,26 @@ function createToastItem(
   index: number,
   parent: toast.GroupService,
 ): ToastItem {
-  const title = h('div', { class: 'fui-toast-title' }, data.title ?? '')
+  const title = h('div', { class: 'fui-toast-title', children: data.title ?? '' })
   let description = data.description
-    ? h('div', { class: 'fui-toast-description' }, data.description)
+    ? h('div', { class: 'fui-toast-description', children: data.description })
     : null
   const close = h('button', {
     class: 'fui-toast-close',
     type: 'button',
   })
-  close.append(h('span', { class: 'fui-icon fui-icon--x', 'aria-hidden': true }))
+  close.append(h('span', { class: 'fui-icon fui-icon--x', ariaHidden: 'true' }))
   let action = data.action
-    ? h('button', { class: 'fui-toast-action', type: 'button' }, data.action.label)
+    ? h('button', { class: 'fui-toast-action', type: 'button', children: data.action.label })
     : null
-  const element = h(
-    'div',
-    { class: 'fui-toast' },
-    h('div', { class: 'fui-toast-copy' }, title, description),
-    action,
-    close,
-  )
+  const element = h('div', {
+    class: 'fui-toast',
+    children: [
+      h('div', { class: 'fui-toast-copy', children: [title, description] }),
+      action,
+      close,
+    ],
+  })
   root.append(element)
   const machine = createZagMachine(
     toast.machine,

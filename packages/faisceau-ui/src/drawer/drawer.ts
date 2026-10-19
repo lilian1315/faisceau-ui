@@ -1,6 +1,6 @@
 import '../styles/base.scss'
 import '../styles/drawer.scss'
-import { h } from '@lilian1315/create-element'
+import { createElement as h } from '@lilian1315/create-element'
 import { createZagMachine } from 'faisceau-zag'
 import * as drawer from '@zag-js/drawer'
 import {
@@ -108,7 +108,7 @@ function factory(
       }
       if (title.parentElement !== header) header.prepend(title)
     } else {
-      title = h('h2', { class: 'fui-drawer-title' }, options.title ?? '')
+      title = h('h2', { class: 'fui-drawer-title', children: options.title })
       header.prepend(title)
       generated.push(title)
     }
@@ -125,7 +125,7 @@ function factory(
       }
       if (description.parentElement !== header) title.after(description)
     } else if (options.description !== undefined) {
-      description = h('p', { class: 'fui-drawer-description' }, options.description)
+      description = h('p', { class: 'fui-drawer-description', children: options.description })
       title.after(description)
       generated.push(description)
     } else {
@@ -142,7 +142,7 @@ function factory(
       generated.push(close)
     }
     grabberIndicator = h('div', { class: 'fui-drawer-grabber-indicator' })
-    grabber = h('div', { class: 'fui-drawer-grabber' }, grabberIndicator)
+    grabber = h('div', { class: 'fui-drawer-grabber', children: grabberIndicator })
     content.prepend(grabber)
     generated.push(grabber)
     if (!adoptedHeader) grabber.after(header)
@@ -182,7 +182,7 @@ function factory(
       }
       if (footer.parentElement !== content) body.after(footer)
     } else if (options.footer !== undefined) {
-      footer = h('div', { class: 'fui-drawer-footer' }, options.footer)
+      footer = h('div', { class: 'fui-drawer-footer', children: options.footer })
       body.after(footer)
       generated.push(footer)
     } else {
@@ -207,20 +207,22 @@ function factory(
       throw new Error('[Faisceau UI] Drawer creation requires options.content.')
     const created = options as DrawerOptions
     root = h('div') as HTMLElement
-    title = h('h2', { class: 'fui-drawer-title' }, created.title)
+    title = h('h2', { class: 'fui-drawer-title', children: created.title })
     description = created.description
-      ? h('p', { class: 'fui-drawer-description' }, created.description)
+      ? h('p', { class: 'fui-drawer-description', children: created.description })
       : null
     close = createClose(created.closeLabel)
     grabberIndicator = h('div', { class: 'fui-drawer-grabber-indicator' })
-    grabber = h('div', { class: 'fui-drawer-grabber' }, grabberIndicator)
-    bodyContent = h('div', { class: 'fui-drawer-body-content' }, created.content)
-    body = h('div', { class: 'fui-drawer-body' }, bodyContent)
+    grabber = h('div', { class: 'fui-drawer-grabber', children: grabberIndicator })
+    bodyContent = h('div', { class: 'fui-drawer-body-content', children: created.content })
+    body = h('div', { class: 'fui-drawer-body', children: bodyContent })
     footer =
-      created.footer === undefined ? null : h('div', { class: 'fui-drawer-footer' }, created.footer)
-    header = h('div', { class: 'fui-drawer-header' }, title, description, close)
-    content = h('div', { class: 'fui-drawer-content' }, grabber, header, body, footer)
-    positioner = h('div', { class: 'fui-drawer-positioner' }, content)
+      created.footer === undefined
+        ? null
+        : h('div', { class: 'fui-drawer-footer', children: created.footer })
+    header = h('div', { class: 'fui-drawer-header', children: [title, description, close] })
+    content = h('div', { class: 'fui-drawer-content', children: [grabber, header, body, footer] })
+    positioner = h('div', { class: 'fui-drawer-positioner', children: content })
     backdrop = h('div', { class: 'fui-drawer-backdrop' })
     if (wantsSwipeArea) swipeArea = h('div', { class: 'fui-drawer-swipe-area' })
     root.append(backdrop, positioner)
@@ -387,7 +389,7 @@ function createClose(label = 'Fermer'): HTMLButtonElement {
     class: 'fui-drawer-close',
     type: 'button',
   })
-  close.append(h('span', { class: 'fui-icon fui-icon--x', 'aria-hidden': true }))
+  close.append(h('span', { class: 'fui-icon fui-icon--x', ariaHidden: 'true' }))
   return close
 }
 

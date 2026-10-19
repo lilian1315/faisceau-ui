@@ -1,4 +1,4 @@
-import { h } from '@lilian1315/create-element'
+import { createElement as h } from '@lilian1315/create-element'
 import { createZagMachine } from 'faisceau-zag'
 import * as dialog from '@zag-js/dialog'
 
@@ -98,7 +98,7 @@ function factory(
       }
       if (title.parentElement !== header) header.prepend(title)
     } else {
-      title = h('h2', { class: `${classPrefix}-title` }, options.title ?? '')
+      title = h('h2', { class: `${classPrefix}-title`, children: options.title })
       header.prepend(title)
       generated.push(title)
     }
@@ -117,7 +117,7 @@ function factory(
       }
       if (description.parentElement !== header) title.after(description)
     } else if (options.description !== undefined) {
-      description = h('p', { class: `${classPrefix}-description` }, options.description)
+      description = h('p', { class: `${classPrefix}-description`, children: options.description })
       title.after(description)
       generated.push(description)
     } else {
@@ -170,7 +170,7 @@ function factory(
       }
       if (footer.parentElement !== content) body.after(footer)
     } else if (options.footer !== undefined) {
-      footer = h('div', { class: `${classPrefix}-footer` }, options.footer)
+      footer = h('div', { class: `${classPrefix}-footer`, children: options.footer })
       body.after(footer)
       generated.push(footer)
     } else {
@@ -339,7 +339,7 @@ function createClose(variant: OverlayVariant, label = 'Fermer'): HTMLButtonEleme
     class: `fui-${variant}-close`,
     type: 'button',
   })
-  close.append(h('span', { class: 'fui-icon fui-icon--x', 'aria-hidden': true }))
+  close.append(h('span', { class: 'fui-icon fui-icon--x', ariaHidden: 'true' }))
   return close
 }
 

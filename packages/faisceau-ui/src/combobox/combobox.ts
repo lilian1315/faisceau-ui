@@ -1,7 +1,7 @@
 import '../styles/base.scss'
 import '../styles/listbox.scss'
 import '../styles/combobox.scss'
-import { h } from '@lilian1315/create-element'
+import { createElement as h } from '@lilian1315/create-element'
 import * as combobox from '@zag-js/combobox'
 import { effect } from 'faisceau'
 import { createZagMachine } from 'faisceau-zag'
@@ -497,29 +497,22 @@ function renderSelectedTags(
   remove: (value: string) => void,
 ): void {
   const tags = items.map((item) => {
-    const label = h('span', { class: 'fui-combobox-tag-label' }, item.label)
-    const removeTrigger = h(
-      'button',
-      {
-        'aria-label': getRemoveLabel(item),
-        class: 'fui-combobox-tag-remove',
-        data: { value: item.value },
-        disabled,
-        type: 'button',
-      },
-      h('span', { class: 'fui-icon fui-icon--x', 'aria-hidden': true }),
-    )
+    const label = h('span', { class: 'fui-combobox-tag-label', children: item.label })
+    const removeTrigger = h('button', {
+      ariaLabel: getRemoveLabel(item),
+      class: 'fui-combobox-tag-remove',
+      data: { value: item.value },
+      disabled,
+      type: 'button',
+      children: h('span', { class: 'fui-icon fui-icon--x', ariaHidden: 'true' }),
+    })
     removeTrigger.addEventListener('click', () => remove(item.value))
 
-    return h(
-      'span',
-      {
-        class: 'fui-combobox-tag',
-        data: { value: item.value },
-      },
-      label,
-      removeTrigger,
-    )
+    return h('span', {
+      class: 'fui-combobox-tag',
+      data: { value: item.value },
+      children: [label, removeTrigger],
+    })
   })
 
   selection.replaceChildren(...tags)

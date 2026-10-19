@@ -1,5 +1,5 @@
-import { asDom } from '@lilian1315/create-element/faisceau/jsx-runtime'
-import { h } from '@lilian1315/create-element/faisceau'
+import { build } from '@lilian1315/create-element/faisceau/virtual/dom'
+import { createElement as h } from '@lilian1315/create-element/faisceau'
 import type { Meta, StoryObj } from '@storybook/html-vite'
 import { createCollapsible, enhanceCollapsible, type CollapsibleOptions } from 'faisceau-ui'
 
@@ -64,7 +64,7 @@ export const enhance: Story = {
       eyebrow: 'enhanceCollapsible',
       title: 'Progressive enhancement',
     })
-    const root = asDom<'section'>(
+    const root = build<'section'>(
       <section class="fui-collapsible">
         <button class="fui-collapsible-trigger" type="button">
           <span class="fui-collapsible-trigger-text">Informations techniques</span>

@@ -1,6 +1,6 @@
 import '../styles/base.scss'
 import '../styles/collapsible.scss'
-import { h } from '@lilian1315/create-element'
+import { createElement as h } from '@lilian1315/create-element'
 import * as collapsible from '@zag-js/collapsible'
 import { createZagMachine } from 'faisceau-zag'
 
@@ -20,18 +20,19 @@ interface CollapsibleParts {
 export function createCollapsible(options: CollapsibleOptions): CollapsibleController {
   const root = h('div', { class: 'fui-collapsible' })
   if (options.className) root.classList.add(...options.className.split(/\s+/).filter(Boolean))
-  const indicator = h(
-    'span',
-    { class: 'fui-collapsible-indicator' },
-    h('span', { class: 'fui-icon fui-icon--chevron-down', 'aria-hidden': true }),
-  )
-  const trigger = h(
-    'button',
-    { class: 'fui-collapsible-trigger', type: 'button' },
-    h('span', { class: 'fui-collapsible-trigger-text' }, options.trigger),
-    indicator,
-  )
-  const content = h('div', { class: 'fui-collapsible-content' }, options.content)
+  const indicator = h('span', {
+    class: 'fui-collapsible-indicator',
+    children: h('span', { class: 'fui-icon fui-icon--chevron-down', ariaHidden: 'true' }),
+  })
+  const trigger = h('button', {
+    class: 'fui-collapsible-trigger',
+    type: 'button',
+    children: [
+      h('span', { class: 'fui-collapsible-trigger-text', children: options.trigger }),
+      indicator,
+    ],
+  })
+  const content = h('div', { class: 'fui-collapsible-content', children: options.content })
   root.append(trigger, content)
   return setupCollapsible(root, options, { content, indicator, trigger }, true)
 }

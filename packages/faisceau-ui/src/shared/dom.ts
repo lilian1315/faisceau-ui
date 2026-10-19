@@ -1,6 +1,5 @@
 import {
-  h,
-  type ElementAttributesTagNameMap,
+  createElement as h,
   type PrefixedElementTag,
   type ElementPrefixedTagNameMap,
 } from '@lilian1315/create-element'
@@ -54,7 +53,7 @@ export function ensureText<Tag extends PrefixedElementTag>(
     const created = h(part.tag, {
       class: part.class,
       data: part.data,
-    } as ElementAttributesTagNameMap[Tag] & { children: never })
+    } as any)
     place(root, created)
     restores.push(() => created.remove())
     node = created

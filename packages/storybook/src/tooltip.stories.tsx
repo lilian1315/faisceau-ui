@@ -1,7 +1,8 @@
 import { createTooltip, enhanceTooltip } from 'faisceau-ui'
 import type { Meta, StoryObj } from '@storybook/html-vite'
+import { build } from '@lilian1315/create-element/faisceau/virtual/dom'
 
-import { asDom, createStoryShell, trackController } from './story.tsx'
+import { createStoryShell, trackController } from './story.tsx'
 
 interface TooltipStoryArgs {
   closeDelay: number
@@ -63,7 +64,7 @@ export const create: Story = {
       eyebrow: 'createTooltip',
       title: 'Construction programmatique',
     })
-    const host = asDom<HTMLDivElement>(<div />)
+    const host = build<'div'>(<div />)
     story.canvas.append(host)
     const { placement, ...options } = args
     const controller = createTooltip({
@@ -92,7 +93,7 @@ export const enhance: Story = {
       eyebrow: 'enhanceTooltip',
       title: 'Progressive enhancement',
     })
-    const trigger = asDom<HTMLButtonElement>(
+    const trigger = build<'button'>(
       <button class="fui-story__button" title={args.content} type="button">
         {args.trigger}
       </button>,

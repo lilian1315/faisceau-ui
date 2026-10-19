@@ -1,6 +1,6 @@
 import '../styles/base.scss'
 import '../styles/tooltip.scss'
-import { h } from '@lilian1315/create-element'
+import { createElement as h } from '@lilian1315/create-element'
 import { createZagMachine } from 'faisceau-zag'
 import * as tooltip from '@zag-js/tooltip'
 
@@ -18,14 +18,11 @@ interface TooltipSetup {
 /** Builds a tooltip with a button trigger. Call `.mount(target)` to start it. */
 export function createTooltip(options: TooltipOptions): TooltipController {
   const root = h('div', { class: 'fui-tooltip', data: { fuiComponent: 'tooltip' } })
-  const trigger = h(
-    'button',
-    {
-      class: 'fui-tooltip-trigger fui-tooltip-trigger--generated',
-      type: 'button',
-    },
-    options.trigger,
-  )
+  const trigger = h('button', {
+    class: 'fui-tooltip-trigger fui-tooltip-trigger--generated',
+    type: 'button',
+    children: options.trigger,
+  })
   root.append(trigger)
   return setupTooltip(root, options, { ownsRoot: true, start: false, trigger })
 }

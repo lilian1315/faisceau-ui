@@ -1,7 +1,8 @@
 import { createDrawer, enhanceDrawer } from 'faisceau-ui'
 import type { Meta, StoryObj } from '@storybook/html-vite'
+import { build } from '@lilian1315/create-element/faisceau/virtual/dom'
 
-import { asDom, createStoryShell, trackController } from './story.tsx'
+import { createStoryShell, trackController } from './story.tsx'
 
 interface Args {
   swipeDirection: 'up' | 'down' | 'start' | 'end'
@@ -24,12 +25,12 @@ export const create: Story = {
       description:
         'La machine Zag Drawer gère le focus, les snap points et les gestes de glissement. Le trigger reste externe. Le corps défile indépendamment de la zone de grip et du header, avec des ombres de bordure apparaissant quand le contenu dépasse les bords.',
     })
-    const trigger = asDom<HTMLButtonElement>(
+    const trigger = build<'button'>(
       <button class="fui-story__button" id="story-drawer-trigger" type="button">
         Ouvrir le panneau
       </button>,
     )
-    const host = asDom<HTMLDivElement>(<div />)
+    const host = build<'div'>(<div />)
     story.canvas.append(trigger, host)
     trackController(
       story.root,
@@ -63,12 +64,12 @@ export const enhance: Story = {
       description:
         'Seul le contenu métier est nécessaire dans le HTML initial ; le trigger est externe.',
     })
-    const trigger = asDom<HTMLButtonElement>(
+    const trigger = build<'button'>(
       <button class="fui-story__button" id="story-drawer-enhance-trigger" type="button">
         Navigation
       </button>,
     )
-    const root = asDom<HTMLDivElement>(
+    const root = build<'div'>(
       <div class="fui-drawer">
         <aside class="fui-drawer-content">
           <h2 class="fui-drawer-title">Navigation</h2>

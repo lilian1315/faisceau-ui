@@ -1,9 +1,9 @@
 import { createCheckbox, enhanceCheckbox, type CheckboxProps } from 'faisceau-ui'
-import { asDom } from '@lilian1315/create-element/faisceau/jsx-runtime'
+import { build } from '@lilian1315/create-element/faisceau/virtual/dom'
 import type { Meta, StoryObj } from '@storybook/html-vite'
 
 import { createStoryShell, trackController } from './story.tsx'
-import { h } from '@lilian1315/create-element/faisceau'
+import { createElement as h } from '@lilian1315/create-element/faisceau'
 
 type CheckboxStoryArgs = CheckboxProps
 
@@ -79,7 +79,7 @@ export const enhance: Story = {
       eyebrow: 'enhanceCheckbox',
       title: 'Progressive enhancement',
     })
-    const root = asDom<'label'>(
+    const root = build<'label'>(
       <label class="fui-checkbox">
         <input type="checkbox" class="fui-checkbox-input" checked />
         <span class="fui-field-label">Recevoir les nouveautés</span>

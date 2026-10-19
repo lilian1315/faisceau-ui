@@ -1,6 +1,6 @@
 import '../styles/base.scss'
 import '../styles/checkbox.scss'
-import { h } from '@lilian1315/create-element'
+import { createElement as h } from '@lilian1315/create-element'
 import * as checkbox from '@zag-js/checkbox'
 import { createZagMachine } from 'faisceau-zag'
 import type { CheckboxController, CheckboxProps } from './types'
@@ -34,13 +34,14 @@ function factory(root?: HTMLLabelElement, options?: CheckboxProps): CheckboxCont
   }
 
   let input: HTMLInputElement
-  let indicator = h(
-    'span',
-    { class: 'fui-checkbox-indicator' },
-    h('span', { class: 'fui-icon fui-icon--check', 'aria-hidden': true }),
-    h('span', { class: 'fui-icon fui-icon--minus', 'aria-hidden': true }),
-  )
-  let control = h('span', { class: 'fui-checkbox-control' }, indicator)
+  let indicator = h('span', {
+    class: 'fui-checkbox-indicator',
+    children: [
+      h('span', { class: 'fui-icon fui-icon--check', ariaHidden: 'true' }),
+      h('span', { class: 'fui-icon fui-icon--minus', ariaHidden: 'true' }),
+    ],
+  })
+  let control = h('span', { class: 'fui-checkbox-control', children: indicator })
 
   if (root) {
     const _input = root.querySelector<HTMLInputElement>("input[type='checkbox'].fui-checkbox-input")

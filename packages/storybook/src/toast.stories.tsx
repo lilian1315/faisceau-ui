@@ -1,7 +1,8 @@
 import { createToaster, enhanceToaster } from 'faisceau-ui'
 import type { Meta, StoryObj } from '@storybook/html-vite'
+import { build } from '@lilian1315/create-element/faisceau/virtual/dom'
 
-import { asDom, createStoryShell, trackController } from './story.tsx'
+import { createStoryShell, trackController } from './story.tsx'
 
 const meta = { title: 'Toast/Anatomie' } satisfies Meta
 export default meta
@@ -16,8 +17,8 @@ export const create: Story = {
       description:
         'Chaque notification est une machine enfant du groupe Zag et peut avoir un type, une durée et une action.',
     })
-    const host = asDom<HTMLDivElement>(<div />)
-    const controls = asDom<HTMLDivElement>(
+    const host = build<'div'>(<div />)
+    const controls = build<'div'>(
       <div class="fui-story__row">
         <button class="fui-story__button" type="button">
           Succès
@@ -62,12 +63,12 @@ export const enhance: Story = {
       description:
         'Une région vide existante reçoit les props accessibles et les notifications créées ensuite.',
     })
-    const button = asDom<HTMLButtonElement>(
+    const button = build<'button'>(
       <button class="fui-story__button" type="button">
         Notifier
       </button>,
     )
-    const region = asDom<HTMLDivElement>(<div id="notifications" />)
+    const region = build<'div'>(<div id="notifications" />)
     story.canvas.append(button, region)
     const toaster = enhanceToaster(region, { placement: 'top-end' })
     trackController(story.root, toaster)

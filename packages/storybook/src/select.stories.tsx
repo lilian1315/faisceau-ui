@@ -1,9 +1,10 @@
-import { h } from '@lilian1315/create-element/faisceau'
-import { asDom } from '@lilian1315/create-element/faisceau/jsx-runtime'
+import { createElement as h } from '@lilian1315/create-element/faisceau'
+import { build } from '@lilian1315/create-element/faisceau/virtual/dom'
 import type { Meta, StoryObj } from '@storybook/html-vite'
 import { createSelect, enhanceSelect } from 'faisceau-ui/select'
 import type { SelectProps } from 'faisceau-ui/select'
 import { createStoryShell, trackController } from './story.tsx'
+import { signal, computed, effect, untracked } from 'faisceau'
 
 const countries = [
   { value: 'ng', label: 'Nigeria' },
@@ -39,54 +40,60 @@ const meta = {
       title: 'Choose a country',
       description: 'Use the pointer, arrow keys, or type a country name. Korea is unavailable.',
     })
-    const form = asDom<'form'>(
-      <form style={{ display: 'grid', gap: '16px', width: '320px', maxWidth: '100%' }} />,
-    )
+
+    const mode = signal<'short' | 'long'>('short')
+
     const host = h('div')
-    const shortListButton = h('button', { type: 'button' }, 'Short list')
-    const longListButton = h('button', { type: 'button' }, 'Long list')
-    const listActions = h(
-      'div',
-      { style: 'display: flex; gap: 12px' },
-      shortListButton,
-      longListButton,
-    )
-    form.append(listActions, host)
-    story.canvas.append(form)
-    let controller: ReturnType<typeof createSelect>
-
-    const renderSelect = (mode: 'short' | 'long') => {
-      controller?.destroy()
-      const items = mode === 'short' ? args.items : longList
-      controller = createSelect({
-        ...args,
-        items,
-        ...(mode === 'long' && args.value === undefined && args.defaultValue === undefined
-          ? { defaultValue: ['40'] }
-          : {}),
-        onValueChange(details) {
-          story.output.textContent = `value = ${JSON.stringify(details.value)}`
-          args.onValueChange?.(details)
-        },
-      }).mount(host)
-      shortListButton.setAttribute('aria-pressed', String(mode === 'short'))
-      longListButton.setAttribute('aria-pressed', String(mode === 'long'))
-      story.setSource(
-        `createSelect({\n  label: "Country",\n  name: "country",\n  items: ${mode === 'short' ? 'countries' : 'longList'},\n  multiple: ${!!args.multiple},\n  clearable: ${!!args.clearable}\n}).mount(form)`,
-      )
-    }
-
-    shortListButton.addEventListener('click', () => renderSelect('short'))
-    longListButton.addEventListener('click', () => renderSelect('long'))
-    renderSelect('short')
-    form.append(
-      asDom<'div'>(
+    const form = build<'form'>(
+      <form style={{ display: 'grid', gap: '16px', width: '320px', maxWidth: '100%' }}>
+        <div style={{ display: 'flex', gap: '12px' }}>
+          <button
+            aria-pressed={computed(() => (mode.get() === 'short' ? 'true' : 'false'))}
+            onclick={() => mode.set('short')}
+            type="button"
+          >
+            Short list
+          </button>
+          <button
+            aria-pressed={computed(() => (mode.get() === 'long' ? 'true' : 'false'))}
+            onclick={() => mode.set('long')}
+            type="button"
+          >
+            Long list
+          </button>
+        </div>
+        {host}
         <div style={{ display: 'flex', gap: '12px' }}>
           <button type="submit">Read FormData</button>
           <button type="reset">Reset</button>
-        </div>,
-      ),
+        </div>
+      </form>,
     )
+    story.canvas.append(form)
+    let controller: ReturnType<typeof createSelect>
+
+    effect(() => {
+      const _mode = mode.get()
+      untracked(() => {
+        controller?.destroy()
+        const items = _mode === 'short' ? args.items : longList
+        controller = createSelect({
+          ...args,
+          items,
+          ...(_mode === 'long' && args.value === undefined && args.defaultValue === undefined
+            ? { defaultValue: ['40'] }
+            : {}),
+          onValueChange(details) {
+            story.output.textContent = `value = ${JSON.stringify(details.value)}`
+            args.onValueChange?.(details)
+          },
+        }).mount(host)
+        story.setSource(
+          `createSelect({\n  label: "Country",\n  name: "country",\n  items: ${_mode === 'short' ? 'countries' : 'longList'},\n  multiple: ${!!args.multiple},\n  clearable: ${!!args.clearable}\n}).mount(form)`,
+        )
+      })
+    })
+
     form.addEventListener('submit', (event) => {
       event.preventDefault()
       story.output.textContent = JSON.stringify([...new FormData(form)])
@@ -115,7 +122,7 @@ export const Enhance: Story = {
       description:
         'A root and native select are enough. The visible control and popup are generated; destroy restores the original markup and keeps the current value.',
     })
-    const root = asDom<'div'>(
+    const root = build<'div'>(
       <div class="fui-select" style={{ width: '320px' }}>
         <label class="fui-label">Country</label>
         <select class="fui-select-native-select" name="country">
@@ -134,17 +141,14 @@ export const Enhance: Story = {
         story.output.textContent = JSON.stringify(value)
       },
     })
-    const destroy = h(
-      'button',
-      {
-        type: 'button',
-        onclick: () => {
-          controller.destroy()
-          destroy.disabled = true
-        },
+    const destroy = h('button', {
+      type: 'button',
+      onclick: () => {
+        controller.destroy()
+        destroy.disabled = true
       },
-      'Destroy enhancement',
-    )
+      children: 'Destroy enhancement',
+    })
     story.canvas.append(destroy)
     trackController(story.root, controller)
     story.setSource(`${source}\n\nenhanceSelect(root)`)

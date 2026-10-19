@@ -1,9 +1,9 @@
 import { createCombobox, enhanceCombobox, type ComboboxProps } from 'faisceau-ui'
-import { asDom } from '@lilian1315/create-element/faisceau/jsx-runtime'
+import { build } from '@lilian1315/create-element/faisceau/virtual/dom'
 import type { Meta, StoryObj } from '@storybook/html-vite'
 
 import { createStoryShell, trackController } from './story.tsx'
-import { h } from '@lilian1315/create-element/faisceau'
+import { createElement as h } from '@lilian1315/create-element/faisceau'
 
 type ComboboxStoryArgs = ComboboxProps
 
@@ -100,7 +100,7 @@ export const enhance: Story = {
       eyebrow: 'enhanceCombobox',
       title: 'Progressive enhancement',
     })
-    const root = asDom<'div'>(
+    const root = build<'div'>(
       <div class="fui-combobox">
         <label class="fui-field-label">Ville</label>
         <select class="fui-combobox-native-select" name="city">

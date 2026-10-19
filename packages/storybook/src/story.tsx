@@ -1,3 +1,5 @@
+import { build } from '@lilian1315/create-element/faisceau/virtual/dom'
+
 interface StoryShellOptions {
   description: string
   eyebrow: string
@@ -12,16 +14,16 @@ export interface StoryShell {
 }
 
 export function createStoryShell(options: StoryShellOptions): StoryShell {
-  const canvas = asDom<HTMLElement>(
+  const canvas = build<'section'>(
     <section aria-label="Aperçu du composant" class="fui-story__canvas" />,
   )
-  const output = asDom<HTMLOutputElement>(
+  const output = build<'output'>(
     <output aria-live="polite" class="fui-story__output">
       Interagissez avec le composant pour observer sa valeur.
     </output>,
   )
-  const source = asDom<HTMLElement>(<code />)
-  const root = asDom<HTMLElement>(
+  const source = build<'code'>(<code />)
+  const root = build<'article'>(
     <article class="fui-story" lang="fr">
       <header class="fui-story__header">
         <span class="fui-story__eyebrow">{options.eyebrow}</span>
@@ -47,10 +49,6 @@ export function createStoryShell(options: StoryShellOptions): StoryShell {
       source.textContent = value.trim()
     },
   }
-}
-
-export function asDom<T extends globalThis.Element>(element: unknown): T {
-  return element as T
 }
 
 export function trackController(root: HTMLElement, controller: { destroy(): void }): void {

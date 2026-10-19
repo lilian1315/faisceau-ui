@@ -1,4 +1,4 @@
-import { h } from '@lilian1315/create-element'
+import { createElement as h } from '@lilian1315/create-element'
 
 import type { FuiItem } from '../shared/index.js'
 
@@ -31,61 +31,61 @@ export function buildControl(options: {
     class: 'fui-combobox-input',
     placeholder: options.placeholder,
     type: 'text',
-  }) as HTMLInputElement
-  const field = h('span', { class: 'fui-combobox-field' }, selection, input)
-  const clearTrigger = h(
-    'button',
-    {
-      'aria-label': options.clearLabel ?? 'Clear selection',
-      class: 'fui-combobox-clear-trigger',
-      hidden: true,
-      type: 'button',
-    },
-    h('span', { class: 'fui-icon fui-icon--x', 'aria-hidden': true }),
-  ) as HTMLButtonElement
-  const trigger = h(
-    'button',
-    { class: 'fui-combobox-trigger', type: 'button' },
-    h('span', { class: 'fui-icon fui-icon--chevron-down', 'aria-hidden': true }),
-  ) as HTMLButtonElement
-  const control = h('div', { class: 'fui-combobox-control' }, field, clearTrigger, trigger)
+  })
+  const field = h('span', { class: 'fui-combobox-field', children: [selection, input] })
+  const clearTrigger = h('button', {
+    ariaLabel: options.clearLabel ?? 'Clear selection',
+    class: 'fui-combobox-clear-trigger',
+    hidden: true,
+    type: 'button',
+    children: h('span', { class: 'fui-icon fui-icon--x', ariaHidden: 'true' }),
+  })
+  const trigger = h('button', {
+    class: 'fui-combobox-trigger',
+    type: 'button',
+    children: h('span', { class: 'fui-icon fui-icon--chevron-down', ariaHidden: 'true' }),
+  })
+  const control = h('div', {
+    class: 'fui-combobox-control',
+    children: [field, clearTrigger, trigger],
+  })
   return { control, field, selection, input, clearTrigger, trigger }
 }
 
 /** Builds the popup shell; items are rendered separately with {@link buildItem}. */
 export function buildPopup(items: readonly FuiItem[], emptyLabel?: string): ComboboxPopup {
-  const list = h('ul', { class: 'fui-combobox-list' }, items.map(buildItem))
-  const empty = h('p', { class: 'fui-combobox-empty', hidden: true }, emptyLabel ?? 'No results')
-  const content = h('div', { class: 'fui-combobox-content' }, list, empty)
-  const positioner = h('div', { class: 'fui-combobox-positioner' }, content)
+  const list = h('ul', { class: 'fui-combobox-list', children: items.map(buildItem) })
+  const empty = h('p', {
+    class: 'fui-combobox-empty',
+    hidden: true,
+    children: emptyLabel ?? 'No results',
+  })
+  const content = h('div', { class: 'fui-combobox-content', children: [list, empty] })
+  const positioner = h('div', { class: 'fui-combobox-positioner', children: content })
   return { positioner, content, list, empty }
 }
 
 /** Builds one popup row for an item. */
 export function buildItem(item: FuiItem): HTMLLIElement {
-  const text = h('span', { class: 'fui-combobox-item-text' }, item.label)
+  const text = h('span', { class: 'fui-combobox-item-text', children: item.label })
   const children: Node[] = [text]
 
   if (item.description) {
-    children.push(h('span', { class: 'fui-combobox-item-description' }, item.description))
+    children.push(h('span', { class: 'fui-combobox-item-description', children: item.description }))
   }
 
   children.push(
-    h(
-      'span',
-      { class: 'fui-combobox-item-indicator' },
-      h('span', { class: 'fui-icon fui-icon--check', 'aria-hidden': true }),
-    ),
+    h('span', {
+      class: 'fui-combobox-item-indicator',
+      children: h('span', { class: 'fui-icon fui-icon--check', ariaHidden: 'true' }),
+    }),
   )
 
-  return h(
-    'li',
-    {
-      class: 'fui-combobox-item',
-      data: { disabled: item.disabled, value: item.value },
-    },
+  return h('li', {
+    class: 'fui-combobox-item',
+    data: { disabled: item.disabled, value: item.value },
     children,
-  )
+  })
 }
 
 /** Builds the native select kept in the document as the submitted control. */
@@ -102,14 +102,14 @@ export function buildNativeSelect(
   },
 ): HTMLSelectElement {
   const native = h('select', {
-    'aria-hidden': true,
+    ariaHidden: 'true',
     class: 'fui-combobox-native-select',
     disabled: options.disabled,
     multiple: options.multiple,
     name: options.name,
     required: options.required,
-    tabindex: -1,
-  }) as HTMLSelectElement
+    tabIndex: -1,
+  })
   if (options.form !== undefined) native.setAttribute('form', options.form)
   hideNativeSelect(native)
   native.replaceChildren(
@@ -192,11 +192,11 @@ export function buildOptions(
   const options: HTMLOptionElement[] = []
 
   if (!multiple) {
-    const placeholderOption = h(
-      'option',
-      { data: { placeholder: '' }, value: '' },
-      placeholder ?? 'Select an option',
-    ) as HTMLOptionElement
+    const placeholderOption = h('option', {
+      data: { placeholder: '' },
+      value: '',
+      children: placeholder ?? 'Select an option',
+    })
     placeholderOption.hidden = true
     placeholderOption.selected = selected.size === 0
     // `defaultSelected` drives `form.reset()`; keep it aligned with the initial value.
@@ -205,11 +205,11 @@ export function buildOptions(
   }
 
   for (const item of items) {
-    const option = h(
-      'option',
-      { disabled: item.disabled, value: item.value },
-      item.label,
-    ) as HTMLOptionElement
+    const option = h('option', {
+      disabled: item.disabled,
+      value: item.value,
+      children: item.label,
+    })
     if (item.description) option.dataset.description = item.description
     option.selected = selected.has(item.value)
     // `defaultSelected` drives `form.reset()`; keep it aligned with the initial value.
