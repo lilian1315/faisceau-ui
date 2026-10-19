@@ -67,7 +67,7 @@ describe('Select (Zag v2)', () => {
     await vi.waitFor(() => expect(events).toEqual(['input', 'change']))
     expect(new FormData(form).get('country')).toBe('kr')
     expect(onValueChange).toHaveBeenCalledTimes(1)
-    await expect.element(trigger()).toHaveTextContent('Korea')
+    await expect.element(trigger()).toMatchTextContent('Korea')
     await expect.element(trigger()).toHaveFocus()
     expect(controller.api.get().open).toBe(false)
   })
@@ -99,20 +99,20 @@ describe('Select (Zag v2)', () => {
     await userEvent.keyboard('ke')
     await vi.waitFor(() => expect(controller.api.get().highlightedValue).toBe('ke'))
     await userEvent.keyboard('{Enter}')
-    await expect.element(trigger()).toHaveTextContent('Kenya')
+    await expect.element(trigger()).toMatchTextContent('Kenya')
   })
 
   it('supports closed typeahead, looping, clear and deselection', async () => {
     const controller = create({ loopFocus: true, clearable: true, deselectable: true })
     part(controller, 'trigger').focus()
     await userEvent.keyboard('uni')
-    await expect.element(trigger()).toHaveTextContent('United Kingdom')
+    await expect.element(trigger()).toMatchTextContent('United Kingdom')
     const clear = page.getByRole('button', { name: 'Clear value' }).element() as HTMLButtonElement
     expect(clear.parentElement).toBe(part(controller, 'control'))
     expect(getComputedStyle(clear).backgroundColor).toBe('rgba(0, 0, 0, 0)')
     clear.click()
     await expect.element(trigger()).toHaveFocus()
-    await expect.element(trigger()).toHaveTextContent('Select an option')
+    await expect.element(trigger()).toMatchTextContent('Select an option')
     await userEvent.keyboard('{ArrowDown}')
     await expect.element(page.getByRole('listbox')).toHaveFocus()
     await userEvent.keyboard('{ArrowUp}')
@@ -162,7 +162,7 @@ describe('Select (Zag v2)', () => {
     controller.root.addEventListener('change', () => events.push('change'))
     native.value = 'kr'
     native.dispatchEvent(new Event(type, { bubbles: true }))
-    await expect.element(trigger()).toHaveTextContent('Korea')
+    await expect.element(trigger()).toMatchTextContent('Korea')
     await new Promise((resolve) => setTimeout(resolve, 20))
     expect(events).toEqual([type])
   })
@@ -204,7 +204,7 @@ describe('Select (Zag v2)', () => {
     await option('Korea').click()
     expect(onValueChange).toHaveBeenCalledWith(expect.objectContaining({ value: ['kr'] }))
     expect(controller.api.get().value).toEqual(['ng'])
-    await expect.element(trigger()).toHaveTextContent('Nigeria')
+    await expect.element(trigger()).toMatchTextContent('Nigeria')
     expect(part<HTMLSelectElement>(controller, 'native-select').value).toBe('ng')
   })
 
@@ -361,7 +361,7 @@ describe('Select (Zag v2)', () => {
       part(controller, 'list').clientHeight,
     )
     await option('Option 80').click()
-    await expect.element(trigger()).toHaveTextContent('Option 80')
+    await expect.element(trigger()).toMatchTextContent('Option 80')
     await trigger().click()
     await vi.waitFor(() => {
       const triggerValue = part(controller, 'value-text').getBoundingClientRect()

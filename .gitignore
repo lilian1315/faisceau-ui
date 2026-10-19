@@ -39,3 +39,4 @@ __screenshots__
 !.vscode/
 !.vscode/settings.json
 !.vscode/extensions.json
+.vitest/
