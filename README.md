@@ -47,10 +47,6 @@ Pour utiliser directement le pont de bas niveau :
 pnpm add faisceau-zag @zag-js/vanilla faisceau
 ```
 
-La publication vers JSR est désactivée : les modules des composants importent
-leurs `.scss`, que JSR ne sait pas traiter comme points d'entrée. Seul npm est
-publié, avec le CSS compilé et importé automatiquement.
-
 Le pont suit l'adapter Vanilla officiel et déclare ses runtimes en peer dependencies. Cette
 version utilise Zag `2.0.0-next.3` et Faisceau 0.3.x. Le projet cible uniquement les navigateurs
 modernes ; le rendu serveur ne fait pas partie de son contrat.
