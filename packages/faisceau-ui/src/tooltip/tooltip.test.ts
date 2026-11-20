@@ -32,7 +32,7 @@ describe('Tooltip', () => {
     expect(content.textContent).toContain('Create a new document')
     expect(content.hidden).toBe(false)
     expect(trigger.getAttribute('aria-describedby')).toBe(content.id)
-    expect(onOpenChange).toHaveBeenLastCalledWith({ open: true })
+    expect(onOpenChange).toHaveBeenLastCalledWith(expect.objectContaining({ open: true }))
 
     controller.api.get().setOpen(false)
     await flushMachine()

@@ -8,7 +8,6 @@ import { createId } from '../shared/id.ts'
 import { normalizeItems } from '../shared/items.ts'
 import type { FuiItem } from '../shared/items.ts'
 import { requireFuiClass } from '../shared/parts.ts'
-import { createAlignedPositioning } from './alignment.ts'
 import { createMarkup } from './markup.ts'
 import { bindNativeEvents, readValue, writeValue } from './native.ts'
 import type { EnhanceSelectProps, SelectController, SelectProps } from './types.ts'
@@ -136,20 +135,12 @@ function setup(
     ...behavior
   } = props
   const hasValue = signal(readValue(native).length > 0)
-  const alignmentActive = signal(false)
-  const alignItemWithTrigger = behavior.alignItemWithTrigger
-  const alignedPositioning = createAlignedPositioning(
-    { trigger, valueText, content, list },
-    behavior.positioning,
-    (aligned) => alignmentActive.set(aligned),
-  )
-  const shouldAlign = () => !!alignItemWithTrigger && !behavior.multiple && hasValue.get()
+  const shouldAlign = () => !!behavior.alignItemWithTrigger && !behavior.multiple && hasValue.get()
   const zag = createZagMachine(
     select.machine as select.Machine<FuiItem>,
     () => ({
       ...behavior,
-      alignItemWithTrigger: false,
-      positioning: shouldAlign() ? alignedPositioning : behavior.positioning,
+      alignItemWithTrigger: shouldAlign(),
       id,
       collection: select.collection({
         items,
@@ -172,10 +163,7 @@ function setup(
   zag.bind(valueText, (api) => api.getValueTextProps())
   zag.bind(indicator, (api) => api.getIndicatorProps())
   zag.bind(positioner, (api) => api.getPositionerProps())
-  zag.bind(content, (api) => ({
-    ...api.getContentProps(),
-    'data-align-with-trigger': alignmentActive.get() ? '' : undefined,
-  }))
+  zag.bind(content, (api) => api.getContentProps())
   zag.bind(list, (api) => api.getListProps())
   if (description) description.id = `${id}:description`
   if (clear)
@@ -204,10 +192,17 @@ function setup(
   })
   const stopSync = effect(() => {
     const api = zag.api.get()
-    if (!api.open || !api.hasSelectedItems) alignmentActive.set(false)
     hasValue.set(api.hasSelectedItems)
     valueText.textContent = api.hasSelectedItems ? api.valueAsString : placeholder
     writeValue(native, api.value)
+    if (!api.open) {
+      // Popper writes --x/--y straight onto the element, so spreadProps never
+      // cleans them up. Clear them on close: on reopen the positioner then stays
+      // hidden off-screen (transform fallback) until placement/alignment applies,
+      // instead of flashing at the previous open's coordinates for a frame.
+      positioner.style.removeProperty('--x')
+      positioner.style.removeProperty('--y')
+    }
   })
   let started = false
   let destroyed = false

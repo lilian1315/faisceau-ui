@@ -28,7 +28,7 @@ describe('Collapsible', () => {
     expect(controller.api.get().open).toBe(true)
     expect(trigger.getAttribute('aria-expanded')).toBe('true')
     expect(content.hidden).toBe(false)
-    expect(onOpenChange).toHaveBeenLastCalledWith({ open: true })
+    expect(onOpenChange).toHaveBeenLastCalledWith(expect.objectContaining({ open: true }))
 
     trigger.focus()
     await userEvent.keyboard('{Enter}')

@@ -372,11 +372,14 @@ describe('Combobox', () => {
     const input = controller.root.querySelector<HTMLInputElement>('input')!
 
     controller.root.querySelector<HTMLButtonElement>('.fui-combobox-trigger')!.click()
-    await flushMachine()
+    // Zag 2.0.0-next.4 settles transitions over deferred microtasks, so wait for
+    // the open state and its initial highlight instead of assuming one flush.
+    await vi.waitFor(() => expect(controller.api.get().highlightedValue).toBe('one'))
 
     input.dispatchEvent(
       new KeyboardEvent('keydown', { bubbles: true, cancelable: true, key: 'ArrowDown' }),
     )
+    await vi.waitFor(() => expect(controller.api.get().highlightedValue).toBe('two'))
     input.dispatchEvent(
       new KeyboardEvent('keydown', { bubbles: true, cancelable: true, key: 'Enter' }),
     )

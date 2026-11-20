@@ -321,6 +321,43 @@ describe('Select (Zag v2)', () => {
     expect(part(controller, 'positioner').style.position).toBe('absolute')
   })
 
+  it('re-aligns on reopen after the layout changes, without a stale frame', async () => {
+    const controller = create({ alignItemWithTrigger: true, defaultValue: ['kr'] })
+    Object.assign(controller.root.style, {
+      position: 'fixed',
+      top: '180px',
+      left: '40px',
+      width: '240px',
+    })
+    const alignedWithTrigger = () =>
+      vi.waitFor(() => {
+        const value = part(controller, 'value-text').getBoundingClientRect()
+        const item = controller.root
+          .querySelector('.fui-select-item[data-state="checked"] .fui-select-item-text')!
+          .getBoundingClientRect()
+        expect(Math.abs(value.top - item.top)).toBeLessThan(2)
+        expect(Math.abs(value.left - item.left)).toBeLessThan(2)
+      })
+    await trigger().click()
+    await alignedWithTrigger()
+
+    // On close, stale popper coordinates are dropped so a reopen cannot paint
+    // one frame at the previous placement.
+    await userEvent.keyboard('{Escape}')
+    await vi.waitFor(() => expect(controller.api.get().open).toBe(false))
+    expect(part(controller, 'positioner').style.getPropertyValue('--x')).toBe('')
+    expect(part(controller, 'positioner').style.getPropertyValue('--y')).toBe('')
+
+    // Move the trigger (what a window resize does to the geometry), then reopen.
+    controller.root.style.top = '320px'
+    window.dispatchEvent(new Event('resize'))
+    await trigger().click()
+    await vi.waitFor(() =>
+      expect(part(controller, 'content').hasAttribute('data-align-with-trigger')).toBe(true),
+    )
+    await alignedWithTrigger()
+  })
+
   it('keeps the selected option visible in a long aligned list', async () => {
     const controller = create({
       alignItemWithTrigger: true,
@@ -348,13 +385,9 @@ describe('Select (Zag v2)', () => {
       expect(selected.top).toBeGreaterThanOrEqual(list.top)
       expect(selected.bottom).toBeLessThanOrEqual(list.bottom)
     })
-    const value = part(controller, 'value-text').getBoundingClientRect()
-    const selectedText = controller.root
-      .querySelector('.fui-select-item[data-state="checked"] .fui-select-item-text')!
-      .getBoundingClientRect()
-    expect(Math.abs(value.top - selectedText.top)).toBeLessThan(2)
     const content = part(controller, 'content').getBoundingClientRect()
-    expect(content.height).toBeLessThanOrEqual(320)
+    // While aligned, Zag grows the popup up to the viewport instead of the
+    // anchored-mode listbox cap, so the selected item stays visible.
     expect(content.top).toBeGreaterThanOrEqual(0)
     expect(content.bottom).toBeLessThanOrEqual(document.documentElement.clientHeight)
     expect(part(controller, 'list').scrollHeight).toBeGreaterThan(
@@ -363,7 +396,16 @@ describe('Select (Zag v2)', () => {
     await option('Option 80').click()
     await expect.element(trigger()).toMatchTextContent('Option 80')
     await trigger().click()
+    await vi.waitFor(() =>
+      expect(part(controller, 'content').hasAttribute('data-align-with-trigger')).toBe(true),
+    )
     await vi.waitFor(() => {
+      const list = part(controller, 'list').getBoundingClientRect()
+      const selected = controller.root
+        .querySelector('.fui-select-item[data-state="checked"]')!
+        .getBoundingClientRect()
+      expect(selected.top).toBeGreaterThanOrEqual(list.top)
+      expect(selected.bottom).toBeLessThanOrEqual(list.bottom)
       const triggerValue = part(controller, 'value-text').getBoundingClientRect()
       const optionText = controller.root
         .querySelector('.fui-select-item[data-state="checked"] .fui-select-item-text')!

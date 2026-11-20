@@ -22,7 +22,7 @@ describe('Dialog', () => {
     expect(content.getAttribute('aria-labelledby')).toBeTruthy()
     controller.root.querySelector<HTMLButtonElement>('.fui-dialog-close')!.click()
     await flushMachine()
-    expect(onOpenChange).toHaveBeenLastCalledWith({ open: false })
+    expect(onOpenChange).toHaveBeenLastCalledWith(expect.objectContaining({ open: false }))
   })
 
   it('binds every trigger matching the selector without owning them', async () => {
