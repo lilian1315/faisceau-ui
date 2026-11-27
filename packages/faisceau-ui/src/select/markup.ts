@@ -1,4 +1,5 @@
 import { createElement as h } from '@lilian1315/create-element'
+import { groupOptions, groupRows } from '../shared/item-groups.ts'
 import type { FuiItem } from '../shared/items.ts'
 import type { SelectProps } from './types.ts'
 
@@ -14,9 +15,14 @@ export function createMarkup(items: FuiItem[], props: SelectProps): HTMLDivEleme
         children: props.placeholder ?? 'Select an option',
       }),
     )
-  for (const item of items) {
-    native.append(h('option', { value: item.value, disabled: item.disabled, children: item.label }))
-  }
+  native.append(
+    ...groupOptions(
+      items,
+      items.map((item) =>
+        h('option', { value: item.value, disabled: item.disabled, children: item.label }),
+      ),
+    ),
+  )
   for (const option of native.options) {
     option.defaultSelected = selected.includes(option.value)
     option.selected = option.defaultSelected
@@ -58,23 +64,30 @@ export function createMarkup(items: FuiItem[], props: SelectProps): HTMLDivEleme
           hidden: true,
           children: h('ul', {
             class: 'fui-select-list',
-            children: items.map((item) =>
-              h('li', {
-                class: 'fui-select-item',
-                children: [
-                  h('span', { class: 'fui-select-item-text', children: item.label }),
-                  h('span', {
-                    class: 'fui-select-item-indicator',
-                    children: h('span', { class: 'fui-icon fui-icon--check', ariaHidden: 'true' }),
-                  }),
-                  item.description
-                    ? h('span', {
-                        class: 'fui-select-item-description',
-                        children: item.description,
-                      })
-                    : null,
-                ],
-              }),
+            children: groupRows(
+              items,
+              items.map((item) =>
+                h('li', {
+                  class: 'fui-select-item',
+                  children: [
+                    h('span', { class: 'fui-select-item-text', children: item.label }),
+                    h('span', {
+                      class: 'fui-select-item-indicator',
+                      children: h('span', {
+                        class: 'fui-icon fui-icon--check',
+                        ariaHidden: 'true',
+                      }),
+                    }),
+                    item.description
+                      ? h('span', {
+                          class: 'fui-select-item-description',
+                          children: item.description,
+                        })
+                      : null,
+                  ],
+                }),
+              ),
+              'fui-select',
             ),
           }),
         }),

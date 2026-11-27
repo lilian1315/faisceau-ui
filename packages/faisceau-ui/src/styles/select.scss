@@ -1,3 +1,5 @@
+@use './mixins' as *;
+
 .fui-select {
   display: grid;
   gap: 8px;
@@ -218,3 +220,5 @@
     opacity: 1;
   }
 }
+
+@include fui-item-groups('select');

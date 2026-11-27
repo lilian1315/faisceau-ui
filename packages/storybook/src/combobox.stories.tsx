@@ -72,7 +72,7 @@ export const create: Story = {
       ...args,
       defaultValue: args.multiple ? ['paris', 'lyon'] : [],
       getRemoveLabel: (item) => `Retirer ${item.label}`,
-      items: cities,
+      items: args.items ?? cities,
       name: args.multiple ? 'cities' : 'city',
       onValueChange: ({ value }) => {
         story.output.textContent = `value = ${value.join(', ') || '(vide)'}`
@@ -82,7 +82,7 @@ export const create: Story = {
     story.setSource(`createCombobox({
       label: "${args.label}",
       name: "${args.multiple ? 'cities' : 'city'}",
-      items: cities,
+      items: args.items ?? cities,
       multiple: ${args.multiple},
       emptyLabel: "${args.emptyLabel}"
     }).mount(target)`)
@@ -107,11 +107,13 @@ export const enhance: Story = {
           <option value="" data-placeholder="" hidden>
             Rechercher une ville…
           </option>
-          <option value="paris" selected>
-            Paris
-          </option>
-          <option value="lyon">Lyon</option>
-          <option value="bordeaux">Bordeaux</option>
+          <optgroup label="France">
+            <option value="paris" selected>
+              Paris
+            </option>
+            <option value="lyon">Lyon</option>
+            <option value="bordeaux">Bordeaux</option>
+          </optgroup>
         </select>
       </div>,
     )
@@ -124,5 +126,19 @@ export const enhance: Story = {
     trackController(story.root, controller)
     story.setSource(source)
     return story.root
+  },
+}
+
+export const Groups: Story = {
+  ...create,
+  name: 'Groups',
+  args: {
+    ...create.args,
+    items: [
+      { value: 'paris', label: 'Paris', group: 'France' },
+      { value: 'lyon', label: 'Lyon', group: 'France' },
+      { value: 'brussels', label: 'Bruxelles', group: 'Belgique' },
+      { value: 'liege', label: 'Liège', group: 'Belgique', disabled: true },
+    ],
   },
 }

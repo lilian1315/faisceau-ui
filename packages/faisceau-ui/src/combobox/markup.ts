@@ -1,6 +1,7 @@
 import { createElement as h } from '@lilian1315/create-element'
 
-import type { FuiItem } from '../shared/index.js'
+import type { FuiItem } from '../shared/items.ts'
+import { groupOptions, groupRows } from '../shared/item-groups.ts'
 
 export interface ComboboxControl {
   readonly control: HTMLElement
@@ -54,7 +55,10 @@ export function buildControl(options: {
 
 /** Builds the popup shell; items are rendered separately with {@link buildItem}. */
 export function buildPopup(items: readonly FuiItem[], emptyLabel?: string): ComboboxPopup {
-  const list = h('ul', { class: 'fui-combobox-list', children: items.map(buildItem) })
+  const list = h('ul', {
+    class: 'fui-combobox-list',
+    children: groupRows(items, items.map(buildItem), 'fui-combobox'),
+  })
   const empty = h('p', {
     class: 'fui-combobox-empty',
     hidden: true,
@@ -148,7 +152,8 @@ export function reconcileNativeSelectOptions(
     empty.hidden = true
     empty.selected = selected.size === 0
   }
-  select.replaceChildren(...(empty ? [empty, ...options] : options))
+  const grouped = groupOptions(items, options)
+  select.replaceChildren(...(empty ? [empty, ...grouped] : grouped))
 }
 
 /** Returns selected values, excluding only the explicitly-marked placeholder option. */
@@ -187,7 +192,7 @@ export function buildOptions(
   placeholder: string | undefined,
   multiple: boolean | undefined,
   value: readonly string[],
-): HTMLOptionElement[] {
+): HTMLElement[] {
   const selected = new Set(value)
   const options: HTMLOptionElement[] = []
 
@@ -216,5 +221,6 @@ export function buildOptions(
     option.defaultSelected = option.selected
     options.push(option)
   }
-  return options
+  const offset = multiple ? 0 : 1
+  return [...options.slice(0, offset), ...groupOptions(items, options.slice(offset))]
 }

@@ -129,8 +129,12 @@ export const Enhance: Story = {
           <option value="" data-placeholder>
             Choose a country
           </option>
-          <option value="ng">Nigeria</option>
-          <option value="jp">Japan</option>
+          <optgroup label="Africa">
+            <option value="ng">Nigeria</option>
+          </optgroup>
+          <optgroup label="Asia">
+            <option value="jp">Japan</option>
+          </optgroup>
         </select>
       </div>,
     )
@@ -153,5 +157,18 @@ export const Enhance: Story = {
     trackController(story.root, controller)
     story.setSource(`${source}\n\nenhanceSelect(root)`)
     return story.root
+  },
+}
+
+export const Groups: Story = {
+  name: 'Groups',
+  args: {
+    items: [
+      { value: 'ng', label: 'Nigeria', group: 'Africa' },
+      { value: 'ke', label: 'Kenya', group: 'Africa' },
+      { value: 'jp', label: 'Japan', group: 'Asia' },
+      { value: 'kr', label: 'Korea', group: 'Asia', disabled: true },
+      { value: 'uk', label: 'United Kingdom' },
+    ],
   },
 }

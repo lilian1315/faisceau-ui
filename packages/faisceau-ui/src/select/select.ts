@@ -38,6 +38,10 @@ export function enhanceSelect(root: HTMLElement, props: EnhanceSelectProps = {})
       .map((option) => ({
         value: option.value,
         label: option.label,
+        group:
+          option.parentElement instanceof HTMLOptGroupElement
+            ? option.parentElement.label
+            : undefined,
         disabled:
           option.disabled ||
           (option.parentElement instanceof HTMLOptGroupElement && option.parentElement.disabled),
@@ -177,6 +181,14 @@ function setup(
     zag.bind(text, (api) => api.getItemTextProps({ item }))
     zag.bind(indicator, (api) => api.getItemIndicatorProps({ item }))
   })
+  Array.from(list.querySelectorAll<HTMLElement>('.fui-select-item-group')).forEach(
+    (group, index) => {
+      zag.bind(group, (api) => api.getItemGroupProps({ id: String(index) }))
+      zag.bind(requireFuiClass(group, 'fui-select-item-group-label'), (api) =>
+        api.getItemGroupLabelProps({ htmlFor: String(index) }),
+      )
+    },
+  )
   const stopNativeEvents = bindNativeEvents(
     native,
     () => zag.api.get().value,

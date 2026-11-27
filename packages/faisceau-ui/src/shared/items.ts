@@ -4,6 +4,8 @@ export interface FuiItem {
   readonly label: string
   readonly disabled?: boolean
   readonly description?: string
+  /** Label of the group containing this option. Adjacent items share a group. */
+  readonly group?: string
 }
 
 /** A shorthand string or a complete item accepted by component factories. */
@@ -63,6 +65,10 @@ function normalizeItem(input: FuiItemInput, index: number): FuiItem {
     throw new TypeError(
       `[Faisceau UI] Invalid item description at index ${index}. Expected a string.`,
     )
+  }
+
+  if (input.group !== undefined && typeof input.group !== 'string') {
+    throw new TypeError(`[Faisceau UI] Invalid item group at index ${index}. Expected a string.`)
   }
 
   return input

@@ -187,3 +187,17 @@
     @include fui-focus-ring;
   }
 }
+
+@mixin fui-item-groups($component) {
+  .fui-#{$component}-item-group-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .fui-#{$component}-item-group-label {
+    padding: var(--fui-space-2);
+    color: var(--fui-color-muted-foreground);
+    font-size: var(--fui-font-size-caption);
+    font-weight: var(--fui-font-weight-medium);
+  }
+}

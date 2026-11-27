@@ -14,7 +14,8 @@ import {
   reconcileKeyedValues,
   type FuiItem,
   type FuiItemInput,
-} from '../shared/index.js'
+} from '../shared/index.ts'
+import { groupRows } from '../shared/item-groups.ts'
 import { captureAttributes, captureChildNodes, ensureText, insertAfter } from '../shared/dom.ts'
 import {
   buildControl,
@@ -203,8 +204,24 @@ function factory(
     if (indicator) disposers.push(zag.bind(indicator, (api) => api.getItemIndicatorProps({ item })))
     itemDisposers.set(item.value, () => disposers.forEach((dispose) => dispose()))
   }
+  let groupDisposers: (() => void)[] = []
+  const bindGroups = (): void => {
+    groupDisposers.forEach((dispose) => dispose())
+    groupDisposers = []
+    Array.from(list.querySelectorAll<HTMLElement>('.fui-combobox-item-group')).forEach(
+      (group, index) => {
+        groupDisposers.push(zag.bind(group, (api) => api.getItemGroupProps({ id: String(index) })))
+        const label = group.querySelector<HTMLElement>('.fui-combobox-item-group-label')!
+        groupDisposers.push(
+          zag.bind(label, (api) => api.getItemGroupLabelProps({ htmlFor: String(index) })),
+        )
+      },
+    )
+  }
+  bindGroups()
+  const rows = list.querySelectorAll<HTMLElement>('.fui-combobox-item')
   for (const [index, item] of currentItems.entries()) {
-    bindItem(list.children[index] as HTMLElement, item)
+    bindItem(rows[index]!, item)
   }
 
   // Unlike Select, Zag's Combobox owns no hidden select, so the native select is
@@ -305,9 +322,9 @@ function factory(
       itemByValue = new Map(currentItems.map((item) => [item.value, item]))
       const nextValues = new Set(itemByValue.keys())
       const elements = new Map(
-        Array.from(list.children)
-          .filter((element) => element.classList.contains('fui-combobox-item'))
-          .map((element) => [element.getAttribute('data-value')!, element as HTMLElement] as const),
+        Array.from(list.querySelectorAll<HTMLElement>('.fui-combobox-item')).map(
+          (element) => [element.getAttribute('data-value')!, element as HTMLElement] as const,
+        ),
       )
       const ordered = reconcileKeyedValues({
         create: (item) => buildItem(item),
@@ -329,7 +346,8 @@ function factory(
           bindItem(element, item)
         },
       })
-      list.append(...ordered)
+      list.replaceChildren(...groupRows(currentItems, ordered, 'fui-combobox'))
+      bindGroups()
       const api = zag.api.get()
       const next = api.value.filter((entry) => nextValues.has(entry))
       if (next.length !== api.value.length) syncNativeValue(next)
@@ -372,6 +390,7 @@ function factory(
       stopSelectedTags()
       for (const dispose of itemDisposers.values()) dispose()
       itemDisposers.clear()
+      groupDisposers.forEach((dispose) => dispose())
       nativeSelect.removeEventListener('input', handleNativeChange)
       nativeSelect.removeEventListener('change', handleNativeChange)
       nativeSelect.removeEventListener('focus', focusInput)
@@ -406,6 +425,7 @@ function readItems(native: HTMLSelectElement): FuiItemInput[] {
       return {
         value: option.value,
         label: option.label || option.text,
+        group: group instanceof HTMLOptGroupElement ? group.label : undefined,
         ...(disabled ? { disabled: true as const } : {}),
         ...(description ? { description } : {}),
       }
@@ -525,10 +545,13 @@ function updateFilteredMarkup(
   filteredItems: readonly FuiItem[],
 ): void {
   const visibleValues = new Set(filteredItems.map((item) => item.value))
-  for (const element of list.children) {
-    if (element instanceof HTMLElement && element.classList.contains('fui-combobox-item')) {
-      element.hidden = !visibleValues.has(element.dataset.value ?? '')
-    }
+  for (const element of list.querySelectorAll<HTMLElement>('.fui-combobox-item')) {
+    element.hidden = !visibleValues.has(element.dataset.value ?? '')
+  }
+  for (const group of list.querySelectorAll<HTMLElement>('.fui-combobox-item-group')) {
+    group.hidden = !Array.from(group.querySelectorAll<HTMLElement>('.fui-combobox-item')).some(
+      (row) => !row.hidden,
+    )
   }
   empty.hidden = filteredItems.length > 0
 }

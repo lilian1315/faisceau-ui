@@ -112,6 +112,26 @@ const combobox = createCombobox({
 combobox.mount(document.querySelector('#app')!)
 ```
 
+## Groupes
+
+Les options de Select et Combobox acceptent `group: 'Europe'` : les options consécutives du
+même groupe partagent un libellé accessible et un `<optgroup>` natif. Les options sans `group`
+restent indépendantes, dans l'ordre fourni. Par exemple :
+
+```ts
+items: [
+  { value: 'fr', label: 'France', group: 'Europe' },
+  { value: 'be', label: 'Belgique', group: 'Europe' },
+  { value: 'jp', label: 'Japon', group: 'Asie' },
+]
+```
+
+`enhanceSelect` et `enhanceCombobox` reprennent les libellés des `<optgroup>` existants et
+respectent leur état `disabled`. Combobox masque les groupes sans résultat pendant le filtrage ;
+`setItems()` permet aussi de modifier les groupes en conservant les options retenues.
+Les classes d'anatomie sont `fui-select-item-group`, `fui-select-item-group-label`,
+`fui-select-item-group-list` et leurs équivalents `fui-combobox-*`.
+
 ## Sélection multiple
 
 Les deux composants acceptent `multiple: true`. Un Select affiche les libellés sélectionnés dans son trigger et garde sa liste ouverte pour permettre plusieurs choix. Une Combobox affiche chaque valeur sélectionnée sous forme de pastille retirable et vide son champ après une sélection afin de poursuivre la recherche.

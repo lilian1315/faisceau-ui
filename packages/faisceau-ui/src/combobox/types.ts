@@ -1,7 +1,7 @@
 import type * as combobox from '@zag-js/combobox'
 
-import type { FuiItem, FuiItemInput } from '../shared/index.js'
-import type { FuiController } from '../types.js'
+import type { FuiItem, FuiItemInput } from '../shared/index.ts'
+import type { FuiController } from '../types.ts'
 
 export interface ComboboxProps extends Omit<
   combobox.Props<FuiItem>,
