@@ -48,7 +48,7 @@ pnpm add faisceau-zag @zag-js/vanilla faisceau
 ```
 
 Le pont suit l'adapter Vanilla officiel et déclare ses runtimes en peer dependencies. Cette
-version utilise Zag `2.0.0-next.3` et Faisceau 0.3.x. Le projet cible uniquement les navigateurs
+version utilise Zag `2.0.0-next.4` et Faisceau 0.4.2. Le projet cible uniquement les navigateurs
 modernes ; le rendu serveur ne fait pas partie de son contrat.
 
 ## Créer un Select
@@ -79,13 +79,13 @@ select.mount(document.querySelector('#app')!)
 
 Une chaîne peut servir de raccourci d'item ; sa valeur et son libellé seront identiques.
 
-Les options suivent Zag `2.0.0-next.3` : `multiple`, `defaultValue`, `value`, `onValueChange`,
+Les options suivent Zag `2.0.0-next.4` : `multiple`, `defaultValue`, `value`, `onValueChange`,
 `disabled`, `readOnly`, `required`, `deselectable`, `loopFocus` et `alignItemWithTrigger`.
 Avec `alignItemWithTrigger: true`, l'option sélectionnée est alignée après le calcul de la hauteur
 plafonnée du popup, y compris dans une longue liste. Sans sélection, en mode multiple ou lorsque
 l'alignement exact ne tient pas dans la zone visible, Select conserve le positionnement standard
-de Zag et Floating UI. La valeur vide est réservée au placeholder. Les items sont fixes pendant la
-vie du contrôleur.
+de Zag et Floating UI. La valeur vide est réservée au placeholder. Les options peuvent être
+remplacées avec `setItems()`.
 
 Références : [machine v2](https://github.com/chakra-ui/zag/tree/v2/packages/machines/select/src),
 [tests e2e d'alignement](https://github.com/chakra-ui/zag/blob/v2/e2e/select-align-with-trigger.e2e.ts) et
@@ -112,6 +112,111 @@ const combobox = createCombobox({
 combobox.mount(document.querySelector('#app')!)
 ```
 
+## Collections dynamiques
+
+Les sous-modules `faisceau-ui/combobox` et `faisceau-ui/select` exposent `collection()`,
+la fabrique de collections Zag spécialisée pour les objets `FuiItem` (`value`, `label`,
+`disabled`, `description`, `group`). Ils sont aussi accessibles via les exports nommés
+`combobox` et `select` de `faisceau-ui`.
+
+```ts
+import * as combobox from 'faisceau-ui/combobox'
+import * as select from 'faisceau-ui/select'
+
+const initial = combobox.collection({
+  items: [{ value: 'fr', label: 'France' }],
+})
+const search = combobox.createCombobox({ label: 'Pays', items: initial }).mount(target)
+const picker = select.createSelect({ label: 'Pays', items: initial }).mount(otherTarget)
+
+const next = initial.setItems([
+  { value: 'fr', label: 'France', group: 'Europe' },
+  { value: 'be', label: 'Belgique', group: 'Europe' },
+])
+search.setItems(next)
+picker.setItems(next)
+```
+
+La propriété `items` et la méthode `setItems()` acceptent un tableau d'objets ou de chaînes,
+ou une collection Zag. Un tableau est automatiquement converti en collection ; une collection
+fournie est utilisée directement avec ses mappings. `setItems()` remplace la source complète et fonctionne également avant
+`mount()` ou après `enhance*()`. Les méthodes Zag comme `setItems()`, `append()` et `remove()`
+renvoient une nouvelle collection ; transmettre ce résultat à `setItems()`.
+Ne pas modifier `collection.items` en place.
+
+Si plusieurs éléments ont le même identifiant de sélection, seul le premier est conservé et un avertissement
+est émis dans la console pour chaque occurrence ignorée. Cette règle s'applique aussi aux
+valeurs produites par `itemToValue` et aux options natives adoptées, sans modifier la collection fournie.
+
+### Identité des options
+
+En mode enhancement, `data-id` permet de séparer l'identifiant de sélection de la valeur soumise :
+
+```html
+<option data-id="delivery-home" value="standard">Livraison à domicile</option>
+<option data-id="delivery-pickup" value="standard">Livraison en point relais</option>
+```
+
+Zag, `value`, `defaultValue`, les callbacks et `api.setValue()` utilisent ici `delivery-home`
+ou `delivery-pickup`. Le formulaire soumet toujours `standard`. L'attribut HTML `id` n'est
+pas utilisé comme identité des options. Sans `data-id`, `value` reste l'identifiant.
+
+Le même modèle est disponible à la création et dans `setItems()` :
+
+```ts
+controller.setItems([
+  { id: 'delivery-home', value: 'standard', label: 'Livraison à domicile' },
+  { id: 'delivery-pickup', value: 'standard', label: 'Livraison en point relais' },
+])
+```
+
+L'identifiant reste stable si la valeur soumise change. Plusieurs options peuvent soumettre
+la même valeur si leurs identifiants sont distincts. En sélection multiple, `FormData.getAll()`
+conserve ces valeurs répétées. Le filtrage, le reset et la restauration du markup conservent
+cette distinction. Les collections personnalisées conservent leur mapping `itemToValue` ;
+avec un `id` explicite, `value` reste la valeur soumise.
+
+### Sélection des valeurs identiques
+
+Select et Combobox proposent `selectSameValue`, **activé par défaut**. Sélectionner une option
+sélectionne aussi les options activées ayant la même valeur soumise, même si leurs `data-id`
+diffèrent. Retirer une option en mode multiple, ou appeler `api.clearValue(id)`, retire tout
+son groupe. Les éléments désactivés ne sont pas ajoutés automatiquement.
+
+```ts
+createSelect({
+  label: 'Livraison',
+  items: deliveryOptions,
+  selectSameValue: false, // Sélection indépendante par identifiant
+})
+```
+
+La règle s'applique aux valeurs initiales, aux interactions, à l'API, aux changements natifs
+et au reset. Les callbacks reçoivent les identifiants et objets du groupe complet. En mode
+contrôlé, la sélection ne change que si le consommateur accepte la nouvelle valeur.
+Le regroupement utilise toujours la collection complète de Combobox, même pendant le filtrage.
+
+En mode simple, un seul groupe de valeurs est sélectionné : toutes ses lignes sont marquées
+comme sélectionnées et `api.value` contient leurs identifiants. Le `<select>` natif reste
+simple et soumet une seule valeur. En mode multiple, il sélectionne toutes les options du
+groupe et `FormData.getAll()` contient les valeurs répétées. Cette règle est ajoutée par
+Faisceau UI ; les identifiants de collection Zag restent uniques.
+
+L'affichage des sélections déduplique automatiquement les éléments ayant à la fois la même
+valeur soumise et le même libellé : le texte de Select, le champ simple de Combobox et ses
+pastilles n'affichent cette paire qu'une fois. Les libellés différents pour une même valeur,
+ou identiques pour des valeurs différentes, restent distincts. Les identifiants sélectionnés,
+les callbacks, les options natives et les valeurs de `FormData` restent complets. Cette règle
+d'affichage s'applique aussi avec `selectSameValue: false` si les éléments sont explicitement
+sélectionnés ; retirer une pastille fusionnée retire les identifiants qu'elle représente.
+
+Le rendu conserve les lignes et options natives encore présentes par leur valeur, actualise
+les libellés et groupes, et retire les sélections absentes de la nouvelle collection.
+Le filtrage de Combobox dérive une collection de résultats sans retirer les options du
+`<select>` natif ni les sélections. `destroy()` restaure les options et groupes d'origine
+en mode enhancement, en conservant la valeur courante lorsqu'elle existe dans ce markup.
+La propriété `collection` et la méthode `setCollection()` sont remplacées par cette API unique.
+
 ## Groupes
 
 Les options de Select et Combobox acceptent `group: 'Europe'` : les options consécutives du
@@ -127,10 +232,13 @@ items: [
 ```
 
 `enhanceSelect` et `enhanceCombobox` reprennent les libellés des `<optgroup>` existants et
-respectent leur état `disabled`. Combobox masque les groupes sans résultat pendant le filtrage ;
+respectent leur état `disabled`. Combobox rend les groupes avec des résultats pendant le filtrage ;
 `setItems()` permet aussi de modifier les groupes en conservant les options retenues.
 Les classes d'anatomie sont `fui-select-item-group`, `fui-select-item-group-label`,
 `fui-select-item-group-list` et leurs équivalents `fui-combobox-*`.
+
+Si une collection définit `groupBy` ou `groupSort`, le rendu et les options natives suivent
+l'ordre de `collection.group()`, comme la navigation au clavier de Zag.
 
 ## Sélection multiple
 
@@ -247,7 +355,8 @@ const combobox = enhanceCombobox(document.querySelector<HTMLDivElement>('#comman
 ```
 
 La saisie, le trigger, la liste filtrable et l'état vide sont générés ; seuls le conteneur
-`.fui-combobox` et son `<select>` natif sont requis. Les valeurs des options doivent être uniques.
+`.fui-combobox` et son `<select>` natif sont requis. Les options de même identifiant sont ignorées
+après la première, avec un avertissement dans la console.
 Les options `disabled` et les `<optgroup disabled>` sont reconnues ; la seule l'option vide
 portant `data-placeholder` est réservée au placeholder.
 

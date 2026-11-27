@@ -1,32 +1,12 @@
 import { createElement as h } from '@lilian1315/create-element'
-import { groupOptions, groupRows } from '../shared/item-groups.ts'
 import type { FuiItem } from '../shared/items.ts'
+import { buildNativeOptions } from '../shared/native-options.ts'
 import type { SelectProps } from './types.ts'
 
 export function createMarkup(items: FuiItem[], props: SelectProps): HTMLDivElement {
   const selected = props.value ?? props.defaultValue ?? []
   const native = h('select', { class: 'fui-select-native-select', multiple: props.multiple })
-  if (!props.multiple)
-    native.append(
-      h('option', {
-        value: '',
-        hidden: true,
-        data: { placeholder: '' },
-        children: props.placeholder ?? 'Select an option',
-      }),
-    )
-  native.append(
-    ...groupOptions(
-      items,
-      items.map((item) =>
-        h('option', { value: item.value, disabled: item.disabled, children: item.label }),
-      ),
-    ),
-  )
-  for (const option of native.options) {
-    option.defaultSelected = selected.includes(option.value)
-    option.selected = option.defaultSelected
-  }
+  native.append(...buildNativeOptions(items, props.placeholder, props.multiple, selected))
   const control = h('div', {
     class: 'fui-select-control',
     children: [
@@ -64,31 +44,6 @@ export function createMarkup(items: FuiItem[], props: SelectProps): HTMLDivEleme
           hidden: true,
           children: h('ul', {
             class: 'fui-select-list',
-            children: groupRows(
-              items,
-              items.map((item) =>
-                h('li', {
-                  class: 'fui-select-item',
-                  children: [
-                    h('span', { class: 'fui-select-item-text', children: item.label }),
-                    h('span', {
-                      class: 'fui-select-item-indicator',
-                      children: h('span', {
-                        class: 'fui-icon fui-icon--check',
-                        ariaHidden: 'true',
-                      }),
-                    }),
-                    item.description
-                      ? h('span', {
-                          class: 'fui-select-item-description',
-                          children: item.description,
-                        })
-                      : null,
-                  ],
-                }),
-              ),
-              'fui-select',
-            ),
           }),
         }),
       }),
@@ -97,4 +52,26 @@ export function createMarkup(items: FuiItem[], props: SelectProps): HTMLDivEleme
   if (props.description)
     root.append(h('p', { class: 'fui-select-description', children: props.description }))
   return root
+}
+
+export function buildItem(item: FuiItem): HTMLLIElement {
+  return h('li', {
+    class: 'fui-select-item',
+    children: [
+      h('span', { class: 'fui-select-item-text', children: item.label }),
+      h('span', {
+        class: 'fui-select-item-indicator',
+        children: h('span', {
+          class: 'fui-icon fui-icon--check',
+          ariaHidden: 'true',
+        }),
+      }),
+      item.description
+        ? h('span', {
+            class: 'fui-select-item-description',
+            children: item.description,
+          })
+        : null,
+    ],
+  })
 }

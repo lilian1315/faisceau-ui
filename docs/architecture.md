@@ -88,6 +88,72 @@ back to `ownerDocument` for this Storybook and test case.
   transitions, and `scale: 0.96` press feedback.
 - Icons are Lucide SVGs vendored under `src/icons/` and rendered as `currentColor` CSS masks.
 
+## Reactive item collections
+
+Select and Combobox keep their authoritative Zag collection in a Faisceau signal. Their
+controllers expose `setItems()`; the component subpaths and root namespaces expose
+`collection()` for the shared `FuiItem` shape. Both the `items` prop and `setItems()` accept
+an item array or a Zag collection (`FuiItems`). A shared `toCollection()` boundary converts
+arrays and preserves supplied collections and mappings. There is no separate `collection`
+prop or `setCollection()` controller method. Collection operations are immutable: callers publish the returned
+collection through `setItems()` rather than mutating `items` in place.
+
+Normalization keeps the first item for each effective collection value and warns for each
+ignored duplicate, including collisions from `itemToValue`. Sanitizing an external collection
+returns a copy only when duplicates are removed, preserving mappings and the caller's source.
+Adopted native options follow the same rule and are restored on teardown. Malformed item
+shapes still fail validation before publication.
+
+Items may supply an explicit `id`, read from native option `data-id` in enhancement mode.
+The default Zag collection key is `item.id ?? item.value`; native submission keeps `item.value`.
+Without an explicit identity, existing `value` and custom `itemToValue` behavior is preserved.
+Selection props, callbacks, tags, reconciliation, native event reads, and reset use selection
+keys, so distinct identities can submit the same native value. DOM option `id` is not a key.
+The shared native bridge reapplies selection by identity before internal change events reach
+caller listeners, because Zag Select's own native sync compares against submitted option values.
+
+`selectSameValue` defaults to true. `shared/value-selection.ts` controls the Zag value prop
+internally to expand selected identities into enabled peers with the same submitted value.
+An index of identities and submitted-value groups is derived once per collection snapshot,
+so expansion, removal and accessibility queries share the same lookup data.
+It normalizes callbacks once, preserves ignored controlled proposals, and removes whole groups
+on item toggles and `clearValue(id)`. It uses the authoritative collection, not filtered results.
+The public option can disable this FUI-specific policy and retain independent Zag selections.
+Single mode selects one logical submitted-value group: its distinct keys are selected in Zag,
+while the native single select submits one representative. Multiple mode submits all selected
+native options, including repeated values. When grouping permits several selected identities,
+the popup listbox advertises `aria-multiselectable` even for one logical submitted-value group.
+Reset reapplies native group selection even when
+the machine value has not changed. Collection replacement captures expanded keys before
+publishing the new source so newly added peers and surviving identities stay consistent.
+
+`shared/selection-labels.ts` deduplicates selected display items by the exact submitted-value
+and mapped-label pair, preserving their first occurrence and selection order. Connected
+`valueAsString`, the Select trigger, the Combobox single input, and multiple-selection tags
+use that presentation. Selection keys, `selectedItems`, callbacks and native options remain
+complete. Independent selections also share a tag for identical pairs; removing that tag
+removes every identity it represents. With value grouping enabled, removal retains the
+existing whole-value-group policy. Typed input text is preserved.
+
+A shared reactive renderer owns keyed rows, groups, and Zag binding cleanup. Retained rows
+keep their child nodes and bindings when the item and its presentation are unchanged.
+The shared collection projection follows `collection.group()` so custom group ordering
+matches Zag navigation and the native options. Select renders
+its full collection. Combobox derives a filtered collection for both Zag and the result
+rows; its native options and selected tags always derive from the full collection.
+Replacing a full collection reconciles native options and removes missing selected values.
+Filtering never prunes selections. Reset restores only initial values that still exist.
+Enhanced controls restore original option nodes, groups, text, and attributes on teardown.
+
+`shared/native-select.ts` owns collection-to-option reconciliation, pruning removed values,
+native value reads/writes, event echo suppression, focus forwarding, and reset pruning.
+Both components use that bridge. Select retains Zag's hidden-select notifications and reset;
+Combobox supplies the missing change notification and initial reset values. Both emit one
+native `input` followed by `change` for a visual selection. The native empty-selection
+representation is preserved per component (Select's placeholder, Combobox's unselected option set).
+`shared/native-options.ts` owns native option construction, metadata reading and reconciliation
+for both components. Combobox keeps its filter text and display mode in one input-state signal.
+
 ## Native form protocol
 
 Select and Combobox retain one real `<select>` as the submitted control. Checkbox retains one real

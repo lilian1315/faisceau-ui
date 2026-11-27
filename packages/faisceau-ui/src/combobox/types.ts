@@ -1,15 +1,18 @@
 import type * as combobox from '@zag-js/combobox'
 
-import type { FuiItem, FuiItemInput } from '../shared/index.ts'
+import type { FuiItem } from '../shared/index.ts'
 import type { FuiController } from '../types.ts'
+import type { FuiItems } from '../shared/collection.ts'
 
 export interface ComboboxProps extends Omit<
   combobox.Props<FuiItem>,
   'allowCustomValue' | 'collection' | 'getRootNode' | 'id' | 'ids' | 'onInputValueChange'
 > {
   id?: string
-  /** Available options. Strings become `{ value, label }` items. */
-  items: readonly FuiItemInput[]
+  /** Item array or Zag collection. Arrays are converted automatically; strings become `{ value, label }`. */
+  items: FuiItems
+  /** Select enabled items sharing the submitted value together. @default true */
+  selectSameValue?: boolean
   /** Visible label rendered above the control. */
   label?: string
   /** Supporting text rendered below the control. */
@@ -30,7 +33,7 @@ export interface ComboboxProps extends Omit<
 
 export type EnhanceComboboxProps = Omit<ComboboxProps, 'items'> & {
   /** Replaces the options read from the native select when provided. */
-  items?: readonly FuiItemInput[]
+  items?: FuiItems
 }
 
 /** @deprecated Use {@link ComboboxProps} instead. */
@@ -40,6 +43,6 @@ export type EnhanceComboboxOptions = EnhanceComboboxProps
 
 export type ComboboxApi = combobox.Api
 export interface ComboboxController extends FuiController<ComboboxApi> {
-  /** Replaces the authoritative suggestion collection. */
-  setItems(items: readonly FuiItemInput[]): void
+  /** Replaces the full source with an item array or collection; filtering only affects the popup. */
+  setItems(items: FuiItems): void
 }

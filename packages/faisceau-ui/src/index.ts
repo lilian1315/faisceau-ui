@@ -1,4 +1,7 @@
 export { createCombobox, enhanceCombobox } from './combobox/index.ts'
+export * as combobox from './combobox/index.ts'
+export * as select from './select/index.ts'
+export type { FuiCollection, FuiItems } from './shared/collection.ts'
 export type {
   ComboboxApi,
   ComboboxController,

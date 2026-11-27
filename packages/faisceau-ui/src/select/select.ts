@@ -1,15 +1,24 @@
 import '../styles/base.scss'
 import '../styles/select.scss'
 import * as select from '@zag-js/select'
-import { effect, signal } from 'faisceau'
+import { batch, effect, signal } from 'faisceau'
 import { createZagMachine } from 'faisceau-zag'
 import { captureAttributes, captureChildNodes, getLookupRoot, insertAfter } from '../shared/dom.ts'
 import { createId } from '../shared/id.ts'
-import { normalizeItems } from '../shared/items.ts'
-import type { FuiItem } from '../shared/items.ts'
+import { getItemId, type FuiItem } from '../shared/items.ts'
 import { requireFuiClass } from '../shared/parts.ts'
-import { createMarkup } from './markup.ts'
-import { bindNativeEvents, readValue, writeValue } from './native.ts'
+import { buildItem, createMarkup } from './markup.ts'
+import { collectionItems, toCollection, type FuiCollection } from '../shared/collection.ts'
+import { createValueSelection } from '../shared/value-selection.ts'
+import { renderCollection } from '../shared/collection-renderer.ts'
+import { readNativeItems, reconcileNativeSelectOptions } from '../shared/native-options.ts'
+import {
+  bindNativeEvents,
+  readValue,
+  writeValue,
+  syncNativeCollection,
+  trackCollectionReset,
+} from '../shared/native-select.ts'
 import type { EnhanceSelectProps, SelectController, SelectProps } from './types.ts'
 
 export function createSelect(props: SelectProps): SelectController {
@@ -20,9 +29,11 @@ export function createSelect(props: SelectProps): SelectController {
     clearable: _clearable,
     ...behavior
   } = props
-  const items = normalizeItems(inputs)
+  if (inputs === undefined) throw new Error('[Faisceau UI] Select creation requires options.items.')
+  const source = toCollection(inputs)
+  const items = collectionItems(source)
   validateValues(items)
-  return setup(createMarkup(items, props), items, behavior)
+  return setup(createMarkup(items, props), source, behavior)
 }
 
 export function enhanceSelect(root: HTMLElement, props: EnhanceSelectProps = {}): SelectController {
@@ -32,23 +43,18 @@ export function enhanceSelect(root: HTMLElement, props: EnhanceSelectProps = {})
   if (!(native instanceof HTMLSelectElement))
     throw new Error('[Faisceau UI] Select requires a native <select>.')
   const placeholderOption = native.querySelector<HTMLOptionElement>('option[data-placeholder]')
-  const items = normalizeItems(
-    Array.from(native.options)
-      .filter((option) => option !== placeholderOption)
-      .map((option) => ({
-        value: option.value,
-        label: option.label,
-        group:
-          option.parentElement instanceof HTMLOptGroupElement
-            ? option.parentElement.label
-            : undefined,
-        disabled:
-          option.disabled ||
-          (option.parentElement instanceof HTMLOptGroupElement && option.parentElement.disabled),
-      })),
-  )
+  const nativeItems = readNativeItems(native)
+  const source = toCollection(props.items ?? nativeItems)
+  const items = collectionItems(source)
   validateValues(items)
   const restore = [root, ...root.querySelectorAll('*')].map(captureAttributes)
+  restore.push(
+    captureChildNodes(native),
+    ...Array.from(native.querySelectorAll('optgroup, option'), captureChildNodes),
+  )
+  const initialValue = readValue(native)
+  if (props.items !== undefined || nativeItems.length !== items.length)
+    reconcileNativeSelectOptions(native, items, props.placeholder ?? placeholderOption?.label ?? '')
   const parent = root.parentNode
   const next = root.nextSibling
   const markup = createMarkup(items, { ...props, items, label: props.label ?? '' })
@@ -77,7 +83,7 @@ export function enhanceSelect(root: HTMLElement, props: EnhanceSelectProps = {})
   }
   return setup(
     root,
-    items,
+    source,
     {
       name: native.name || undefined,
       form: native.getAttribute('form') ?? undefined,
@@ -85,7 +91,7 @@ export function enhanceSelect(root: HTMLElement, props: EnhanceSelectProps = {})
       multiple: native.multiple,
       required: native.required,
       disabled: native.disabled,
-      defaultValue: readValue(native),
+      defaultValue: initialValue,
       placeholder: placeholderOption?.label,
       ...props,
     },
@@ -100,7 +106,7 @@ export function enhanceSelect(root: HTMLElement, props: EnhanceSelectProps = {})
 
 function setup(
   root: HTMLElement,
-  items: FuiItem[],
+  initialCollection: FuiCollection,
   props: EnhanceSelectProps,
   restore?: () => void,
 ): SelectController {
@@ -120,41 +126,40 @@ function setup(
   const list = part('list')
   const description = root.querySelector<HTMLElement>('.fui-select-description')
   const clear = root.querySelector<HTMLButtonElement>('.fui-select-clear-trigger')
-  const rows = Array.from(list.querySelectorAll<HTMLElement>('.fui-select-item'))
-  if (rows.length !== items.length)
-    throw new Error(
-      '[Faisceau UI] Select needs one .fui-select-item per native option, in the same order (excluding the empty placeholder).',
-    )
-  const itemParts = rows.map((row) => ({
-    row,
-    text: requireFuiClass(row, 'fui-select-item-text'),
-    indicator: requireFuiClass(row, 'fui-select-item-indicator'),
-  }))
   const {
     id = createId('select'),
     placeholder = 'Select an option',
     label: _label,
     description: _description,
     clearable: _clearable,
+    items: _items,
+    selectSameValue = true,
     ...behavior
   } = props
+  const collection = signal(initialCollection)
+  const selection = createValueSelection({
+    getCollection: () => collection.get(),
+    enabled: selectSameValue,
+    multiple: behavior.multiple ?? false,
+    value: behavior.value,
+    defaultValue: behavior.defaultValue ?? readValue(native),
+    onValueChange: behavior.onValueChange,
+  })
+  writeValue(native, selection.initialValue)
+
   const hasValue = signal(readValue(native).length > 0)
   const shouldAlign = () => !!behavior.alignItemWithTrigger && !behavior.multiple && hasValue.get()
   const zag = createZagMachine(
     select.machine as select.Machine<FuiItem>,
     () => ({
       ...behavior,
+      ...selection.props(),
       alignItemWithTrigger: shouldAlign(),
       id,
-      collection: select.collection({
-        items,
-        itemToValue: (item) => item.value,
-        itemToString: (item) => item.label,
-        isItemDisabled: (item) => !!item.disabled,
-      }),
+      collection: collection.get(),
       getRootNode: () => getLookupRoot(root),
     }),
-    select.connect,
+    (service, normalize) => selection.connect(select.connect(service, normalize)),
   )
 
   zag.bind(root, (api) => api.getRootProps())
@@ -175,31 +180,39 @@ function setup(
       ...api.getClearTriggerProps(),
       disabled: api.disabled || props.readOnly,
     }))
-  itemParts.forEach(({ row, text, indicator }, index) => {
-    const item = items[index]!
-    zag.bind(row, (api) => api.getItemProps({ item }))
-    zag.bind(text, (api) => api.getItemTextProps({ item }))
-    zag.bind(indicator, (api) => api.getItemIndicatorProps({ item }))
+  const stopRows = renderCollection({
+    list,
+    prefix: 'fui-select',
+    getCollection: () => collection.get(),
+    createItem: buildItem,
+    bind: (element, getter) => zag.bind(element, getter),
   })
-  Array.from(list.querySelectorAll<HTMLElement>('.fui-select-item-group')).forEach(
-    (group, index) => {
-      zag.bind(group, (api) => api.getItemGroupProps({ id: String(index) }))
-      zag.bind(requireFuiClass(group, 'fui-select-item-group-label'), (api) =>
-        api.getItemGroupLabelProps({ htmlFor: String(index) }),
-      )
-    },
-  )
-  const stopNativeEvents = bindNativeEvents(
+  const nativeState = {
     native,
-    () => zag.api.get().value,
-    (value) => zag.api.get().setValue(value),
-    () => trigger.focus(),
-  )
+    getCollection: () => collection.get(),
+    getValue: () => zag.api.peek().value,
+    setValue: (value: string[]) => zag.api.peek().setValue(value),
+    writeValue: (value: string[]) => writeValue(native, selection.normalize(value)),
+  }
+  const stopCollection = syncNativeCollection({
+    ...nativeState,
+    placeholder,
+  })
+  const stopNativeEvents = bindNativeEvents({
+    ...nativeState,
+    focus: () => trigger.focus(),
+    normalize: selection.fromNative,
+  })
   zag.bind(native, (api) => {
     // Vanilla maps defaultValue to select.value, which cannot represent multiple
     // values. Let Zag's native sync and the effect below own option selection.
     // The native bridge handles both events; Vanilla aliases change to input.
-    const { value: _value, oninput: _onInput, ...attrs } = api.getHiddenSelectProps()
+    const {
+      value: _value,
+      oninput: _onInput,
+      onfocus: _onFocus,
+      ...attrs
+    } = api.getHiddenSelectProps()
     return attrs
   })
   const stopSync = effect(() => {
@@ -218,11 +231,21 @@ function setup(
   })
   let started = false
   let destroyed = false
+  let stopReset = () => {}
   return {
     root,
     api: zag.api,
     get started() {
       return started && !destroyed
+    },
+    setItems(next) {
+      assertAlive()
+      const source = toCollection(next)
+      validateValues(collectionItems(source))
+      batch(() => {
+        selection.capture()
+        collection.set(source)
+      })
     },
     mount(target) {
       assertAlive()
@@ -233,6 +256,7 @@ function setup(
       assertAlive()
       if (!started) {
         zag.start()
+        stopReset = trackCollectionReset(nativeState)
         started = true
       }
       return this
@@ -242,7 +266,10 @@ function setup(
       destroyed = true
       const value = zag.api.get().value
       stopSync()
+      stopCollection()
+      stopRows()
       stopNativeEvents()
+      stopReset()
       zag.destroy()
       if (restore) {
         restore()
@@ -256,6 +283,6 @@ function setup(
 }
 
 function validateValues(items: FuiItem[]): void {
-  if (items.some((item) => item.value === ''))
+  if (items.some((item) => getItemId(item) === ''))
     throw new Error('[Faisceau UI] Select reserves the empty value for its placeholder.')
 }

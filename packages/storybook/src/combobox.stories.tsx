@@ -1,4 +1,4 @@
-import { createCombobox, enhanceCombobox, type ComboboxProps } from 'faisceau-ui'
+import { combobox, createCombobox, enhanceCombobox, type ComboboxProps } from 'faisceau-ui'
 import { build } from '@lilian1315/create-element/faisceau/virtual/dom'
 import type { Meta, StoryObj } from '@storybook/html-vite'
 
@@ -18,6 +18,10 @@ const cities = [
 
 const meta = {
   argTypes: {
+    selectSameValue: {
+      control: 'boolean',
+      description: 'Sélectionne ensemble les options de même valeur soumise.',
+    },
     label: { control: 'text', description: 'Libellé visible et accessible.' },
     description: { control: 'text', description: 'Aide associée au champ.' },
     multiple: {
@@ -70,7 +74,7 @@ export const create: Story = {
     story.canvas.append(host)
     const controller = createCombobox({
       ...args,
-      defaultValue: args.multiple ? ['paris', 'lyon'] : [],
+      defaultValue: args.defaultValue ?? (args.multiple ? ['paris', 'lyon'] : []),
       getRemoveLabel: (item) => `Retirer ${item.label}`,
       items: args.items ?? cities,
       name: args.multiple ? 'cities' : 'city',
@@ -108,11 +112,15 @@ export const enhance: Story = {
             Rechercher une ville…
           </option>
           <optgroup label="France">
-            <option value="paris" selected>
+            <option data-id="city-paris" value="paris" selected>
               Paris
             </option>
-            <option value="lyon">Lyon</option>
-            <option value="bordeaux">Bordeaux</option>
+            <option data-id="city-lyon" value="lyon">
+              Lyon
+            </option>
+            <option data-id="city-bordeaux" value="bordeaux">
+              Bordeaux
+            </option>
           </optgroup>
         </select>
       </div>,
@@ -140,5 +148,60 @@ export const Groups: Story = {
       { value: 'brussels', label: 'Bruxelles', group: 'Belgique' },
       { value: 'liege', label: 'Liège', group: 'Belgique', disabled: true },
     ],
+  },
+}
+
+export const SameValues: Story = {
+  ...create,
+  name: 'Same submitted value',
+  args: {
+    label: 'Livraison',
+    multiple: true,
+    selectSameValue: true,
+    defaultValue: [],
+    items: [
+      { id: 'home', value: 'standard', label: 'Livraison à domicile' },
+      { id: 'home-alt', value: 'standard', label: 'Livraison à domicile' },
+      { id: 'pickup', value: 'standard', label: 'Point relais' },
+      { id: 'express', value: 'express', label: 'Livraison express' },
+    ],
+  },
+}
+
+export const DynamicCollection: Story = {
+  name: 'setItems()',
+  render() {
+    const story = createStoryShell({
+      eyebrow: 'Combobox · collection',
+      title: 'Actualiser les suggestions',
+      description:
+        'La collection pilote les résultats et le select natif. La saisie en cours continue de filtrer les nouvelles données.',
+    })
+    const controller = combobox
+      .createCombobox({
+        label: 'Ville',
+        name: 'city',
+        items: combobox.collection({ items: cities.slice(0, 3) }),
+      })
+      .mount(story.canvas)
+    const refresh = build<'button'>(
+      <button
+        type="button"
+        onclick={() => controller.setItems(combobox.collection({ items: [...cities] }))}
+      >
+        Charger toutes les villes
+      </button>,
+    )
+    story.canvas.prepend(refresh)
+    trackController(story.root, controller)
+    story.setSource(`import * as combobox from 'faisceau-ui/combobox'
+
+const controller = combobox.createCombobox({
+  label: 'Ville',
+  items: combobox.collection({ items: cities.slice(0, 3) }),
+}).mount(target)
+
+controller.setItems(combobox.collection({ items: cities }))`)
+    return story.root
   },
 }

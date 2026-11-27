@@ -1,5 +1,7 @@
 import { afterEach, describe, expect, it } from 'vite-plus/test'
 import {
+  combobox as comboboxModule,
+  select as selectModule,
   createCheckbox,
   createCollapsible,
   createSelect,
@@ -8,11 +10,15 @@ import {
 } from 'faisceau-ui'
 import { createCheckbox as createCheckboxFromSubpath } from 'faisceau-ui/checkbox'
 import { createCollapsible as createCollapsibleFromSubpath } from 'faisceau-ui/collapsible'
-import { createCombobox as createComboboxFromSubpath } from 'faisceau-ui/combobox'
+import {
+  collection as comboboxCollection,
+  createCombobox as createComboboxFromSubpath,
+} from 'faisceau-ui/combobox'
 import { createDialog as createDialogFromSubpath } from 'faisceau-ui/dialog'
 import { createDrawer as createDrawerFromSubpath } from 'faisceau-ui/drawer'
 import {
   createSelect as createSelectFromSubpath,
+  collection as selectCollection,
   enhanceSelect as enhanceSelectFromSubpath,
 } from 'faisceau-ui/select'
 import { createToaster as createToasterFromSubpath } from 'faisceau-ui/toast'
@@ -29,6 +35,69 @@ afterEach(() => {
 })
 
 describe('published package contract', () => {
+  it('groups matching submitted values by default through both public component namespaces', async () => {
+    for (const component of [comboboxModule, selectModule]) {
+      const form = document.createElement('form')
+      document.body.append(form)
+      const create =
+        'createCombobox' in component ? component.createCombobox : component.createSelect
+      const controller = create({
+        label: 'Choice',
+        name: 'choice',
+        multiple: true,
+        defaultValue: ['first'],
+        items: [
+          { id: 'first', value: 'shared', label: 'Same' },
+          { id: 'second', value: 'shared', label: 'Same' },
+        ],
+      }).mount(form)
+      try {
+        expect(controller.api.get().value).toEqual(['first', 'second'])
+        expect(controller.api.get().valueAsString).toBe('Same')
+        expect(new FormData(form).getAll('choice')).toEqual(['shared', 'shared'])
+        controller.api.get().clearValue('second')
+        await flushMachine()
+        expect(controller.api.get().value).toEqual([])
+      } finally {
+        controller.destroy()
+      }
+    }
+  })
+  it('ships collection factories and reactive replacement through root namespaces and subpaths', async () => {
+    expect(comboboxModule.collection).toBe(comboboxCollection)
+    expect(selectModule.collection).toBe(selectCollection)
+    for (const component of [comboboxModule, selectModule]) {
+      const create =
+        'createCombobox' in component ? component.createCombobox : component.createSelect
+      const controller = create({
+        label: 'Country',
+        items: component.collection({ items }),
+      }).mount(document.body)
+      try {
+        controller.setItems(
+          component.collection({
+            items: [{ id: 'switzerland', value: 'ch', label: 'Switzerland' }],
+          }),
+        )
+        await flushMachine()
+        expect(controller.api.get().collection.getValues()).toEqual(['switzerland'])
+        expect(controller.root.querySelector('option[value="ch"]')?.textContent).toBe('Switzerland')
+        controller.api.get().setValue(['switzerland'])
+        await flushMachine()
+        expect(
+          controller.root.querySelector<HTMLSelectElement>('select')!.selectedOptions[0]?.dataset
+            .id,
+        ).toBe('switzerland')
+        expect(controller.root.querySelector<HTMLSelectElement>('select')!.value).toBe('ch')
+        expect(controller.root.querySelector('[role="option"]')?.textContent).toContain(
+          'Switzerland',
+        )
+        expect('setCollection' in controller).toBe(false)
+      } finally {
+        controller.destroy()
+      }
+    }
+  })
   it('ships Select through root and subpath exports with standalone styling', async () => {
     expect(createSelectFromSubpath).toBe(createSelect)
     expect(typeof enhanceSelectFromSubpath).toBe('function')

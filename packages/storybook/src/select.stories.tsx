@@ -1,7 +1,7 @@
 import { createElement as h } from '@lilian1315/create-element/faisceau'
 import { build } from '@lilian1315/create-element/faisceau/virtual/dom'
 import type { Meta, StoryObj } from '@storybook/html-vite'
-import { createSelect, enhanceSelect } from 'faisceau-ui/select'
+import { collection, createSelect, enhanceSelect } from 'faisceau-ui/select'
 import type { SelectProps } from 'faisceau-ui/select'
 import { createStoryShell, trackController } from './story.tsx'
 import { signal, computed, effect, untracked } from 'faisceau'
@@ -27,6 +27,7 @@ const meta = {
     placeholder: { control: 'text' },
     description: { control: 'text' },
     multiple: { control: 'boolean' },
+    selectSameValue: { control: 'boolean' },
     disabled: { control: 'boolean' },
     readOnly: { control: 'boolean' },
     invalid: { control: 'boolean' },
@@ -70,26 +71,23 @@ const meta = {
       </form>,
     )
     story.canvas.append(form)
-    let controller: ReturnType<typeof createSelect>
-
-    effect(() => {
-      const _mode = mode.get()
+    const controller = createSelect({
+      ...args,
+      onValueChange(details) {
+        story.output.textContent = `value = ${JSON.stringify(details.value)}`
+        args.onValueChange?.(details)
+      },
+    }).mount(host)
+    const stopCollection = effect(() => {
+      const currentMode = mode.get()
       untracked(() => {
-        controller?.destroy()
-        const items = _mode === 'short' ? args.items : longList
-        controller = createSelect({
-          ...args,
-          items,
-          ...(_mode === 'long' && args.value === undefined && args.defaultValue === undefined
-            ? { defaultValue: ['40'] }
-            : {}),
-          onValueChange(details) {
-            story.output.textContent = `value = ${JSON.stringify(details.value)}`
-            args.onValueChange?.(details)
-          },
-        }).mount(host)
+        controller.setItems(
+          currentMode === 'short' ? (args.items ?? countries) : collection({ items: longList }),
+        )
+        if (currentMode === 'long' && args.value === undefined && args.defaultValue === undefined)
+          controller.api.get().setValue(['40'])
         story.setSource(
-          `createSelect({\n  label: "Country",\n  name: "country",\n  items: ${_mode === 'short' ? 'countries' : 'longList'},\n  multiple: ${!!args.multiple},\n  clearable: ${!!args.clearable}\n}).mount(form)`,
+          `import * as select from 'faisceau-ui/select'\n\nconst controller = select.createSelect({ label: "Country", name: "country", items: countries }).mount(form)\ncontroller.setItems(select.collection({ items: ${currentMode === 'short' ? 'countries' : 'longList'} }))`,
         )
       })
     })
@@ -98,7 +96,12 @@ const meta = {
       event.preventDefault()
       story.output.textContent = JSON.stringify([...new FormData(form)])
     })
-    trackController(story.root, { destroy: () => controller.destroy() })
+    trackController(story.root, {
+      destroy: () => {
+        stopCollection()
+        controller.destroy()
+      },
+    })
     return story.root
   },
 } satisfies Meta<SelectProps>
@@ -110,6 +113,21 @@ export const Create: Story = {
   args: {
     description: 'Your country of residence.',
     clearable: true,
+  },
+}
+
+export const SameValues: Story = {
+  name: 'Same submitted value',
+  args: {
+    label: 'Delivery',
+    multiple: true,
+    selectSameValue: true,
+    items: [
+      { id: 'home', value: 'standard', label: 'Home delivery' },
+      { id: 'home-alt', value: 'standard', label: 'Home delivery' },
+      { id: 'pickup', value: 'standard', label: 'Pickup point' },
+      { id: 'express', value: 'express', label: 'Express delivery' },
+    ],
   },
 }
 
@@ -130,10 +148,14 @@ export const Enhance: Story = {
             Choose a country
           </option>
           <optgroup label="Africa">
-            <option value="ng">Nigeria</option>
+            <option data-id="country-ng" value="ng">
+              Nigeria
+            </option>
           </optgroup>
           <optgroup label="Asia">
-            <option value="jp">Japan</option>
+            <option data-id="country-jp" value="jp">
+              Japan
+            </option>
           </optgroup>
         </select>
       </div>,

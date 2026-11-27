@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
 import { page, userEvent } from 'vite-plus/test/browser'
 import { createSelect, enhanceSelect } from '../select/select.ts'
-import { createCombobox, enhanceCombobox } from '../combobox/combobox.ts'
+import { createCombobox, enhanceCombobox, collection } from '../combobox/index.ts'
 import type { FuiItemInput } from './items.ts'
 
 const items = [
@@ -71,6 +71,8 @@ for (const [name, create, enhance] of [
         ).not.toBeNull()
       }
       await page.getByRole('combobox', { name: 'Country' }).click()
+      if (name === 'select') await expect.element(page.getByRole('listbox')).toHaveFocus()
+      await vi.waitFor(() => expect(controller.api.get().open).toBe(true))
       await userEvent.keyboard('{ArrowDown}')
       await vi.waitFor(() => expect(controller.api.get().highlightedValue).toBe('fr'))
       await userEvent.keyboard('{ArrowDown}')
@@ -109,13 +111,16 @@ it('filters whole combobox groups and moves retained rows and native options bet
   const native = root.querySelector('option[value="fr"]')!
   controller.api.get().setInputValue('France')
   await vi.waitFor(() => {
-    const groups = root.querySelectorAll<HTMLElement>('.fui-combobox-item-group')
-    expect(Array.from(groups, (group) => group.hidden)).toEqual([false, true, true])
+    expect(root.querySelectorAll('.fui-combobox-item-group')).toHaveLength(1)
   })
-  controller.setItems([
-    { value: 'jp', label: 'Japan', group: 'Asia' },
-    { value: 'fr', label: 'France', group: 'New group' },
-  ])
+  controller.setItems(
+    collection({
+      items: [
+        { value: 'jp', label: 'Japan', group: 'Asia' },
+        { value: 'fr', label: 'France', group: 'New group' },
+      ],
+    }),
+  )
   expect(root.querySelector('.fui-combobox-item[data-value="fr"]')).toBe(row)
   expect(row.closest('.fui-combobox-item-group')?.textContent).toContain('New group')
   expect(native.parentElement?.getAttribute('label')).toBe('New group')
@@ -124,17 +129,13 @@ it('filters whole combobox groups and moves retained rows and native options bet
   await vi.waitFor(() =>
     expect(root.querySelector<HTMLElement>('.fui-combobox-empty')!.hidden).toBe(false),
   )
-  expect(
-    Array.from(root.querySelectorAll<HTMLElement>('.fui-combobox-item-group')).every(
-      (group) => group.hidden,
-    ),
-  ).toBe(true)
+  expect(root.querySelectorAll('.fui-combobox-item-group')).toHaveLength(0)
   controller.api.get().setInputValue('')
   await vi.waitFor(() =>
     expect(root.querySelector<HTMLElement>('.fui-combobox-item-group')!.hidden).toBe(false),
   )
   root.querySelector<HTMLButtonElement>('.fui-combobox-trigger')!.click()
   await vi.waitFor(() => expect(controller.api.get().open).toBe(true))
-  row.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+  root.querySelector<HTMLElement>('.fui-combobox-item[data-value="fr"]')!.click()
   await vi.waitFor(() => expect(controller.api.get().value).toEqual(['fr']))
 })

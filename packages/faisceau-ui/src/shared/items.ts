@@ -1,5 +1,7 @@
 /** The default item shape shared by Select and Combobox. */
 export interface FuiItem {
+  /** Stable selection identity. Native options expose this as data-id; defaults to value. */
+  readonly id?: string
   readonly value: string
   readonly label: string
   readonly disabled?: boolean
@@ -13,27 +15,36 @@ export type FuiItemInput = string | FuiItem
 
 /**
  * Converts shorthand strings to the default item shape and validates item
- * values. Object inputs are preserved by reference.
+ * identities. Duplicate identities warn and keep the first item. Object inputs are preserved by reference.
  */
-export function normalizeItems(items: readonly FuiItemInput[]): FuiItem[] {
+export function normalizeItems(
+  items: readonly FuiItemInput[],
+  getValue: (item: FuiItem) => string = getItemId,
+): FuiItem[] {
   const normalized: FuiItem[] = []
   const valueIndexes = new Map<string, number>()
 
   items.forEach((input, index) => {
     const item = normalizeItem(input, index)
-    const previousIndex = valueIndexes.get(item.value)
+    const value = getValue(item)
+    const previousIndex = valueIndexes.get(value)
 
     if (previousIndex !== undefined) {
-      throw new Error(
-        `[Faisceau UI] Duplicate item value "${item.value}" at indexes ${previousIndex} and ${index}. Item values must be unique.`,
+      console.warn(
+        `[Faisceau UI] Duplicate item value "${value}" at indexes ${previousIndex} and ${index}. Ignoring item at index ${index}; keeping the first occurrence.`,
       )
+      return
     }
 
-    valueIndexes.set(item.value, index)
+    valueIndexes.set(value, index)
     normalized.push(item)
   })
 
   return normalized
+}
+
+export function getItemId(item: FuiItem): string {
+  return item.id ?? item.value
 }
 
 function normalizeItem(input: FuiItemInput, index: number): FuiItem {
@@ -53,6 +64,12 @@ function normalizeItem(input: FuiItemInput, index: number): FuiItem {
 
   if (typeof input.label !== 'string') {
     throw new TypeError(`[Faisceau UI] Invalid item label at index ${index}. Expected a string.`)
+  }
+
+  if (input.id !== undefined && (typeof input.id !== 'string' || input.id.length === 0)) {
+    throw new TypeError(
+      `[Faisceau UI] Invalid item id at index ${index}. Expected a non-empty string.`,
+    )
   }
 
   if (input.disabled !== undefined && typeof input.disabled !== 'boolean') {

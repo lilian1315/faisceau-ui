@@ -1,7 +1,7 @@
 import { createElement as h } from '@lilian1315/create-element'
 
-import type { FuiItem } from '../shared/items.ts'
-import { groupOptions, groupRows } from '../shared/item-groups.ts'
+import { getItemId, type FuiItem } from '../shared/items.ts'
+import { buildNativeOptions } from '../shared/native-options.ts'
 
 export interface ComboboxControl {
   readonly control: HTMLElement
@@ -54,10 +54,9 @@ export function buildControl(options: {
 }
 
 /** Builds the popup shell; items are rendered separately with {@link buildItem}. */
-export function buildPopup(items: readonly FuiItem[], emptyLabel?: string): ComboboxPopup {
+export function buildPopup(emptyLabel?: string): ComboboxPopup {
   const list = h('ul', {
     class: 'fui-combobox-list',
-    children: groupRows(items, items.map(buildItem), 'fui-combobox'),
   })
   const empty = h('p', {
     class: 'fui-combobox-empty',
@@ -87,7 +86,7 @@ export function buildItem(item: FuiItem): HTMLLIElement {
 
   return h('li', {
     class: 'fui-combobox-item',
-    data: { disabled: item.disabled, value: item.value },
+    data: { disabled: item.disabled, value: getItemId(item) },
     children,
   })
 }
@@ -117,55 +116,9 @@ export function buildNativeSelect(
   if (options.form !== undefined) native.setAttribute('form', options.form)
   hideNativeSelect(native)
   native.replaceChildren(
-    ...buildOptions(items, options.placeholder, options.multiple, options.value ?? []),
+    ...buildNativeOptions(items, options.placeholder, options.multiple, options.value ?? []),
   )
   return native
-}
-
-/** Reconciles native options by value while preserving retained option nodes and selection. */
-export function reconcileNativeSelectOptions(
-  select: HTMLSelectElement,
-  items: readonly FuiItem[],
-  placeholder: string,
-): void {
-  const selected = new Set(getNativeSelectValue(select))
-  const placeholderOption = findPlaceholderOption(select)
-  const existing = new Map(
-    Array.from(select.options)
-      .filter((option) => option !== placeholderOption)
-      .map((option) => [option.value, option]),
-  )
-  const empty = select.multiple ? null : (placeholderOption ?? new Option(placeholder, ''))
-  const options = items.map((item) => {
-    const option = existing.get(item.value) ?? new Option()
-    option.value = item.value
-    option.textContent = item.label
-    option.disabled = item.disabled ?? false
-    option.selected = selected.has(item.value)
-    if (item.description) option.dataset.description = item.description
-    else delete option.dataset.description
-    return option
-  })
-  if (empty) {
-    empty.textContent = placeholder
-    empty.dataset.placeholder = ''
-    empty.hidden = true
-    empty.selected = selected.size === 0
-  }
-  const grouped = groupOptions(items, options)
-  select.replaceChildren(...(empty ? [empty, ...grouped] : grouped))
-}
-
-/** Returns selected values, excluding only the explicitly-marked placeholder option. */
-function getNativeSelectValue(select: HTMLSelectElement): string[] {
-  const placeholder = findPlaceholderOption(select)
-  return Array.from(select.selectedOptions)
-    .filter((option) => option !== placeholder)
-    .map((option) => option.value)
-}
-
-function findPlaceholderOption(select: HTMLSelectElement): HTMLOptionElement | undefined {
-  return Array.from(select.options).find((option) => option.hasAttribute('data-placeholder'))
 }
 
 /** Visually hides the native select without removing it from the tab order or forms. */
@@ -184,43 +137,4 @@ export function hideNativeSelect(native: HTMLSelectElement): void {
     whiteSpace: 'nowrap',
     wordWrap: 'normal',
   })
-}
-
-/** Builds native options, marking the placeholder and the selected values. */
-export function buildOptions(
-  items: readonly FuiItem[],
-  placeholder: string | undefined,
-  multiple: boolean | undefined,
-  value: readonly string[],
-): HTMLElement[] {
-  const selected = new Set(value)
-  const options: HTMLOptionElement[] = []
-
-  if (!multiple) {
-    const placeholderOption = h('option', {
-      data: { placeholder: '' },
-      value: '',
-      children: placeholder ?? 'Select an option',
-    })
-    placeholderOption.hidden = true
-    placeholderOption.selected = selected.size === 0
-    // `defaultSelected` drives `form.reset()`; keep it aligned with the initial value.
-    placeholderOption.defaultSelected = placeholderOption.selected
-    options.push(placeholderOption)
-  }
-
-  for (const item of items) {
-    const option = h('option', {
-      disabled: item.disabled,
-      value: item.value,
-      children: item.label,
-    })
-    if (item.description) option.dataset.description = item.description
-    option.selected = selected.has(item.value)
-    // `defaultSelected` drives `form.reset()`; keep it aligned with the initial value.
-    option.defaultSelected = option.selected
-    options.push(option)
-  }
-  const offset = multiple ? 0 : 1
-  return [...options.slice(0, offset), ...groupOptions(items, options.slice(offset))]
 }

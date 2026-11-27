@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vite-plus/test'
 
-import { createCombobox, enhanceCombobox } from './combobox.ts'
+import { createCombobox, enhanceCombobox, collection } from './index.ts'
 
 afterEach(() => {
   document.body.replaceChildren()
@@ -75,7 +75,7 @@ describe('Combobox', () => {
     controller.destroy()
   })
 
-  it('emits one native change per visual interaction', async () => {
+  it('emits native input then change once per visual interaction', async () => {
     const controller = createCombobox({
       items: ['One', 'Two'],
       label: 'Value',
@@ -92,9 +92,7 @@ describe('Combobox', () => {
     controller.root.querySelector<HTMLElement>('.fui-combobox-item[data-value="Two"]')!.click()
     await flushMachine()
 
-    // Like Zag's hidden select, the machine emits its own bubbling change while
-    // native listeners observe no input event.
-    expect(nativeInput).not.toHaveBeenCalled()
+    expect(nativeInput).toHaveBeenCalledOnce()
     expect(nativeChange).toHaveBeenCalledOnce()
     controller.destroy()
   })
@@ -271,7 +269,7 @@ describe('Combobox', () => {
 
     expect(controller.api.get().inputValue).toBe('ly')
     expect(requireItem(controller.root, 'Lyon').hidden).toBe(false)
-    expect(requireItem(controller.root, 'Paris').hidden).toBe(true)
+    expect(controller.root.querySelector('.fui-combobox-item[data-value="Paris"]')).toBeNull()
     expect(controller.root.querySelector<HTMLElement>('.fui-combobox-empty')!.hidden).toBe(true)
 
     controller.api.get().setInputValue('xyz')
@@ -296,7 +294,7 @@ describe('Combobox', () => {
 
     expect(controller.api.get().inputValue).toBe('ly')
     expect(requireItem(controller.root, 'Lyon').hidden).toBe(false)
-    expect(requireItem(controller.root, 'Paris').hidden).toBe(true)
+    expect(controller.root.querySelector('.fui-combobox-item[data-value="Paris"]')).toBeNull()
     controller.destroy()
   })
 
@@ -311,10 +309,14 @@ describe('Combobox', () => {
     }).mount(document.body)
     const retained = requireItem(controller.root, 'be')
 
-    controller.setItems([
-      { label: 'Belgium', value: 'be' },
-      { label: 'Switzerland', value: 'ch' },
-    ])
+    controller.setItems(
+      collection({
+        items: [
+          { label: 'Belgium', value: 'be' },
+          { label: 'Switzerland', value: 'ch' },
+        ],
+      }),
+    )
     controller.api.get().setInputValue('')
     await flushMachine()
 

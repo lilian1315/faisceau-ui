@@ -1,5 +1,13 @@
 import { assertType, expectTypeOf, test } from 'vite-plus/test'
-import { createSelect, type FuiItemInput, type SelectController } from 'faisceau-ui'
+import {
+  combobox,
+  select,
+  createSelect,
+  type FuiItemInput,
+  type SelectController,
+} from 'faisceau-ui'
+import { collection as comboboxCollection } from 'faisceau-ui/combobox'
+import { collection as selectCollection } from 'faisceau-ui/select'
 import type { ComboboxProps } from 'faisceau-ui/combobox'
 import type { CheckboxProps } from 'faisceau-ui/checkbox'
 import type { CollapsibleOptions } from 'faisceau-ui/collapsible'
@@ -31,4 +39,18 @@ test('exposes the declarations shipped through every public UI entry', () => {
   })
   assertType<ToasterOptions>({ placement: 'bottom-end' })
   expectTypeOf(createSelect({ items, label: 'Pays' })).toMatchTypeOf<SelectController>()
+  const collection = comboboxCollection({ items })
+  const search = combobox.createCombobox({ items: collection, label: 'Pays' })
+  const picker = select.createSelect({ items: selectCollection({ items }), label: 'Pays' })
+  search.setItems(collection.setItems([{ value: 'ch', label: 'Suisse' }]))
+  picker.setItems(collection)
+  search.setItems(['France', { value: 'be', label: 'Belgique' }])
+  picker.setItems(['France'])
+  search.setItems([{ id: 'country-fr', value: 'fr', label: 'France' }])
+  picker.setItems([{ id: 'country-fr', value: 'fr', label: 'France' }])
+  assertType<ComboboxProps>({ items, selectSameValue: false })
+  assertType<EnhanceSelectProps>({ selectSameValue: true })
+  expectTypeOf<ComboboxProps>().not.toHaveProperty('collection')
+  expectTypeOf(search).not.toHaveProperty('setCollection')
+  expectTypeOf(picker).not.toHaveProperty('setCollection')
 })

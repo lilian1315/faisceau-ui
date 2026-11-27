@@ -3,28 +3,42 @@ import '../styles/listbox.scss'
 import '../styles/combobox.scss'
 import { createElement as h } from '@lilian1315/create-element'
 import * as combobox from '@zag-js/combobox'
-import { effect } from 'faisceau'
+import { markAsInternalChangeEvent, trackFieldsetDisabled } from '@zag-js/dom-query'
+import { computed, batch, effect, signal, type Reactive } from 'faisceau'
 import { createZagMachine } from 'faisceau-zag'
 
 import type { ComboboxController, ComboboxProps, EnhanceComboboxProps } from './types.ts'
+import { createId, getLookupRoot, normalizeItems, type FuiItem } from '../shared/index.ts'
 import {
-  createId,
-  getLookupRoot,
-  normalizeItems,
-  reconcileKeyedValues,
-  type FuiItem,
-  type FuiItemInput,
-} from '../shared/index.ts'
-import { groupRows } from '../shared/item-groups.ts'
+  collectionItems,
+  toCollection,
+  presentItem,
+  type FuiCollection,
+} from '../shared/collection.ts'
+import { getItemId } from '../shared/items.ts'
+import { createValueSelection } from '../shared/value-selection.ts'
+import { uniqueSelectionLabels } from '../shared/selection-labels.ts'
+import { renderCollection } from '../shared/collection-renderer.ts'
+import {
+  buildNativeOptions,
+  readNativeItems,
+  reconcileNativeSelectOptions,
+} from '../shared/native-options.ts'
+import {
+  bindNativeEvents,
+  readValue,
+  writeValue,
+  sameValues,
+  syncNativeCollection,
+  trackCollectionReset,
+} from '../shared/native-select.ts'
 import { captureAttributes, captureChildNodes, ensureText, insertAfter } from '../shared/dom.ts'
 import {
   buildControl,
   buildItem,
   buildNativeSelect,
-  buildOptions,
   buildPopup,
   hideNativeSelect,
-  reconcileNativeSelectOptions,
 } from './markup.ts'
 
 export function createCombobox(options: ComboboxProps): ComboboxController {
@@ -48,7 +62,7 @@ function factory(
 
   const enhanceMode = !!root
   const restores: (() => void)[] = []
-  options ??= { items: [] }
+  options ??= {}
 
   let multiple: boolean = options.multiple ?? false
   let placeholder: string | undefined = options.placeholder
@@ -57,25 +71,41 @@ function factory(
   let items: FuiItem[]
   let initialValue: string[]
 
+  const requestedCollection = options.items === undefined ? undefined : toCollection(options.items)
+
   if (root) {
     const found = root.querySelector<HTMLSelectElement>('select.fui-combobox-native-select')
     if (!found)
       throw new Error('[Faisceau UI] missing Combobox `select.fui-combobox-native-select`')
     nativeSelect = found
-    restores.push(captureAttributes(root), captureAttributes(nativeSelect))
+    restores.push(
+      captureAttributes(root),
+      captureAttributes(nativeSelect),
+      captureChildNodes(nativeSelect),
+      ...Array.from(nativeSelect.querySelectorAll('optgroup, option')).flatMap((element) => [
+        captureAttributes(element),
+        captureChildNodes(element),
+      ]),
+    )
     if (typeof options.multiple === 'undefined') multiple = nativeSelect.multiple
 
-    initialValue = [...(options.value ?? options.defaultValue ?? readSelected(nativeSelect))]
-    if (options.items) {
-      items = normalizeItems(options.items)
-      const known = new Set(items.map((item) => item.value))
+    initialValue = [...(options.value ?? options.defaultValue ?? readValue(nativeSelect))]
+    if (requestedCollection) {
+      items = collectionItems(requestedCollection)
+      const known = new Set(items.map(getItemId))
       initialValue = initialValue.filter((value) => known.has(value))
-      restores.push(captureChildNodes(nativeSelect))
       nativeSelect.replaceChildren(
-        ...buildOptions(items, options.placeholder, multiple, initialValue),
+        ...buildNativeOptions(items, options.placeholder, multiple, initialValue),
       )
     } else {
-      items = normalizeItems(readItems(nativeSelect))
+      const inputs = readNativeItems(nativeSelect)
+      items = normalizeItems(inputs)
+      if (items.length !== inputs.length)
+        reconcileNativeSelectOptions(
+          nativeSelect,
+          items,
+          placeholder ?? readPlaceholder(nativeSelect) ?? '',
+        )
     }
     // Like Checkbox, unspecified form props are read from the adopted element.
     options = {
@@ -96,9 +126,9 @@ function factory(
     if (options.disabled !== undefined) nativeSelect.disabled = options.disabled
     if (options.required !== undefined) nativeSelect.required = options.required
   } else {
-    if (options.items === undefined)
+    if (requestedCollection === undefined)
       throw new Error('[Faisceau UI] Combobox creation requires options.items.')
-    items = normalizeItems(options.items)
+    items = collectionItems(requestedCollection)
     initialValue = [...(options.value ?? options.defaultValue ?? [])]
     root = h('div', { class: 'fui-combobox' }) as HTMLDivElement
     nativeSelect = buildNativeSelect(items, { ...options, multiple, value: initialValue })
@@ -131,12 +161,13 @@ function factory(
   })
   insertAfter(root, control, nativeSelect)
   restores.push(() => control.remove())
-  const { positioner, content, list, empty } = buildPopup(items, options.emptyLabel)
+  const { positioner, content, list, empty } = buildPopup(options.emptyLabel)
   insertAfter(root, positioner, control)
   restores.push(() => positioner.remove())
 
   const {
     items: _items,
+    selectSameValue = true,
     label: _label,
     description: _description,
     placeholder: _placeholder,
@@ -151,26 +182,52 @@ function factory(
     ...behavior
   } = options
 
-  let currentItems = [...items]
-  let itemByValue = new Map(currentItems.map((item) => [item.value, item]))
-  const initialInput = behavior.inputValue ?? behavior.defaultInputValue ?? ''
-  const initialItems = getFilteredItems(currentItems, initialInput, filter)
-  updateFilteredMarkup(list, empty, initialItems)
+  const collection = signal(requestedCollection ?? toCollection(items))
+  const valueSelection = createValueSelection({
+    getCollection: () => collection.get(),
+    enabled: selectSameValue,
+    multiple,
+    value,
+    defaultValue: initialValue,
+    onValueChange: behavior.onValueChange,
+  })
+  writeValue(nativeSelect, valueSelection.initialValue, 'none')
 
-  let updateCollection = (_inputValue: string): void => {}
+  const inputState = signal({
+    filter: behavior.inputValue ?? behavior.defaultInputValue ?? '',
+    userInput: behavior.inputValue !== undefined || behavior.defaultInputValue !== undefined,
+  })
+  const filteredCollection: Reactive<FuiCollection> = computed(() => {
+    const source = collection.get()
+    const query = inputState.get().filter
+    return query.length === 0
+      ? source
+      : source.setItems(source.items.filter((item) => filter(presentItem(source, item), query)))
+  })
+  const id = requestedId ?? createId('combobox')
+  const fieldsetDisabled = signal(false)
+  let started = false
+  let destroyed = false
   const zag = createZagMachine(
     combobox.machine as combobox.Machine<FuiItem>,
-    {
+    (): combobox.Props<FuiItem> => ({
       ...behavior,
+      disabled: (behavior.disabled ?? false) || fieldsetDisabled.get(),
       multiple,
-      collection: createCollection(initialItems),
+      collection: filteredCollection.get(),
       getRootNode: () => getLookupRoot(root),
-      id: requestedId ?? createId('combobox'),
+      id,
       inputBehavior: behavior.inputBehavior ?? 'autohighlight',
       // The native select owns submission; the filter input must stay nameless.
       name: undefined,
       onInputValueChange(details) {
-        updateCollection(details.inputValue)
+        const selectionText =
+          details.reason !== 'input-change' &&
+          valueSelection.isGroupedSelectionText(details.inputValue)
+        inputState.set({
+          filter: selectionText ? '' : details.inputValue,
+          userInput: details.reason === 'input-change',
+        })
         onInputValueChange?.(details)
       },
       openOnClick: behavior.openOnClick ?? true,
@@ -181,8 +238,19 @@ function factory(
         ...behavior.positioning,
       },
       ...(value !== undefined ? { value } : { defaultValue: initialValue }),
+      ...valueSelection.props(),
+    }),
+    (service, normalize) => {
+      const api = valueSelection.connect(combobox.connect(service, normalize))
+      const inputValue = inputState.get().userInput
+        ? api.inputValue
+        : valueSelection.inputText(api.inputValue, api.value)
+      return {
+        ...api,
+        inputValue,
+        getInputProps: () => ({ ...api.getInputProps(), value: inputValue }),
+      }
     },
-    combobox.connect,
   )
 
   zag.bind(root, (api) => api.getRootProps())
@@ -195,42 +263,21 @@ function factory(
   zag.bind(content, (api) => api.getContentProps())
   zag.bind(list, (api) => api.getListProps())
 
-  const itemDisposers = new Map<string, () => void>()
-  const bindItem = (element: HTMLElement, item: FuiItem): void => {
-    const disposers = [zag.bind(element, (api) => api.getItemProps({ item }))]
-    const text = element.querySelector<HTMLElement>('.fui-combobox-item-text')
-    if (text) disposers.push(zag.bind(text, (api) => api.getItemTextProps({ item })))
-    const indicator = element.querySelector<HTMLElement>('.fui-combobox-item-indicator')
-    if (indicator) disposers.push(zag.bind(indicator, (api) => api.getItemIndicatorProps({ item })))
-    itemDisposers.set(item.value, () => disposers.forEach((dispose) => dispose()))
-  }
-  let groupDisposers: (() => void)[] = []
-  const bindGroups = (): void => {
-    groupDisposers.forEach((dispose) => dispose())
-    groupDisposers = []
-    Array.from(list.querySelectorAll<HTMLElement>('.fui-combobox-item-group')).forEach(
-      (group, index) => {
-        groupDisposers.push(zag.bind(group, (api) => api.getItemGroupProps({ id: String(index) })))
-        const label = group.querySelector<HTMLElement>('.fui-combobox-item-group-label')!
-        groupDisposers.push(
-          zag.bind(label, (api) => api.getItemGroupLabelProps({ htmlFor: String(index) })),
-        )
-      },
-    )
-  }
-  bindGroups()
-  const rows = list.querySelectorAll<HTMLElement>('.fui-combobox-item')
-  for (const [index, item] of currentItems.entries()) {
-    bindItem(rows[index]!, item)
-  }
+  const stopRows = renderCollection({
+    list,
+    prefix: 'fui-combobox',
+    getCollection: () => filteredCollection.get(),
+    createItem: buildItem,
+    bind: (element, getter) => zag.bind(element, getter),
+  })
+  const stopEmpty = effect(() => {
+    empty.hidden = filteredCollection.get().size > 0
+  })
 
-  // Unlike Select, Zag's Combobox owns no hidden select, so the native select is
-  // synced here with the exact hidden-select protocol from `@zag-js/select`:
-  // options mirror the machine value (`syncSelectElement`), every machine change
-  // emits one bubbling `change` tagged as internal (`dispatchChangeEvent`), and
-  // native `input`/`change` events flow back into the machine unless internal.
-  const syncNativeValue = (next: readonly string[]): void => {
-    syncSelectElement(nativeSelect, next, multiple)
+  // Select's machine emits native change events itself. Combobox supplies the
+  // same notification; the shared native bridge handles input and external events.
+  const writeNativeValue = (value: readonly string[]) => writeValue(nativeSelect, value, 'none')
+  const notifyNativeChange = (): void => {
     queueMicrotask(() => {
       if (destroyed) return
       nativeSelect.dispatchEvent(
@@ -238,23 +285,26 @@ function factory(
       )
     })
   }
-  const handleNativeChange = (event: Event): void => {
-    if (isInternalChangeEvent(event)) return
-    zag.api.get().setValue(readSelected(nativeSelect))
+  const syncNativeValue = (next: readonly string[]): void => {
+    writeNativeValue(next)
+    notifyNativeChange()
   }
-  const focusInput = (event: Event): void => {
-    event.preventDefault()
-    input.focus({ preventScroll: true })
+  const nativeState = {
+    native: nativeSelect,
+    getCollection: () => collection.get(),
+    getValue: () => zag.api.peek().value,
+    setValue: (value: string[]) => zag.api.peek().setValue(value),
+    writeValue: (value: string[]) => writeNativeValue(valueSelection.normalize(value)),
   }
-  nativeSelect.addEventListener('input', handleNativeChange)
-  nativeSelect.addEventListener('change', handleNativeChange)
-  // Like Zag's hidden select, a focused native control hands focus to the visible
-  // one. Browser extensions and failed native validation can land focus here.
-  nativeSelect.addEventListener('focus', focusInput)
-
+  const stopNativeEvents = bindNativeEvents({
+    ...nativeState,
+    focus: () => input.focus({ preventScroll: true }),
+    normalize: valueSelection.fromNative,
+  })
   const stopSync = effect(() => {
     const api = zag.api.get()
-    if (!sameValues(readSelected(nativeSelect), api.value)) syncNativeValue(api.value)
+    if (!sameValues(valueSelection.normalize(readValue(nativeSelect)), api.value))
+      syncNativeValue(api.value)
   })
   const stopClearVisibility = effect(() => {
     const api = zag.api.get()
@@ -262,98 +312,54 @@ function factory(
   })
   const stopSelectedTags = effect(() => {
     const api = zag.api.get()
-    const selectedItems = api.value.flatMap((entry) => {
-      const item = itemByValue.get(entry)
-      return item === undefined ? [] : [item]
-    })
+    const source = collection.get()
+    const selectedItems = source.findMany(api.value).map((item) => presentItem(source, item))
     renderSelectedTags(
       selection,
-      multiple ? selectedItems : [],
+      multiple ? uniqueSelectionLabels(selectedItems) : [],
       api.disabled || behavior.readOnly === true,
       getRemoveLabel,
       (entry) => {
-        api.clearValue(entry)
-        api.focus()
+        const current = zag.api.peek()
+        if (selectSameValue) current.clearValue(entry)
+        else {
+          const item = selectedItems.find((item) => getItemId(item) === entry)!
+          const source = collection.peek()
+          current.setValue(
+            current.value.filter((key) => {
+              const raw = source.find(key)
+              if (!raw) return true
+              const candidate = presentItem(source, raw)
+              return candidate.value !== item.value || candidate.label !== item.label
+            }),
+          )
+        }
+        current.focus()
       },
     )
   })
 
-  let filterRevision = 0
-  let started = false
-  let destroyed = false
-  updateCollection = (inputValue): void => {
-    const filteredItems = getFilteredItems(currentItems, inputValue, filter)
-    updateFilteredMarkup(list, empty, filteredItems)
-    const revision = ++filterRevision
-
-    queueMicrotask(() => {
-      if (destroyed || revision !== filterRevision) return
-      zag.updateProps({ collection: createCollection(filteredItems) })
-    })
-  }
-
-  let form: HTMLFormElement | null = null
-  let fieldsetObserver: MutationObserver | null = null
-  const baseDisabled = behavior.disabled ?? false
-  const handleFormReset = (event: Event): void => {
-    if (event.defaultPrevented) return
-    // Mirrors Zag's `trackFormControl`: reset restores the machine's initial value
-    // and the sync effect rewrites the native options from there.
-    const next = [...initialValue]
-    if (!sameValues(next, zag.api.get().value)) zag.api.get().setValue(next)
-  }
-  const applyFieldsetDisabled = (fieldsetDisabled: boolean): void => {
-    // Mirrors Zag's fieldset tracking: the observable disabled state combines the
-    // machine prop with the closest fieldset. The native select needs no manual
-    // update; a disabled fieldset disables its form controls by itself.
-    const next = baseDisabled || fieldsetDisabled
-    if (next !== zag.api.get().disabled) zag.updateProps({ disabled: next })
-  }
+  const stopCollection = syncNativeCollection({
+    ...nativeState,
+    placeholder: placeholder ?? '',
+    onValueRemoved: notifyNativeChange,
+  })
+  let stopReset = () => {}
+  let stopFieldset = () => {}
 
   const controller: ComboboxController = {
     api: zag.api,
     root,
     get started() {
-      return started
+      return started && !destroyed
     },
-    setItems(inputs) {
+    setItems(next) {
       if (destroyed) return throwDestroyed()
-      currentItems = normalizeItems(inputs)
-      itemByValue = new Map(currentItems.map((item) => [item.value, item]))
-      const nextValues = new Set(itemByValue.keys())
-      const elements = new Map(
-        Array.from(list.querySelectorAll<HTMLElement>('.fui-combobox-item')).map(
-          (element) => [element.getAttribute('data-value')!, element as HTMLElement] as const,
-        ),
-      )
-      const ordered = reconcileKeyedValues({
-        create: (item) => buildItem(item),
-        current: elements,
-        destroy: (element, entry) => {
-          itemDisposers.get(entry)?.()
-          itemDisposers.delete(entry)
-          element.remove()
-        },
-        getKey: (item) => item.value,
-        inputs: currentItems,
-        update: (element, item) => {
-          itemDisposers.get(item.value)?.()
-          const fresh = buildItem(item)
-          element.replaceChildren(...fresh.childNodes)
-          element.dataset.value = item.value
-          element.toggleAttribute('data-disabled', item.disabled === true)
-          element.className = 'fui-combobox-item'
-          bindItem(element, item)
-        },
+      const source = toCollection(next)
+      batch(() => {
+        valueSelection.capture()
+        collection.set(source)
       })
-      list.replaceChildren(...groupRows(currentItems, ordered, 'fui-combobox'))
-      bindGroups()
-      const api = zag.api.get()
-      const next = api.value.filter((entry) => nextValues.has(entry))
-      if (next.length !== api.value.length) syncNativeValue(next)
-      reconcileNativeSelectOptions(nativeSelect, currentItems, placeholder ?? '')
-      if (next.length !== api.value.length) api.setValue(next)
-      updateCollection(api.inputValue)
     },
     mount(target: ParentNode) {
       if (destroyed) return throwDestroyed()
@@ -366,16 +372,12 @@ function factory(
         zag.start()
         // Mirrors the select machine entry: the native selection is rewritten from
         // the machine value, and the label takes ownership of the native control.
-        syncSelectElement(nativeSelect, zag.api.get().value, multiple)
+        writeNativeValue(zag.api.get().value)
         if (label?.id) nativeSelect.setAttribute('aria-labelledby', label.id)
-        form = nativeSelect.form
-        form?.addEventListener('reset', handleFormReset, { passive: true })
-        const fieldset = nativeSelect.closest('fieldset')
-        if (fieldset) {
-          applyFieldsetDisabled(fieldset.disabled)
-          fieldsetObserver = new MutationObserver(() => applyFieldsetDisabled(fieldset.disabled))
-          fieldsetObserver.observe(fieldset, { attributes: true, attributeFilter: ['disabled'] })
-        }
+        stopReset = trackCollectionReset({ ...nativeState, initialValue })
+        stopFieldset =
+          trackFieldsetDisabled(nativeSelect, (disabled) => fieldsetDisabled.set(disabled)) ??
+          (() => {})
         started = true
       }
       return this
@@ -384,24 +386,20 @@ function factory(
       if (destroyed) return
       destroyed = true
       const value = zag.api.get().value
-      filterRevision += 1
+      stopCollection()
+      stopRows()
+      stopEmpty()
       stopSync()
       stopClearVisibility()
       stopSelectedTags()
-      for (const dispose of itemDisposers.values()) dispose()
-      itemDisposers.clear()
-      groupDisposers.forEach((dispose) => dispose())
-      nativeSelect.removeEventListener('input', handleNativeChange)
-      nativeSelect.removeEventListener('change', handleNativeChange)
-      nativeSelect.removeEventListener('focus', focusInput)
-      form?.removeEventListener('reset', handleFormReset)
-      fieldsetObserver?.disconnect()
-      fieldsetObserver = null
+      stopNativeEvents()
+      stopReset()
+      stopFieldset()
       zag.destroy()
 
       if (enhanceMode) {
         restores.forEach((restore) => restore())
-        syncSelectElement(nativeSelect, value, multiple)
+        writeNativeValue(value)
         return
       }
 
@@ -414,91 +412,11 @@ function factory(
   return controller
 }
 
-/** Reads items from native options, skipping the explicitly-marked placeholder. */
-function readItems(native: HTMLSelectElement): FuiItemInput[] {
-  return Array.from(native.options)
-    .filter((option) => !option.hasAttribute('data-placeholder'))
-    .map((option) => {
-      const group = option.parentElement
-      const description = option.dataset.description?.trim()
-      const disabled = option.disabled || (group instanceof HTMLOptGroupElement && group.disabled)
-      return {
-        value: option.value,
-        label: option.label || option.text,
-        group: group instanceof HTMLOptGroupElement ? group.label : undefined,
-        ...(disabled ? { disabled: true as const } : {}),
-        ...(description ? { description } : {}),
-      }
-    })
-}
-
-/** Reads the selected values with the exact `getSelectedValues` logic from `@zag-js/select`. */
-function readSelected(native: HTMLSelectElement): string[] {
-  return native.multiple
-    ? Array.from(native.selectedOptions, (option) => option.value)
-    : native.value
-      ? [native.value]
-      : []
-}
-
 /** Reads the placeholder text from the explicitly-marked option, if any. */
 function readPlaceholder(native: HTMLSelectElement): string | undefined {
   return (
     native.querySelector<HTMLOptionElement>('option[data-placeholder]')?.label.trim() || undefined
   )
-}
-
-/** Writes the machine value onto the native options (`syncSelectElement` in `@zag-js/select`). */
-function syncSelectElement(
-  native: HTMLSelectElement,
-  value: readonly string[],
-  multiple: boolean,
-): void {
-  if (value.length === 0 && !multiple) {
-    native.selectedIndex = -1
-    return
-  }
-  for (const option of native.options) {
-    option.selected = value.includes(option.value)
-  }
-}
-
-/** Tags machine-originated changes so the native handler ignores them (`@zag-js/dom-query`). */
-const INTERNAL_CHANGE_EVENT = Symbol.for('zag.changeEvent')
-
-function isInternalChangeEvent(event: Event): boolean {
-  return Object.prototype.hasOwnProperty.call(event, INTERNAL_CHANGE_EVENT)
-}
-
-function markAsInternalChangeEvent<T extends Event>(event: T): T {
-  if (isInternalChangeEvent(event)) return event
-  Object.defineProperty(event, INTERNAL_CHANGE_EVENT, { value: true })
-  return event
-}
-
-/** Order-insensitive value comparison (native order follows the document). */
-function sameValues(left: readonly string[], right: readonly string[]): boolean {
-  if (left.length !== right.length) return false
-  const rightValues = new Set(right)
-  return left.every((value) => rightValues.has(value))
-}
-
-function createCollection(items: readonly FuiItem[]) {
-  return combobox.collection({
-    items: [...items],
-    isItemDisabled: (item) => item.disabled ?? false,
-    itemToString: (item) => item.label,
-    itemToValue: (item) => item.value,
-  })
-}
-
-function getFilteredItems(
-  items: readonly FuiItem[],
-  inputValue: string,
-  filter: (item: Readonly<FuiItem>, inputValue: string) => boolean,
-): FuiItem[] {
-  if (inputValue.length === 0) return [...items]
-  return items.filter((item) => filter(item, inputValue))
 }
 
 function defaultFilter(item: Readonly<FuiItem>, inputValue: string): boolean {
@@ -521,39 +439,22 @@ function renderSelectedTags(
     const removeTrigger = h('button', {
       ariaLabel: getRemoveLabel(item),
       class: 'fui-combobox-tag-remove',
-      data: { value: item.value },
+      data: { value: getItemId(item) },
       disabled,
       type: 'button',
       children: h('span', { class: 'fui-icon fui-icon--x', ariaHidden: 'true' }),
     })
-    removeTrigger.addEventListener('click', () => remove(item.value))
+    removeTrigger.addEventListener('click', () => remove(getItemId(item)))
 
     return h('span', {
       class: 'fui-combobox-tag',
-      data: { value: item.value },
+      data: { value: getItemId(item) },
       children: [label, removeTrigger],
     })
   })
 
   selection.replaceChildren(...tags)
   selection.hidden = tags.length === 0
-}
-
-function updateFilteredMarkup(
-  list: HTMLElement,
-  empty: HTMLElement,
-  filteredItems: readonly FuiItem[],
-): void {
-  const visibleValues = new Set(filteredItems.map((item) => item.value))
-  for (const element of list.querySelectorAll<HTMLElement>('.fui-combobox-item')) {
-    element.hidden = !visibleValues.has(element.dataset.value ?? '')
-  }
-  for (const group of list.querySelectorAll<HTMLElement>('.fui-combobox-item-group')) {
-    group.hidden = !Array.from(group.querySelectorAll<HTMLElement>('.fui-combobox-item')).some(
-      (row) => !row.hidden,
-    )
-  }
-  empty.hidden = filteredItems.length > 0
 }
 
 function throwDestroyed(): never {
