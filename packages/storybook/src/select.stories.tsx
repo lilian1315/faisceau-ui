@@ -27,7 +27,6 @@ const meta = {
     placeholder: { control: 'text' },
     description: { control: 'text' },
     multiple: { control: 'boolean' },
-    selectSameValue: { control: 'boolean' },
     disabled: { control: 'boolean' },
     readOnly: { control: 'boolean' },
     invalid: { control: 'boolean' },
@@ -116,21 +115,6 @@ export const Create: Story = {
   },
 }
 
-export const SameValues: Story = {
-  name: 'Same submitted value',
-  args: {
-    label: 'Delivery',
-    multiple: true,
-    selectSameValue: true,
-    items: [
-      { id: 'home', value: 'standard', label: 'Home delivery' },
-      { id: 'home-alt', value: 'standard', label: 'Home delivery' },
-      { id: 'pickup', value: 'standard', label: 'Pickup point' },
-      { id: 'express', value: 'express', label: 'Express delivery' },
-    ],
-  },
-}
-
 export const Enhance: Story = {
   name: 'enhance()',
   render() {
@@ -148,14 +132,10 @@ export const Enhance: Story = {
             Choose a country
           </option>
           <optgroup label="Africa">
-            <option data-id="country-ng" value="ng">
-              Nigeria
-            </option>
+            <option value="ng">Nigeria</option>
           </optgroup>
           <optgroup label="Asia">
-            <option data-id="country-jp" value="jp">
-              Japan
-            </option>
+            <option value="jp">Japan</option>
           </optgroup>
         </select>
       </div>,

@@ -1,24 +1,22 @@
 import '../styles/base.scss'
 import '../styles/select.scss'
 import * as select from '@zag-js/select'
-import { batch, effect, signal } from 'faisceau'
+import { effect, signal } from 'faisceau'
 import { createZagMachine } from 'faisceau-zag'
 import { captureAttributes, captureChildNodes, getLookupRoot, insertAfter } from '../shared/dom.ts'
 import { createId } from '../shared/id.ts'
-import { getItemId, type FuiItem } from '../shared/items.ts'
+import type { FuiItem } from '../shared/items.ts'
 import { requireFuiClass } from '../shared/parts.ts'
-import { buildItem, createMarkup } from './markup.ts'
-import { collectionItems, toCollection, type FuiCollection } from '../shared/collection.ts'
-import { createValueSelection } from '../shared/value-selection.ts'
-import { renderCollection } from '../shared/collection-renderer.ts'
-import { readNativeItems, reconcileNativeSelectOptions } from '../shared/native-options.ts'
 import {
-  bindNativeEvents,
-  readValue,
-  writeValue,
-  syncNativeCollection,
-  trackCollectionReset,
-} from '../shared/native-select.ts'
+  buildItem,
+  buildNativeOptions,
+  createMarkup,
+  readNativeItems,
+  readNativeValue,
+  reconcileNativeOptions,
+} from './markup.ts'
+import { collectionItems, toCollection, type FuiCollection } from './collection.ts'
+import { renderCollection } from '../shared/collection-renderer.ts'
 import type { EnhanceSelectProps, SelectController, SelectProps } from './types.ts'
 
 export function createSelect(props: SelectProps): SelectController {
@@ -52,9 +50,9 @@ export function enhanceSelect(root: HTMLElement, props: EnhanceSelectProps = {})
     captureChildNodes(native),
     ...Array.from(native.querySelectorAll('optgroup, option'), captureChildNodes),
   )
-  const initialValue = readValue(native)
+  const initialValue = readNativeValue(native)
   if (props.items !== undefined || nativeItems.length !== items.length)
-    reconcileNativeSelectOptions(native, items, props.placeholder ?? placeholderOption?.label ?? '')
+    reconcileNativeOptions(native, items, props.placeholder ?? placeholderOption?.label ?? '')
   const parent = root.parentNode
   const next = root.nextSibling
   const markup = createMarkup(items, { ...props, items, label: props.label ?? '' })
@@ -133,33 +131,21 @@ function setup(
     description: _description,
     clearable: _clearable,
     items: _items,
-    selectSameValue = true,
     ...behavior
   } = props
   const collection = signal(initialCollection)
-  const selection = createValueSelection({
-    getCollection: () => collection.get(),
-    enabled: selectSameValue,
-    multiple: behavior.multiple ?? false,
-    value: behavior.value,
-    defaultValue: behavior.defaultValue ?? readValue(native),
-    onValueChange: behavior.onValueChange,
-  })
-  writeValue(native, selection.initialValue)
-
-  const hasValue = signal(readValue(native).length > 0)
-  const shouldAlign = () => !!behavior.alignItemWithTrigger && !behavior.multiple && hasValue.get()
+  // Pure Zag: behavior props pass straight to the machine. The machine itself owns
+  // the hidden <select> (option sync, internal change event, form reset, fieldset
+  // disabled, autofill) through getHiddenSelectProps() and its trackFormControlState effect.
   const zag = createZagMachine(
     select.machine as select.Machine<FuiItem>,
     () => ({
       ...behavior,
-      ...selection.props(),
-      alignItemWithTrigger: shouldAlign(),
       id,
       collection: collection.get(),
       getRootNode: () => getLookupRoot(root),
     }),
-    (service, normalize) => selection.connect(select.connect(service, normalize)),
+    (service, normalize) => select.connect(service, normalize),
   )
 
   zag.bind(root, (api) => api.getRootProps())
@@ -174,6 +160,7 @@ function setup(
   zag.bind(positioner, (api) => api.getPositionerProps())
   zag.bind(content, (api) => api.getContentProps())
   zag.bind(list, (api) => api.getListProps())
+  zag.bind(native, (api) => api.getHiddenSelectProps())
   if (description) description.id = `${id}:description`
   if (clear)
     zag.bind(clear, (api) => ({
@@ -187,39 +174,9 @@ function setup(
     createItem: buildItem,
     bind: (element, getter) => zag.bind(element, getter),
   })
-  const nativeState = {
-    native,
-    getCollection: () => collection.get(),
-    getValue: () => zag.api.peek().value,
-    setValue: (value: string[]) => zag.api.peek().setValue(value),
-    writeValue: (value: string[]) => writeValue(native, selection.normalize(value)),
-  }
-  const stopCollection = syncNativeCollection({
-    ...nativeState,
-    placeholder,
-  })
-  const stopNativeEvents = bindNativeEvents({
-    ...nativeState,
-    focus: () => trigger.focus(),
-    normalize: selection.fromNative,
-  })
-  zag.bind(native, (api) => {
-    // Vanilla maps defaultValue to select.value, which cannot represent multiple
-    // values. Let Zag's native sync and the effect below own option selection.
-    // The native bridge handles both events; Vanilla aliases change to input.
-    const {
-      value: _value,
-      oninput: _onInput,
-      onfocus: _onFocus,
-      ...attrs
-    } = api.getHiddenSelectProps()
-    return attrs
-  })
   const stopSync = effect(() => {
     const api = zag.api.get()
-    hasValue.set(api.hasSelectedItems)
     valueText.textContent = api.hasSelectedItems ? api.valueAsString : placeholder
-    writeValue(native, api.value)
     if (!api.open) {
       // Popper writes --x/--y straight onto the element, so spreadProps never
       // cleans them up. Clear them on close: on reopen the positioner then stays
@@ -231,7 +188,6 @@ function setup(
   })
   let started = false
   let destroyed = false
-  let stopReset = () => {}
   return {
     root,
     api: zag.api,
@@ -241,11 +197,14 @@ function setup(
     setItems(next) {
       assertAlive()
       const source = toCollection(next)
-      validateValues(collectionItems(source))
-      batch(() => {
-        selection.capture()
-        collection.set(source)
-      })
+      const items = collectionItems(source)
+      validateValues(items)
+      const value = zag.api.peek().value
+      const kept = value.filter((key) => source.has(key))
+      reconcileNativeOptions(native, items, placeholder)
+      collection.set(source)
+      // Zag's collection watch does not prune removed values; do it once started.
+      if (started && kept.length !== value.length) zag.api.peek().setValue(kept)
     },
     mount(target) {
       assertAlive()
@@ -256,7 +215,6 @@ function setup(
       assertAlive()
       if (!started) {
         zag.start()
-        stopReset = trackCollectionReset(nativeState)
         started = true
       }
       return this
@@ -264,17 +222,11 @@ function setup(
     destroy() {
       if (destroyed) return
       destroyed = true
-      const value = zag.api.get().value
       stopSync()
-      stopCollection()
       stopRows()
-      stopNativeEvents()
-      stopReset()
       zag.destroy()
-      if (restore) {
-        restore()
-        writeValue(native, value)
-      } else root.remove()
+      if (restore) restore()
+      else root.remove()
     },
   }
   function assertAlive() {
@@ -283,6 +235,6 @@ function setup(
 }
 
 function validateValues(items: FuiItem[]): void {
-  if (items.some((item) => getItemId(item) === ''))
+  if (items.some((item) => item.value === ''))
     throw new Error('[Faisceau UI] Select reserves the empty value for its placeholder.')
 }
