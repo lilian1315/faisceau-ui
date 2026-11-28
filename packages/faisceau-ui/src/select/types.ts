@@ -1,7 +1,7 @@
 import type * as select from '@zag-js/select'
 import type { FuiItem } from '../shared/items.ts'
 import type { FuiController } from '../types.ts'
-import type { FuiItems } from '../shared/collection.ts'
+import type { FuiItems } from './collection.ts'
 
 export interface SelectProps extends Omit<
   select.Props<FuiItem>,
@@ -10,8 +10,6 @@ export interface SelectProps extends Omit<
   id?: string
   /** Item array or Zag collection. Arrays are converted automatically. */
   items: FuiItems
-  /** Select enabled items sharing the submitted value together. @default true */
-  selectSameValue?: boolean
   label: string
   description?: string
   placeholder?: string

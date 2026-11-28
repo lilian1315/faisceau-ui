@@ -1,4 +1,5 @@
-@use './mixins' as *;
+// Select styles key off Zag's own data attributes (data-select-*, data-state, ...)
+// under the single root class; no fui-* part class is referenced here.
 
 .fui-select {
   display: grid;
@@ -19,18 +20,17 @@
   }
 }
 
-.fui-select .fui-label {
+.fui-select [data-select-label] {
   font-weight: var(--fui-font-weight-medium);
 }
-.fui-select-description,
-.fui-select-item-description {
+.fui-select > p {
   margin: 0;
   color: var(--fui-color-muted-foreground);
   font-size: var(--fui-font-size-caption);
   text-wrap: pretty;
 }
 
-.fui-select-control {
+.fui-select [data-select-control] {
   overflow: hidden;
   display: flex;
   align-items: stretch;
@@ -42,8 +42,8 @@
   box-shadow: 0 1px 2px var(--fui-color-control-shadow);
 
   &[data-focus],
-  &:has(.fui-select-trigger:focus-visible),
-  &:has(.fui-select-clear-trigger:focus-visible) {
+  &:has([data-select-trigger]:focus-visible),
+  &:has([data-select-clear-trigger]:focus-visible) {
     border-color: var(--fui-color-ring);
     outline: 2px solid var(--fui-color-ring);
     outline-offset: 2px;
@@ -53,8 +53,8 @@
     border-color: var(--fui-color-destructive);
 
     &[data-focus],
-    &:has(.fui-select-trigger:focus-visible),
-    &:has(.fui-select-clear-trigger:focus-visible) {
+    &:has([data-select-trigger]:focus-visible),
+    &:has([data-select-clear-trigger]:focus-visible) {
       outline-color: var(--fui-color-destructive);
     }
   }
@@ -64,8 +64,8 @@
     opacity: 0.5;
   }
 }
-.fui-select-trigger,
-.fui-select-clear-trigger {
+.fui-select [data-select-trigger],
+.fui-select [data-select-clear-trigger] {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -74,6 +74,7 @@
   padding-block: var(--fui-space-1-5);
   padding-inline: var(--fui-space-3);
   border: 0;
+  appearance: none;
   background: transparent;
   color: inherit;
   font: inherit;
@@ -92,20 +93,20 @@
     cursor: default;
   }
 }
-.fui-select-trigger {
+.fui-select [data-select-trigger] {
   flex: 1;
   min-inline-size: 0;
   border-start-start-radius: calc(var(--fui-radius-md) - var(--fui-border-width));
   border-end-start-radius: calc(var(--fui-radius-md) - var(--fui-border-width));
 }
-.fui-select-value-text {
+.fui-select [data-select-value-text] {
   flex: 1;
   overflow-wrap: anywhere;
 }
-.fui-select-trigger[data-placeholder-shown] .fui-select-value-text {
+.fui-select [data-select-trigger][data-placeholder-shown] [data-select-value-text] {
   color: var(--fui-color-muted-foreground);
 }
-.fui-select-clear-trigger {
+.fui-select [data-select-clear-trigger] {
   flex: none;
   justify-content: center;
   inline-size: var(--fui-control-height);
@@ -115,18 +116,18 @@
   border-start-end-radius: calc(var(--fui-radius-md) - var(--fui-border-width));
   border-end-end-radius: calc(var(--fui-radius-md) - var(--fui-border-width));
 }
-.fui-select-indicator {
+.fui-select [data-select-indicator] {
   display: flex;
   color: var(--fui-color-muted-foreground);
 }
-.fui-select-indicator[data-state='open'] {
+.fui-select [data-select-indicator][data-state='open'] {
   rotate: 180deg;
 }
-.fui-select-positioner {
+.fui-select [data-select-positioner] {
   --z-index: calc(var(--fui-z-index-popover) + var(--layer-index, 0)) !important;
   z-index: var(--z-index);
 }
-.fui-select-content {
+.fui-select [data-select-content] {
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -141,7 +142,7 @@
     inset 0 0 0 var(--fui-border-width) var(--fui-color-border),
     0 4px 16px var(--fui-color-popover-shadow);
 }
-.fui-select-list {
+.fui-select [data-select-list] {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
@@ -151,7 +152,7 @@
   list-style: none;
   outline: none;
 }
-.fui-select-item {
+.fui-select [data-select-item] {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 16px;
   align-items: center;
@@ -174,51 +175,72 @@
     cursor: not-allowed;
   }
 }
-.fui-select-item-indicator {
+.fui-select [data-select-item-indicator] {
   grid-column: 2;
   grid-row: 1;
 }
-.fui-select-item-description {
+.fui-select
+  [data-select-item]
+  > span:not([data-select-item-text]):not([data-select-item-indicator]) {
   grid-column: 1;
+  margin: 0;
+  color: var(--fui-color-muted-foreground);
+  font-size: var(--fui-font-size-caption);
+  text-wrap: pretty;
+}
+.fui-select [data-select-item-group] > ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.fui-select [data-select-item-group-label] {
+  padding: var(--fui-space-2);
+  color: var(--fui-color-muted-foreground);
+  font-size: var(--fui-font-size-caption);
+  font-weight: var(--fui-font-weight-medium);
+}
+
+.fui-select [data-select-content][hidden],
+.fui-select [data-select-clear-trigger][hidden],
+.fui-select [data-select-item-indicator][hidden] {
+  display: none;
 }
 
 @media (hover: hover) {
-  .fui-select-trigger:not(:disabled):not([data-readonly]):hover,
-  .fui-select-clear-trigger:not(:disabled):hover {
+  .fui-select [data-select-trigger]:not(:disabled):not([data-readonly]):hover,
+  .fui-select [data-select-clear-trigger]:not(:disabled):hover {
     background: var(--fui-color-muted);
   }
 }
 @media (prefers-reduced-motion: no-preference) {
-  .fui-select-trigger,
-  .fui-select-clear-trigger {
+  .fui-select [data-select-trigger],
+  .fui-select [data-select-clear-trigger] {
     transition:
       background-color 100ms,
       border-color 100ms;
   }
 }
 @media (any-pointer: coarse) {
-  .fui-select-control {
+  .fui-select [data-select-control] {
     min-block-size: var(--fui-control-height-coarse);
   }
 
-  .fui-select-trigger,
-  .fui-select-clear-trigger {
+  .fui-select [data-select-trigger],
+  .fui-select [data-select-clear-trigger] {
     min-block-size: calc(var(--fui-control-height-coarse) - (2 * var(--fui-border-width)));
   }
 
-  .fui-select-clear-trigger {
+  .fui-select [data-select-clear-trigger] {
     inline-size: var(--fui-control-height-coarse);
     min-inline-size: var(--fui-control-height-coarse);
   }
 }
 @media (forced-colors: active) {
-  .fui-select-item[data-highlighted] {
+  .fui-select [data-select-item][data-highlighted] {
     outline-color: Highlight;
   }
-  .fui-select-item[data-disabled] {
+  .fui-select [data-select-item][data-disabled] {
     color: GrayText;
     opacity: 1;
   }
 }
-
-@include fui-item-groups('select');

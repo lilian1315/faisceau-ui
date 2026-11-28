@@ -148,9 +148,9 @@ Si plusieurs éléments ont le même identifiant de sélection, seul le premier 
 est émis dans la console pour chaque occurrence ignorée. Cette règle s'applique aussi aux
 valeurs produites par `itemToValue` et aux options natives adoptées, sans modifier la collection fournie.
 
-### Identité des options
+### Identité des options (Combobox)
 
-En mode enhancement, `data-id` permet de séparer l'identifiant de sélection de la valeur soumise :
+En mode enhancement de Combobox, `data-id` permet de séparer l'identifiant de sélection de la valeur soumise :
 
 ```html
 <option data-id="delivery-home" value="standard">Livraison à domicile</option>
@@ -161,7 +161,7 @@ Zag, `value`, `defaultValue`, les callbacks et `api.setValue()` utilisent ici `d
 ou `delivery-pickup`. Le formulaire soumet toujours `standard`. L'attribut HTML `id` n'est
 pas utilisé comme identité des options. Sans `data-id`, `value` reste l'identifiant.
 
-Le même modèle est disponible à la création et dans `setItems()` :
+Le même modèle est disponible à la création de Combobox et dans `setItems()` :
 
 ```ts
 controller.setItems([
@@ -176,15 +176,19 @@ conserve ces valeurs répétées. Le filtrage, le reset et la restauration du ma
 cette distinction. Les collections personnalisées conservent leur mapping `itemToValue` ;
 avec un `id` explicite, `value` reste la valeur soumise.
 
-### Sélection des valeurs identiques
+> Sur la branche d'expérimentation « zag pur », Select key sa sélection directement par la
+> valeur soumise (comme la collection Zag stock) : `id`/`data-id` et `selectSameValue` ne
+> s'appliquent qu'à Combobox.
 
-Select et Combobox proposent `selectSameValue`, **activé par défaut**. Sélectionner une option
+### Sélection des valeurs identiques (Combobox)
+
+Combobox propose `selectSameValue`, **activé par défaut**. Sélectionner une option
 sélectionne aussi les options activées ayant la même valeur soumise, même si leurs `data-id`
 diffèrent. Retirer une option en mode multiple, ou appeler `api.clearValue(id)`, retire tout
 son groupe. Les éléments désactivés ne sont pas ajoutés automatiquement.
 
 ```ts
-createSelect({
+createCombobox({
   label: 'Livraison',
   items: deliveryOptions,
   selectSameValue: false, // Sélection indépendante par identifiant
@@ -203,7 +207,7 @@ groupe et `FormData.getAll()` contient les valeurs répétées. Cette règle est
 Faisceau UI ; les identifiants de collection Zag restent uniques.
 
 L'affichage des sélections déduplique automatiquement les éléments ayant à la fois la même
-valeur soumise et le même libellé : le texte de Select, le champ simple de Combobox et ses
+valeur soumise et le même libellé : le champ simple de Combobox et ses
 pastilles n'affichent cette paire qu'une fois. Les libellés différents pour une même valeur,
 ou identiques pour des valeurs différentes, restent distincts. Les identifiants sélectionnés,
 les callbacks, les options natives et les valeurs de `FormData` restent complets. Cette règle

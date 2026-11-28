@@ -35,22 +35,22 @@ afterEach(() => {
 })
 
 describe('published package contract', () => {
-  it('groups matching submitted values by default through both public component namespaces', async () => {
-    for (const component of [comboboxModule, selectModule]) {
+  it('groups matching submitted values by default through the Combobox namespace', async () => {
+    for (const component of [comboboxModule]) {
       const form = document.createElement('form')
       document.body.append(form)
-      const create =
-        'createCombobox' in component ? component.createCombobox : component.createSelect
-      const controller = create({
-        label: 'Choice',
-        name: 'choice',
-        multiple: true,
-        defaultValue: ['first'],
-        items: [
-          { id: 'first', value: 'shared', label: 'Same' },
-          { id: 'second', value: 'shared', label: 'Same' },
-        ],
-      }).mount(form)
+      const controller = component
+        .createCombobox({
+          label: 'Choice',
+          name: 'choice',
+          multiple: true,
+          defaultValue: ['first'],
+          items: [
+            { id: 'first', value: 'shared', label: 'Same' },
+            { id: 'second', value: 'shared', label: 'Same' },
+          ],
+        })
+        .mount(form)
       try {
         expect(controller.api.get().value).toEqual(['first', 'second'])
         expect(controller.api.get().valueAsString).toBe('Same')
@@ -80,14 +80,17 @@ describe('published package contract', () => {
           }),
         )
         await flushMachine()
-        expect(controller.api.get().collection.getValues()).toEqual(['switzerland'])
+        // Combobox keys selection by item identity; Select (Zag-pure) keys by submitted value.
+        const isCombobox = 'createCombobox' in component
+        const key = isCombobox ? 'switzerland' : 'ch'
+        expect(controller.api.get().collection.getValues()).toEqual([key])
         expect(controller.root.querySelector('option[value="ch"]')?.textContent).toBe('Switzerland')
-        controller.api.get().setValue(['switzerland'])
+        controller.api.get().setValue([key])
         await flushMachine()
         expect(
           controller.root.querySelector<HTMLSelectElement>('select')!.selectedOptions[0]?.dataset
             .id,
-        ).toBe('switzerland')
+        ).toBe(isCombobox ? 'switzerland' : undefined)
         expect(controller.root.querySelector<HTMLSelectElement>('select')!.value).toBe('ch')
         expect(controller.root.querySelector('[role="option"]')?.textContent).toContain(
           'Switzerland',

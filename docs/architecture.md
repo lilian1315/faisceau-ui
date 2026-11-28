@@ -112,7 +112,10 @@ keys, so distinct identities can submit the same native value. DOM option `id` i
 The shared native bridge reapplies selection by identity before internal change events reach
 caller listeners, because Zag Select's own native sync compares against submitted option values.
 
-`selectSameValue` defaults to true. `shared/value-selection.ts` controls the Zag value prop
+`selectSameValue` defaults to true (Combobox only on the `vibe/zag-pure-select-f571e2` experiment
+branch: Select there follows stock Zag semantics, selection keys = submitted values, and its CSS
+keys off Zag `data-select-*` attributes under the single `.fui-select` root class).
+`shared/value-selection.ts` controls the Zag value prop
 internally to expand selected identities into enabled peers with the same submitted value.
 An index of identities and submitted-value groups is derived once per collection snapshot,
 so expansion, removal and accessibility queries share the same lookup data.

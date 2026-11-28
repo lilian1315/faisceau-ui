@@ -49,7 +49,6 @@ test('exposes the declarations shipped through every public UI entry', () => {
   search.setItems([{ id: 'country-fr', value: 'fr', label: 'France' }])
   picker.setItems([{ id: 'country-fr', value: 'fr', label: 'France' }])
   assertType<ComboboxProps>({ items, selectSameValue: false })
-  assertType<EnhanceSelectProps>({ selectSameValue: true })
   expectTypeOf<ComboboxProps>().not.toHaveProperty('collection')
   expectTypeOf(search).not.toHaveProperty('setCollection')
   expectTypeOf(picker).not.toHaveProperty('setCollection')

@@ -2,19 +2,6 @@
 @use './tokens';
 
 .fui-field-label,
-.fui-select-control,
-.fui-select-trigger,
-.fui-select-value,
-.fui-select-indicator,
-.fui-select-clear-trigger,
-.fui-select-positioner,
-.fui-select-content,
-.fui-select-list,
-.fui-select-item,
-.fui-select-item-text,
-.fui-select-item-description,
-.fui-select-item-indicator,
-.fui-select-native-select,
 .fui-combobox,
 .fui-combobox-control,
 .fui-combobox-field,
@@ -71,8 +58,6 @@
   }
 }
 
-.fui-select-trigger,
-.fui-select-clear-trigger,
 .fui-combobox-trigger,
 .fui-combobox-clear-trigger,
 .fui-combobox-tag-remove {
@@ -150,7 +135,7 @@
   border: 0;
 }
 
-.fui-select-native-select,
+.fui-select > select,
 .fui-combobox-native-select,
 .fui-native-checkbox {
   position: absolute;
@@ -181,13 +166,9 @@
   }
 }
 
-.fui-select-content[hidden],
 .fui-combobox-content[hidden],
-.fui-select-clear-trigger[hidden],
 .fui-combobox-clear-trigger[hidden],
-.fui-select-item[hidden],
 .fui-combobox-item[hidden],
-.fui-select-item-indicator[hidden],
 .fui-combobox-item-indicator[hidden],
 .fui-combobox-empty[hidden] {
   display: none;

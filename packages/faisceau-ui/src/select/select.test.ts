@@ -44,7 +44,7 @@ describe('Select (Zag v2)', () => {
     expect(() => controller.start()).toThrow('destroyed Select')
   })
 
-  it('selects with the pointer, exposes labels and descriptions, and emits input then change once', async () => {
+  it('selects with the pointer, exposes labels and descriptions, and emits one change event', async () => {
     const form = document.createElement('form')
     document.body.append(form)
     const onValueChange = vi.fn()
@@ -64,7 +64,7 @@ describe('Select (Zag v2)', () => {
     await expect.element(page.getByRole('listbox', { name: 'Country' })).toBeVisible()
     await expect.element(option('Japan')).toHaveAttribute('aria-disabled', 'true')
     await option('Korea').click()
-    await vi.waitFor(() => expect(events).toEqual(['input', 'change']))
+    await vi.waitFor(() => expect(events).toEqual(['change']))
     expect(new FormData(form).get('country')).toBe('kr')
     expect(onValueChange).toHaveBeenCalledTimes(1)
     await expect.element(trigger()).toMatchTextContent('Korea')
@@ -154,17 +154,16 @@ describe('Select (Zag v2)', () => {
     expect(controller.api.get().value).toEqual(['ng'])
   })
 
-  it.each(['input', 'change'])('accepts native %s without an event echo', async (type) => {
-    const controller = create()
+  it.each(['input', 'change'])('syncs a native %s into the machine exactly once', async (type) => {
+    const onValueChange = vi.fn()
+    const controller = create({ onValueChange })
     const native = part<HTMLSelectElement>(controller, 'native-select')
-    const events: string[] = []
-    controller.root.addEventListener('input', () => events.push('input'))
-    controller.root.addEventListener('change', () => events.push('change'))
     native.value = 'kr'
     native.dispatchEvent(new Event(type, { bubbles: true }))
+    await vi.waitFor(() => expect(controller.api.get().value).toEqual(['kr']))
     await expect.element(trigger()).toMatchTextContent('Korea')
-    await new Promise((resolve) => setTimeout(resolve, 20))
-    expect(events).toEqual([type])
+    expect(onValueChange).toHaveBeenCalledTimes(1)
+    expect(native.value).toBe('kr')
   })
 
   it('preserves native validity and external form ownership, forwarding invalid focus', async () => {

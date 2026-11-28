@@ -1,6 +1,6 @@
 import { createElement as h } from '@lilian1315/create-element'
 import type { FuiItem } from '../shared/items.ts'
-import { buildNativeOptions } from '../shared/native-options.ts'
+import { groupOptions } from '../shared/item-groups.ts'
 import type { SelectProps } from './types.ts'
 
 export function createMarkup(items: FuiItem[], props: SelectProps): HTMLDivElement {
@@ -74,4 +74,99 @@ export function buildItem(item: FuiItem): HTMLLIElement {
         : null,
     ],
   })
+}
+
+/**
+ * Native options carry only the submitted value: Zag's hidden-select sync and the
+ * machine collection both key selection by `option.value`.
+ */
+export function buildNativeOptions(
+  items: readonly FuiItem[],
+  placeholder: string | undefined,
+  multiple: boolean | undefined,
+  value: readonly string[],
+): HTMLElement[] {
+  const selected = new Set(value)
+  const options: HTMLOptionElement[] = []
+
+  if (!multiple) {
+    const placeholderOption = h('option', {
+      data: { placeholder: '' },
+      value: '',
+      children: placeholder ?? 'Select an option',
+    })
+    placeholderOption.hidden = true
+    placeholderOption.selected = selected.size === 0
+    // `defaultSelected` drives `form.reset()`; keep it aligned with the initial value.
+    placeholderOption.defaultSelected = placeholderOption.selected
+    options.push(placeholderOption)
+  }
+
+  for (const item of items) {
+    const isSelected = selected.has(item.value)
+    const option = h('option', {
+      disabled: item.disabled,
+      value: item.value,
+      children: item.label,
+    })
+    option.selected = isSelected
+    // `defaultSelected` drives `form.reset()`; keep it aligned with the initial value.
+    option.defaultSelected = isSelected
+    options.push(option)
+  }
+  const offset = multiple ? 0 : 1
+  return [...options.slice(0, offset), ...groupOptions(items, options.slice(offset))]
+}
+
+/** Reads caller-owned options by submitted value; the marked placeholder option is skipped. */
+export function readNativeItems(native: HTMLSelectElement): FuiItem[] {
+  return Array.from(native.options)
+    .filter((option) => !option.hasAttribute('data-placeholder'))
+    .map((option) => {
+      const parent = option.parentElement
+      const group = parent instanceof HTMLOptGroupElement ? parent : undefined
+      return {
+        value: option.value,
+        label: option.label || option.text,
+        group: group?.label,
+        disabled: option.disabled || group?.disabled || undefined,
+      }
+    })
+}
+
+/** Returns the selected submitted values, excluding the marked placeholder option. */
+export function readNativeValue(native: HTMLSelectElement): string[] {
+  return Array.from(native.selectedOptions)
+    .filter((option) => !option.hasAttribute('data-placeholder'))
+    .map((option) => option.value)
+}
+
+function findPlaceholderOption(select: HTMLSelectElement): HTMLOptionElement | undefined {
+  return Array.from(select.options).find((option) => option.hasAttribute('data-placeholder'))
+}
+
+/** Rebuilds native options from the authoritative items, preserving the current selection. */
+export function reconcileNativeOptions(
+  select: HTMLSelectElement,
+  items: readonly FuiItem[],
+  placeholder: string,
+): void {
+  const selected = new Set(readNativeValue(select))
+  const placeholderOption = findPlaceholderOption(select)
+  const empty = select.multiple ? null : (placeholderOption ?? new Option(placeholder, ''))
+  const options = items.map((item) => {
+    const isSelected = selected.has(item.value)
+    const option = new Option(item.label, item.value, isSelected, isSelected)
+    option.disabled = item.disabled ?? false
+    return option
+  })
+  if (empty) {
+    empty.textContent = placeholder
+    empty.dataset.placeholder = ''
+    empty.hidden = true
+    empty.selected = selected.size === 0
+    empty.defaultSelected = empty.selected
+  }
+  const grouped = groupOptions(items, options)
+  select.replaceChildren(...(empty ? [empty, ...grouped] : grouped))
 }
